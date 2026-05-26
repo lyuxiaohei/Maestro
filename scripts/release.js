@@ -59,8 +59,8 @@ const WHITELIST = [
   'scripts',          // Install/release scripts (filtered for *.js, excluding *.test.js)
   'skills',           // Skill definitions
   'agents',           // Agent definitions
-  'CLAUDE.md',        // Project instructions
   'README.md',        // Project readme
+  // CLAUDE.md is handled separately: docs/CLAUDE-RELEASE.md → CLAUDE.md
 ];
 
 /**
@@ -159,6 +159,12 @@ function syncFiles(srcRoot, targetDir) {
   // Remove any excluded files that may have been copied via directory copy
   // (e.g., .test.js files in scripts/ subdirectories, .xlsx in subdirs)
   cleanupExcluded(targetDir);
+
+  // Copy release version of CLAUDE.md (without GSD dev references)
+  const releaseClaude = path.join(srcRoot, 'docs', 'CLAUDE-RELEASE.md');
+  if (fs.existsSync(releaseClaude)) {
+    fs.copyFileSync(releaseClaude, path.join(targetDir, 'CLAUDE.md'));
+  }
 }
 
 /**
