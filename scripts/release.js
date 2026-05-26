@@ -59,9 +59,18 @@ const WHITELIST = [
   'scripts',          // Install/release scripts (filtered for *.js, excluding *.test.js)
   'skills',           // Skill definitions
   'agents',           // Agent definitions
-  'docs',             // Diagram files only (filtered for *.html + *.png)
   'README.md',        // Project readme
+  // docs/ images are handled separately: DOCS_IMAGES list below
   // CLAUDE.md is handled separately: docs/CLAUDE-RELEASE.md → CLAUDE.md
+];
+
+/**
+ * Specific docs/ files referenced in README.md to copy to public repo.
+ * Only these files are synced — no analysis docs, no competitor diagrams.
+ */
+const DOCS_IMAGES = [
+  'docs/maestro-18-phases.png',
+  'docs/maestro-phase-lifecycle.png',
 ];
 
 /**
@@ -145,9 +154,6 @@ function syncFiles(srcRoot, targetDir) {
       if (item === 'scripts') {
         // Special handling for scripts/: only *.js, excluding *.test.js
         copyScriptsDir(srcPath, dstPath);
-      } else if (item === 'docs') {
-        // Special handling for docs/: only diagram files (*.html + *.png)
-        copyDocsDir(srcPath, dstPath);
       } else {
         // Full recursive copy for .claude-plugin/, hooks/, skills/, agents/
         fs.cpSync(srcPath, dstPath, { recursive: true });
@@ -168,6 +174,16 @@ function syncFiles(srcRoot, targetDir) {
   const releaseClaude = path.join(srcRoot, 'docs', 'CLAUDE-RELEASE.md');
   if (fs.existsSync(releaseClaude)) {
     fs.copyFileSync(releaseClaude, path.join(targetDir, 'CLAUDE.md'));
+  }
+
+  // Copy only docs/ images referenced in README.md
+  for (const relPath of DOCS_IMAGES) {
+    const src = path.join(srcRoot, relPath);
+    const dst = path.join(targetDir, relPath);
+    if (fs.existsSync(src)) {
+      fs.mkdirSync(path.dirname(dst), { recursive: true });
+      fs.copyFileSync(src, dst);
+    }
   }
 }
 
@@ -194,27 +210,6 @@ function copyScriptsDir(srcDir, dstDir) {
         }
       }
     } else if (stat.isFile() && file.endsWith('.js') && !file.endsWith('.test.js')) {
-      fs.copyFileSync(srcFile, path.join(dstDir, file));
-    }
-  }
-}
-
-/**
- * Copy docs directory, filtering to only diagram files (*.html + *.png).
- * Excludes markdown, xlsx, and other dev-only docs.
- */
-function copyDocsDir(srcDir, dstDir) {
-  fs.mkdirSync(dstDir, { recursive: true });
-
-  for (const file of fs.readdirSync(srcDir)) {
-    const srcFile = path.join(srcDir, file);
-    const stat = fs.statSync(srcFile);
-
-    if (stat.isDirectory()) {
-      // Recurse into subdirectories (e.g., plugin-ecosystem/)
-      const subDst = path.join(dstDir, file);
-      copyDocsDir(srcFile, subDst);
-    } else if (file.endsWith('.html') || file.endsWith('.png')) {
       fs.copyFileSync(srcFile, path.join(dstDir, file));
     }
   }
