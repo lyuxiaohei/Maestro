@@ -177,12 +177,38 @@ function syncFiles(srcRoot, targetDir) {
   }
 
   // Copy only docs/ images referenced in README.md
+  const docsTargetDir = path.join(targetDir, 'docs');
   for (const relPath of DOCS_IMAGES) {
     const src = path.join(srcRoot, relPath);
     const dst = path.join(targetDir, relPath);
     if (fs.existsSync(src)) {
       fs.mkdirSync(path.dirname(dst), { recursive: true });
       fs.copyFileSync(src, dst);
+    }
+  }
+
+  // Remove stale docs/ files not in DOCS_IMAGES
+  if (fs.existsSync(docsTargetDir)) {
+    const allowedNames = new Set(DOCS_IMAGES.map(p => path.basename(p)));
+    function cleanDocsDir(dir) {
+      const entries = fs.readdirSync(dir, { withFileTypes: true });
+      for (const entry of entries) {
+        const fullPath = path.join(dir, entry.name);
+        if (entry.isDirectory()) {
+          cleanDocsDir(fullPath);
+          // Remove empty subdirectories
+          if (fs.readdirSync(fullPath).length === 0) {
+            fs.rmSync(fullPath, { recursive: true, force: true });
+          }
+        } else if (!allowedNames.has(entry.name)) {
+          fs.rmSync(fullPath, { force: true });
+        }
+      }
+    }
+    cleanDocsDir(docsTargetDir);
+    // Remove docs/ itself if empty
+    if (fs.existsSync(docsTargetDir) && fs.readdirSync(docsTargetDir).length === 0) {
+      fs.rmSync(docsTargetDir, { recursive: true, force: true });
     }
   }
 }
