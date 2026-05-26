@@ -168,11 +168,11 @@ Agent 验证失败时：
 
 - **phase_index**: 01
 - **phase_name**: 需求调研
-- **status**: NOT_STARTED
+- **workflow_status**: NOT_STARTED
 
 ## 阶段总览
 
-| # | 阶段名称 | 状态 | 版本 |
+| # | 阶段名称 | phase_status | 版本 |
 |---|----------|------|------|
 | 01 | 需求调研 | NOT_STARTED | - |
 

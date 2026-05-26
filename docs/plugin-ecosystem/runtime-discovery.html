@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude Code Plugin Runtime Discovery</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #f8fafc;
+      font-family: 'Geist', sans-serif;
+      color: #1a2a3a;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 3rem 1.5rem;
+    }
+    header { text-align: center; margin-bottom: 2.5rem; max-width: 600px; }
+    .eyebrow {
+      font-family: 'Geist Mono', monospace;
+      font-size: 7px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: #5a8aaa;
+      margin-bottom: 0.75rem;
+    }
+    h1 {
+      font-family: 'Instrument Serif', serif;
+      font-size: 1.75rem;
+      font-weight: 400;
+      color: #1a2a3a;
+    }
+    main { width: 100%; max-width: 700px; }
+    svg { width: 100%; height: auto; display: block; }
+    footer {
+      margin-top: 2rem;
+      padding-top: 1rem;
+      border-top: 1px solid rgba(26,42,58,0.10);
+      font-family: 'Geist Mono', monospace;
+      font-size: 8px;
+      color: #5a8aaa;
+      letter-spacing: 0.06em;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <p class="eyebrow">Plugin System · Runtime</p>
+    <h1>Claude Code Plugin Runtime Discovery</h1>
+  </header>
+  <main>
+    <svg viewBox="0 0 600 580" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+          <polygon points="0 0, 8 3, 0 6" fill="#3a6b8a"/>
+        </marker>
+        <marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+          <polygon points="0 0, 8 3, 0 6" fill="#1a5276"/>
+        </marker>
+      </defs>
+
+      <!-- Background -->
+      <rect width="100%" height="100%" fill="#f8fafc"/>
+
+      <!-- ==================== ARROWS (drawn first for z-order) ==================== -->
+
+      <!-- 1→2: Claude Code 启动 → 扫描 plugin.json -->
+      <line x1="300" y1="64" x2="300" y2="92" stroke="#3a6b8a" stroke-width="1.2" marker-end="url(#arrow)"/>
+
+      <!-- 2→3: 扫描 plugin.json → 清单存在? -->
+      <line x1="300" y1="124" x2="300" y2="168" stroke="#3a6b8a" stroke-width="1.2" marker-end="url(#arrow)"/>
+
+      <!-- 3→4: 清单存在? → 解析组件路径 (Yes, left) -->
+      <polyline points="268,192 160,192 160,260" fill="none" stroke="#3a6b8a" stroke-width="1.2" marker-end="url(#arrow)"/>
+      <!-- Yes label -->
+      <rect x="216" y="180" width="28" height="12" fill="#f8fafc" rx="2"/>
+      <text x="232" y="192" font-family="Geist Mono, monospace" font-size="8" fill="#3a6b8a" text-anchor="middle">Yes</text>
+
+      <!-- 3→5: 清单存在? → 自动发现默认位置 (No, right) -->
+      <polyline points="332,192 440,192 440,260" fill="none" stroke="#3a6b8a" stroke-width="1.2" marker-end="url(#arrow)"/>
+      <!-- No label -->
+      <rect x="352" y="180" width="24" height="12" fill="#f8fafc" rx="2"/>
+      <text x="368" y="192" font-family="Geist Mono, monospace" font-size="8" fill="#3a6b8a" text-anchor="middle">No</text>
+
+      <!-- 4→6: 解析组件路径 → merge dot -->
+      <line x1="160" y1="292" x2="160" y2="340" stroke="#3a6b8a" stroke-width="1.2"/>
+      <line x1="160" y1="340" x2="296" y2="340" stroke="#3a6b8a" stroke-width="1.2"/>
+
+      <!-- 5→6: 自动发现默认位置 → merge dot -->
+      <line x1="440" y1="292" x2="440" y2="340" stroke="#3a6b8a" stroke-width="1.2"/>
+      <line x1="440" y1="340" x2="304" y2="340" stroke="#3a6b8a" stroke-width="1.2"/>
+
+      <!-- 6→7: merge dot → 注册组件 -->
+      <line x1="300" y1="340" x2="300" y2="356" stroke="#3a6b8a" stroke-width="1.2" marker-end="url(#arrow)"/>
+
+      <!-- 7→8: 注册组件 → 启动 MCP Servers -->
+      <line x1="300" y1="392" x2="300" y2="428" stroke="#3a6b8a" stroke-width="1.2" marker-end="url(#arrow)"/>
+
+      <!-- 8→9: 启动 MCP Servers → 插件就绪 -->
+      <line x1="300" y1="460" x2="300" y2="500" stroke="#1a5276" stroke-width="1.2" marker-end="url(#arrow-accent)"/>
+
+      <!-- ==================== NODES ==================== -->
+
+      <!-- 1. Oval: Claude Code 启动 (start) cx=300, cy=44 -->
+      <ellipse cx="300" cy="44" rx="80" ry="20" fill="#f8fafc" stroke="#1a2a3a" stroke-width="1.2"/>
+      <text x="300" y="48" font-family="Geist, sans-serif" font-size="12" font-weight="600" fill="#1a2a3a" text-anchor="middle">Claude Code 启动</text>
+
+      <!-- 2. Rect: 扫描 plugin.json cx=300, y=92 -->
+      <rect x="228" y="92" width="144" height="32" rx="6" fill="#ffffff" stroke="#1a2a3a" stroke-width="1.2"/>
+      <text x="300" y="112" font-family="Geist, sans-serif" font-size="12" font-weight="600" fill="#1a2a3a" text-anchor="middle">扫描 plugin.json</text>
+
+      <!-- 3. Diamond: 清单存在? cx=300, center cy=192 -->
+      <polygon points="300,168 332,192 300,216 268,192" fill="#f8fafc" stroke="#1a2a3a" stroke-width="1.2"/>
+      <text x="300" y="196" font-family="Geist, sans-serif" font-size="12" font-weight="600" fill="#1a2a3a" text-anchor="middle">清单存在?</text>
+
+      <!-- 4. Rect: 解析组件路径 cx=160, y=260 (Yes branch) -->
+      <rect x="88" y="260" width="144" height="32" rx="6" fill="#ffffff" stroke="#1a2a3a" stroke-width="1.2"/>
+      <text x="160" y="280" font-family="Geist, sans-serif" font-size="12" font-weight="600" fill="#1a2a3a" text-anchor="middle">解析组件路径</text>
+
+      <!-- 5. Rect: 自动发现默认位置 cx=440, y=260 (No branch) -->
+      <rect x="356" y="260" width="168" height="32" rx="6" fill="#ffffff" stroke="#1a2a3a" stroke-width="1.2"/>
+      <text x="440" y="280" font-family="Geist, sans-serif" font-size="12" font-weight="600" fill="#1a2a3a" text-anchor="middle">自动发现默认位置</text>
+
+      <!-- 6. Merge dot cx=300, cy=340 -->
+      <circle cx="300" cy="340" r="4" fill="#1a2a3a"/>
+
+      <!-- 7. Rect: 注册组件 cx=300, y=356 (with sublabel) -->
+      <rect x="228" y="356" width="144" height="36" rx="6" fill="#ffffff" stroke="#1a2a3a" stroke-width="1.2"/>
+      <text x="300" y="372" font-family="Geist, sans-serif" font-size="12" font-weight="600" fill="#1a2a3a" text-anchor="middle">注册组件</text>
+      <text x="300" y="384" font-family="Geist Mono, monospace" font-size="9" fill="#5a8aaa" text-anchor="middle">Skills · Agents · Hooks</text>
+
+      <!-- 8. Rect: 启动 MCP Servers cx=300, y=428 -->
+      <rect x="220" y="428" width="160" height="32" rx="6" fill="#ffffff" stroke="#1a2a3a" stroke-width="1.2"/>
+      <text x="300" y="448" font-family="Geist, sans-serif" font-size="12" font-weight="600" fill="#1a2a3a" text-anchor="middle">启动 MCP Servers</text>
+
+      <!-- 9. Oval: 插件就绪 (end, accent) cx=300, cy=520 -->
+      <ellipse cx="300" cy="520" rx="72" ry="20" fill="rgba(26,82,118,0.08)" stroke="#1a5276" stroke-width="1.2"/>
+      <text x="300" y="524" font-family="Geist, sans-serif" font-size="12" font-weight="600" fill="#1a5276" text-anchor="middle">插件就绪</text>
+
+      <!-- ==================== LEGEND ==================== -->
+      <line x1="100" y1="552" x2="500" y2="552" stroke="rgba(26,42,58,0.10)" stroke-width="1"/>
+
+      <text x="120" y="568" font-family="Geist Mono, monospace" font-size="7" font-weight="500" fill="#5a8aaa" letter-spacing="0.18em" text-transform="uppercase">LEGEND</text>
+
+      <!-- Oval legend -->
+      <ellipse cx="196" cy="564" rx="12" ry="8" fill="#f8fafc" stroke="#1a2a3a" stroke-width="0.8"/>
+      <text x="216" y="568" font-family="Geist Mono, monospace" font-size="8" fill="#3a6b8a">开始 / 结束</text>
+
+      <!-- Rectangle legend -->
+      <rect x="280" y="556" width="20" height="16" rx="3" fill="#ffffff" stroke="#1a2a3a" stroke-width="0.8"/>
+      <text x="308" y="568" font-family="Geist Mono, monospace" font-size="8" fill="#3a6b8a">步骤</text>
+
+      <!-- Diamond legend -->
+      <polygon points="380,556 388,564 380,572 372,564" fill="#f8fafc" stroke="#1a2a3a" stroke-width="0.8"/>
+      <text x="396" y="568" font-family="Geist Mono, monospace" font-size="8" fill="#3a6b8a">判断</text>
+
+    </svg>
+  </main>
+  <footer>Maestro · Plugin Ecosystem Analysis</footer>
+</body>
+</html>

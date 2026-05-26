@@ -59,6 +59,7 @@ const WHITELIST = [
   'scripts',          // Install/release scripts (filtered for *.js, excluding *.test.js)
   'skills',           // Skill definitions
   'agents',           // Agent definitions
+  'docs',             // Diagram files only (filtered for *.html + *.png)
   'README.md',        // Project readme
   // CLAUDE.md is handled separately: docs/CLAUDE-RELEASE.md → CLAUDE.md
 ];
@@ -144,6 +145,9 @@ function syncFiles(srcRoot, targetDir) {
       if (item === 'scripts') {
         // Special handling for scripts/: only *.js, excluding *.test.js
         copyScriptsDir(srcPath, dstPath);
+      } else if (item === 'docs') {
+        // Special handling for docs/: only diagram files (*.html + *.png)
+        copyDocsDir(srcPath, dstPath);
       } else {
         // Full recursive copy for .claude-plugin/, hooks/, skills/, agents/
         fs.cpSync(srcPath, dstPath, { recursive: true });
@@ -190,6 +194,27 @@ function copyScriptsDir(srcDir, dstDir) {
         }
       }
     } else if (stat.isFile() && file.endsWith('.js') && !file.endsWith('.test.js')) {
+      fs.copyFileSync(srcFile, path.join(dstDir, file));
+    }
+  }
+}
+
+/**
+ * Copy docs directory, filtering to only diagram files (*.html + *.png).
+ * Excludes markdown, xlsx, and other dev-only docs.
+ */
+function copyDocsDir(srcDir, dstDir) {
+  fs.mkdirSync(dstDir, { recursive: true });
+
+  for (const file of fs.readdirSync(srcDir)) {
+    const srcFile = path.join(srcDir, file);
+    const stat = fs.statSync(srcFile);
+
+    if (stat.isDirectory()) {
+      // Recurse into subdirectories (e.g., plugin-ecosystem/)
+      const subDst = path.join(dstDir, file);
+      copyDocsDir(srcFile, subDst);
+    } else if (file.endsWith('.html') || file.endsWith('.png')) {
       fs.copyFileSync(srcFile, path.join(dstDir, file));
     }
   }

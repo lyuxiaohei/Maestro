@@ -91,7 +91,7 @@
    - 写入 `human_confirmed=true`
    - 写入 `completed_at`（跳过时间）
    - 跳过 GATE-02 自检和 GATE-05 Agent 验证
-5. 更新 `workflow.md` 阶段总览中对应阶段的 status 为 SKIPPED
+5. 更新 `workflow.md` 阶段总览中对应阶段的 phase_status 为 SKIPPED
 6. 全部跳过完成后，按正常流程启动目标阶段 N
 
 ### 失败处理

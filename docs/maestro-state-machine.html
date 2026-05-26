@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Maestro 阶段状态机</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --color-paper:   #f8fafc;
+      --color-ink:     #1a2a3a;
+      --color-muted:   #3a6b8a;
+      --color-soft:    #5a8aaa;
+      --color-accent:  #1a5276;
+      --color-rule:    rgba(26,42,58,0.10);
+      --font-sans:     'Geist', system-ui, sans-serif;
+      --font-serif:    'Instrument Serif', serif;
+      --font-mono:     'Geist Mono', ui-monospace, monospace;
+    }
+    body {
+      font-family: var(--font-sans);
+      background: var(--color-paper);
+      color: var(--color-ink);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 2rem;
+    }
+    .frame { max-width: 1200px; width: 100%; }
+    .eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--color-muted);
+      margin-bottom: 0.5rem;
+    }
+    h1 {
+      font-family: var(--font-serif);
+      font-size: clamp(1.5rem, 2.4vw + 0.75rem, 2rem);
+      font-weight: 400;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      color: var(--color-ink);
+      margin-bottom: 1.5rem;
+    }
+    svg { width: 100%; min-width: 900px; display: block; }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <p class="eyebrow">State Machine · Maestro Workflow</p>
+    <h1>P##-STATE.md 阶段状态机</h1>
+
+    <svg viewBox="0 0 960 700" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#3a6b8a"/></marker>
+        <marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#1a5276"/></marker>
+        <marker id="arrow-fail" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#8b5a2b"/></marker>
+        <marker id="arrow-skip" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#5a8a6b"/></marker>
+      </defs>
+
+      <rect width="100%" height="100%" fill="#f8fafc"/>
+
+      <!-- ═══════ STATE NODES ═══════ -->
+
+      <!-- NOT_STARTED -->
+      <rect x="100" y="60" width="200" height="72" rx="8" fill="#ffffff" stroke="#1a2a3a" stroke-width="1.2"/>
+      <text x="200" y="86" fill="#5a8aaa" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.10em">STATE</text>
+      <text x="200" y="108" fill="#1a2a3a" font-size="14" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">NOT_STARTED</text>
+      <text x="200" y="124" fill="#5a8aaa" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">初始状态</text>
+
+      <!-- IN_PROGRESS -->
+      <rect x="400" y="180" width="200" height="72" rx="8" fill="rgba(26,82,118,0.08)" stroke="#1a5276" stroke-width="1.2"/>
+      <text x="500" y="206" fill="#1a5276" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.10em">STATE</text>
+      <text x="500" y="228" fill="#1a2a3a" font-size="14" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">IN_PROGRESS</text>
+      <text x="500" y="244" fill="#5a8aaa" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">执行中</text>
+
+      <!-- BLOCKED -->
+      <rect x="720" y="300" width="200" height="72" rx="8" fill="rgba(139,90,43,0.06)" stroke="#8b5a2b" stroke-width="1.2"/>
+      <text x="820" y="326" fill="#8b5a2b" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.10em">STATE</text>
+      <text x="820" y="348" fill="#1a2a3a" font-size="14" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">BLOCKED</text>
+      <text x="820" y="364" fill="#8b5a2b" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">阻塞中</text>
+
+      <!-- COMPLETE -->
+      <rect x="400" y="440" width="200" height="72" rx="8" fill="rgba(26,82,118,0.08)" stroke="#1a5276" stroke-width="1.5"/>
+      <text x="500" y="466" fill="#1a5276" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.10em">STATE</text>
+      <text x="500" y="488" fill="#1a2a3a" font-size="14" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">COMPLETE</text>
+      <text x="500" y="504" fill="#5a8aaa" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">已完成</text>
+
+      <!-- SKIPPED -->
+      <rect x="100" y="300" width="200" height="72" rx="8" fill="rgba(90,138,107,0.06)" stroke="#5a8a6b" stroke-width="1.2"/>
+      <text x="200" y="326" fill="#5a8a6b" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.10em">STATE</text>
+      <text x="200" y="348" fill="#1a2a3a" font-size="14" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">SKIPPED</text>
+      <text x="200" y="364" fill="#5a8a6b" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">已跳过</text>
+
+      <!-- ═══════ TRANSITION ARROWS ═══════ -->
+
+      <!-- NOT_STARTED → IN_PROGRESS (阶段启动) -->
+      <path d="M200,132 L200,156 L400,156 L400,200" fill="none" stroke="#1a5276" stroke-width="1.2" marker-end="url(#arrow-accent)"/>
+      <rect x="240" y="146" width="100" height="14" rx="3" fill="#f8fafc"/>
+      <text x="290" y="156" fill="#1a5276" font-size="9" font-weight="500" font-family="'Geist', sans-serif" text-anchor="middle">编排器启动阶段</text>
+
+      <!-- NOT_STARTED → SKIPPED (用户确认跳过) -->
+      <line x1="200" y1="132" x2="200" y2="300" stroke="#5a8a6b" stroke-width="1.2" marker-end="url(#arrow-skip)"/>
+      <rect x="206" y="200" width="72" height="14" rx="3" fill="#f8fafc"/>
+      <text x="242" y="210" fill="#5a8a6b" font-size="9" font-weight="500" font-family="'Geist', sans-serif" text-anchor="middle">用户确认跳过</text>
+
+      <!-- IN_PROGRESS → BLOCKED (GATE-04) -->
+      <path d="M600,216 L660,216 L660,336 L720,336" fill="none" stroke="#8b5a2b" stroke-width="1" stroke-dasharray="5,4" marker-end="url(#arrow-fail)"/>
+      <rect x="604" y="264" width="56" height="14" rx="3" fill="#f8fafc"/>
+      <text x="632" y="274" fill="#8b5a2b" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">GATE-04</text>
+
+      <!-- IN_PROGRESS → gates → BLOCKED (GATE-02 FAIL) -->
+      <path d="M500,252 L500,280 L760,280 L760,300" fill="none" stroke="#8b5a2b" stroke-width="1" stroke-dasharray="5,4" marker-end="url(#arrow-fail)"/>
+      <rect x="580" y="270" width="80" height="14" rx="3" fill="#f8fafc"/>
+      <text x="620" y="280" fill="#8b5a2b" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">GATE-02 FAIL</text>
+
+      <!-- GATE-02 PASS → GATE-05 → BLOCKED -->
+      <path d="M580,248 L580,290 L880,290 L880,336 L920,336" fill="none" stroke="#8b5a2b" stroke-width="1" stroke-dasharray="5,4" marker-end="url(#arrow-fail)"/>
+      <rect x="680" y="280" width="80" height="14" rx="3" fill="#f8fafc"/>
+      <text x="720" y="290" fill="#8b5a2b" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">GATE-05 FAIL</text>
+
+      <!-- IN_PROGRESS → COMPLETE (通过全部门禁) -->
+      <path d="M500,252 L500,360 L500,440" fill="none" stroke="#1a5276" stroke-width="1.5" marker-end="url(#arrow-accent)"/>
+      <!-- gate labels along the path -->
+      <rect x="506" y="312" width="56" height="14" rx="3" fill="rgba(26,82,118,0.06)"/>
+      <text x="534" y="322" fill="#1a5276" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">GATE-02</text>
+      <rect x="506" y="340" width="56" height="14" rx="3" fill="rgba(26,82,118,0.06)"/>
+      <text x="534" y="350" fill="#1a5276" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">GATE-05</text>
+      <rect x="506" y="368" width="56" height="14" rx="3" fill="rgba(26,82,118,0.06)"/>
+      <text x="534" y="378" fill="#1a5276" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">GATE-01</text>
+      <text x="534" y="398" fill="#1a5276" font-size="8" font-family="'Geist', sans-serif" text-anchor="middle">用户确认 → COMPLETE</text>
+
+      <!-- BLOCKED → IN_PROGRESS (修正后重新执行) -->
+      <path d="M720,340 L680,340 L680,200 L600,200" fill="none" stroke="#3a6b8a" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arrow)"/>
+      <rect x="684" y="256" width="40" height="14" rx="3" fill="#f8fafc"/>
+      <text x="704" y="266" fill="#3a6b8a" font-size="8" font-family="'Geist', sans-serif" text-anchor="middle">修正</text>
+
+      <!-- ═══════ FIELDS PANEL ═══════ -->
+
+      <line x1="60" y1="545" x2="900" y2="545" stroke="rgba(26,42,58,0.10)" stroke-width="0.8"/>
+      <text x="60" y="570" fill="#3a6b8a" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.14em">STATE FIELDS</text>
+
+      <!-- NOT_STARTED fields -->
+      <rect x="60" y="584" width="160" height="56" rx="4" fill="rgba(26,42,58,0.03)" stroke="rgba(26,42,58,0.10)" stroke-width="0.8"/>
+      <text x="68" y="600" fill="#1a2a3a" font-size="8" font-weight="600" font-family="'Geist Mono', monospace">NOT_STARTED</text>
+      <text x="68" y="614" fill="#5a8aaa" font-size="7" font-family="'Geist Mono', monospace">phase_index, status</text>
+      <text x="68" y="626" fill="#5a8aaa" font-size="7" font-family="'Geist Mono', monospace">version, 验证=PENDING</text>
+
+      <!-- IN_PROGRESS fields -->
+      <rect x="240" y="584" width="160" height="56" rx="4" fill="rgba(26,82,118,0.04)" stroke="rgba(26,82,118,0.15)" stroke-width="0.8"/>
+      <text x="248" y="600" fill="#1a2a3a" font-size="8" font-weight="600" font-family="'Geist Mono', monospace">IN_PROGRESS</text>
+      <text x="248" y="614" fill="#5a8aaa" font-size="7" font-family="'Geist Mono', monospace">+ started_at</text>
+      <text x="248" y="626" fill="#5a8aaa" font-size="7" font-family="'Geist Mono', monospace">输入文档, 输入版本</text>
+
+      <!-- BLOCKED fields -->
+      <rect x="420" y="584" width="160" height="56" rx="4" fill="rgba(139,90,43,0.04)" stroke="rgba(139,90,43,0.15)" stroke-width="0.8"/>
+      <text x="428" y="600" fill="#1a2a3a" font-size="8" font-weight="600" font-family="'Geist Mono', monospace">BLOCKED</text>
+      <text x="428" y="614" fill="#5a8aaa" font-size="7" font-family="'Geist Mono', monospace">+ blocked_reason</text>
+      <text x="428" y="626" fill="#5a8aaa" font-size="7" font-family="'Geist Mono', monospace">验证=FAIL</text>
+
+      <!-- COMPLETE fields -->
+      <rect x="600" y="584" width="160" height="56" rx="4" fill="rgba(26,82,118,0.04)" stroke="rgba(26,82,118,0.15)" stroke-width="0.8"/>
+      <text x="608" y="600" fill="#1a2a3a" font-size="8" font-weight="600" font-family="'Geist Mono', monospace">COMPLETE</text>
+      <text x="608" y="614" fill="#5a8aaa" font-size="7" font-family="'Geist Mono', monospace">+ completed_at, confirmed</text>
+      <text x="608" y="626" fill="#5a8aaa" font-size="7" font-family="'Geist Mono', monospace">输出文档, 版本链, 验证=PASS</text>
+
+      <!-- SKIPPED fields -->
+      <rect x="780" y="584" width="160" height="56" rx="4" fill="rgba(90,138,107,0.04)" stroke="rgba(90,138,107,0.15)" stroke-width="0.8"/>
+      <text x="788" y="600" fill="#1a2a3a" font-size="8" font-weight="600" font-family="'Geist Mono', monospace">SKIPPED</text>
+      <text x="788" y="614" fill="#5a8aaa" font-size="7" font-family="'Geist Mono', monospace">+ skip_reason</text>
+      <text x="788" y="626" fill="#5a8aaa" font-size="7" font-family="'Geist Mono', monospace">+ alternative_inputs</text>
+
+      <!-- ═══════ LEGEND ═══════ -->
+      <line x1="60" y1="660" x2="900" y2="660" stroke="rgba(26,42,58,0.10)" stroke-width="0.8"/>
+      <text x="60" y="680" fill="#3a6b8a" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.14em">LEGEND</text>
+
+      <line x1="140" y1="676" x2="176" y2="676" stroke="#1a5276" stroke-width="1.5"/>
+      <text x="184" y="680" fill="#3a6b8a" font-size="9" font-family="'Geist', sans-serif">通过路径</text>
+
+      <line x1="260" y1="676" x2="296" y2="676" stroke="#8b5a2b" stroke-width="1" stroke-dasharray="5,4"/>
+      <text x="304" y="680" fill="#3a6b8a" font-size="9" font-family="'Geist', sans-serif">失败路径</text>
+
+      <line x1="380" y1="676" x2="416" y2="676" stroke="#5a8a6b" stroke-width="1.2"/>
+      <text x="424" y="680" fill="#3a6b8a" font-size="9" font-family="'Geist', sans-serif">跳过路径</text>
+
+      <line x1="500" y1="676" x2="536" y2="676" stroke="#3a6b8a" stroke-width="1" stroke-dasharray="4,3"/>
+      <text x="544" y="680" fill="#3a6b8a" font-size="9" font-family="'Geist', sans-serif">恢复路径</text>
+
+    </svg>
+  </div>
+</body>
+</html>

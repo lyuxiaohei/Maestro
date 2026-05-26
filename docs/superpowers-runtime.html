@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Superpowers 运行时加载</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --color-paper: #f8fafc; --color-ink: #1a2a3a; --color-muted: #3a6b8a;
+      --color-soft: #5a8aaa; --color-accent: #1a5276;
+      --font-sans: 'Geist', system-ui, sans-serif;
+      --font-serif: 'Instrument Serif', serif;
+      --font-mono: 'Geist Mono', ui-monospace, monospace;
+    }
+    body { font-family: var(--font-sans); background: var(--color-paper); color: var(--color-ink); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 3rem 2rem; }
+    .frame { max-width: 1200px; width: 100%; }
+    .eyebrow { font-family: var(--font-mono); font-size: 0.66rem; font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase; color: var(--color-muted); margin-bottom: 0.5rem; }
+    h1 { font-family: var(--font-serif); font-size: clamp(1.5rem, 2.4vw + 0.75rem, 2rem); font-weight: 400; letter-spacing: -0.02em; line-height: 1.15; color: var(--color-ink); margin-bottom: 1.5rem; }
+    svg { width: 100%; min-width: 900px; display: block; }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <p class="eyebrow">Flowchart · Superpowers</p>
+    <h1>Superpowers 运行时加载流程</h1>
+
+    <svg viewBox="0 0 960 760" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#3a6b8a"/></marker>
+        <marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#1a5276"/></marker>
+      </defs>
+      <rect width="100%" height="100%" fill="#f8fafc"/>
+
+      <!-- ── BOOTSTRAP COLUMN (left) ── -->
+      <line x1="260" y1="48" x2="260" y2="72" stroke="#3a6b8a" stroke-width="1" marker-end="url(#arrow)"/>
+      <line x1="260" y1="112" x2="260" y2="136" stroke="#3a6b8a" stroke-width="1" marker-end="url(#arrow)"/>
+      <line x1="260" y1="176" x2="260" y2="200" stroke="#3a6b8a" stroke-width="1" marker-end="url(#arrow)"/>
+      <line x1="260" y1="240" x2="260" y2="264" stroke="#3a6b8a" stroke-width="1" marker-end="url(#arrow)"/>
+      <line x1="260" y1="304" x2="260" y2="336" stroke="#1a5276" stroke-width="1.2" marker-end="url(#arrow-accent)"/>
+
+      <!-- Bootstrap nodes -->
+      <rect x="168" y="16" width="184" height="32" rx="20" fill="rgba(26,42,58,0.05)" stroke="#3a6b8a" stroke-width="1"/>
+      <text x="260" y="37" fill="#1a2a3a" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Claude Code 启动</text>
+
+      <rect x="140" y="72" width="240" height="40" rx="6" fill="#ffffff" stroke="#1a2a3a" stroke-width="1"/>
+      <text x="260" y="96" fill="#1a2a3a" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">读取 plugin.json → hooks/skills</text>
+
+      <rect x="140" y="136" width="240" height="40" rx="6" fill="rgba(26,42,58,0.05)" stroke="#3a6b8a" stroke-width="1"/>
+      <text x="260" y="152" fill="#5a8aaa" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">SESSIONSTART HOOK</text>
+      <text x="260" y="168" fill="#1a2a3a" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">注入 using-superpowers/SKILL.md</text>
+
+      <rect x="120" y="200" width="280" height="40" rx="6" fill="#ffffff" stroke="#1a2a3a" stroke-width="1"/>
+      <text x="260" y="224" fill="#1a2a3a" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">注册全部 14 个 Skill</text>
+
+      <rect x="168" y="264" width="184" height="40" rx="6" fill="rgba(26,82,118,0.08)" stroke="#1a5276" stroke-width="1.2"/>
+      <text x="260" y="288" fill="#1a2a3a" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">等待用户请求</text>
+
+      <!-- ── MAIN PIPELINE (center) ── -->
+      <line x1="540" y1="376" x2="540" y2="400" stroke="#3a6b8a" stroke-width="1" marker-end="url(#arrow)"/>
+      <line x1="540" y1="440" x2="540" y2="464" stroke="#3a6b8a" stroke-width="1" marker-end="url(#arrow)"/>
+      <!-- Pipeline entry -->
+      <rect x="440" y="336" width="200" height="40" rx="6" fill="rgba(26,82,118,0.08)" stroke="#1a5276" stroke-width="1.2"/>
+      <text x="540" y="360" fill="#1a2a3a" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">主工作流 Pipeline</text>
+
+      <rect x="420" y="400" width="240" height="40" rx="6" fill="#ffffff" stroke="#1a2a3a" stroke-width="1"/>
+      <text x="540" y="424" fill="#1a2a3a" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">brainstorming → writing-plans</text>
+
+      <!-- Branch: subagent vs inline -->
+      <line x1="480" y1="440" x2="400" y2="464" stroke="#3a6b8a" stroke-width="1"/>
+      <line x1="400" y1="464" x2="400" y2="504" stroke="#3a6b8a" stroke-width="1" marker-end="url(#arrow)"/>
+      <line x1="600" y1="440" x2="680" y2="464" stroke="#3a6b8a" stroke-width="1"/>
+      <line x1="680" y1="464" x2="680" y2="504" stroke="#3a6b8a" stroke-width="1" marker-end="url(#arrow)"/>
+
+      <rect x="308" y="504" width="184" height="44" rx="6" fill="rgba(26,82,118,0.08)" stroke="#1a5276" stroke-width="1.2"/>
+      <rect x="316" y="510" width="36" height="12" rx="2" fill="transparent" stroke="rgba(26,82,118,0.40)" stroke-width="0.8"/>
+      <text x="334" y="519" fill="rgba(26,82,118,0.80)" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">推荐</text>
+      <text x="400" y="538" fill="#1a2a3a" font-size="10" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">subagent-driven-development</text>
+
+      <rect x="588" y="504" width="184" height="44" rx="6" fill="#ffffff" stroke="#1a2a3a" stroke-width="1"/>
+      <rect x="596" y="510" width="36" height="12" rx="2" fill="transparent" stroke="rgba(26,42,58,0.40)" stroke-width="0.8"/>
+      <text x="614" y="519" fill="rgba(26,42,58,0.80)" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">备选</text>
+      <text x="680" y="538" fill="#1a2a3a" font-size="10" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">executing-plans</text>
+
+      <!-- merge to finish -->
+      <line x1="400" y1="548" x2="400" y2="576" stroke="#3a6b8a" stroke-width="1"/>
+      <line x1="680" y1="548" x2="680" y2="576" stroke="#3a6b8a" stroke-width="1"/>
+      <line x1="400" y1="576" x2="680" y2="576" stroke="#3a6b8a" stroke-width="1"/>
+      <circle cx="540" cy="576" r="4" fill="#1a2a3a"/>
+      <line x1="540" y1="580" x2="540" y2="604" stroke="#3a6b8a" stroke-width="1" marker-end="url(#arrow)"/>
+
+      <rect x="440" y="604" width="200" height="40" rx="6" fill="#ffffff" stroke="#1a2a3a" stroke-width="1"/>
+      <text x="540" y="628" fill="#1a2a3a" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">finishing-a-development-branch</text>
+
+      <!-- ── IRON RULES (right) ── -->
+      <rect x="760" y="336" width="8" height="328" rx="4" fill="rgba(26,82,118,0.10)"/>
+      <text x="800" y="360" fill="#1a5276" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.10em" font-weight="600">铁律</text>
+
+      <line x1="768" y1="388" x2="780" y2="388" stroke="#3a6b8a" stroke-width="1"/>
+      <text x="788" y="392" fill="#1a2a3a" font-size="9" font-weight="600" font-family="'Geist', sans-serif">写代码前</text>
+      <text x="788" y="404" fill="#5a8aaa" font-size="8" font-family="'Geist Mono', monospace">test-driven-development</text>
+
+      <line x1="768" y1="440" x2="780" y2="440" stroke="#3a6b8a" stroke-width="1"/>
+      <text x="788" y="444" fill="#1a2a3a" font-size="9" font-weight="600" font-family="'Geist', sans-serif">修 bug 前</text>
+      <text x="788" y="456" fill="#5a8aaa" font-size="8" font-family="'Geist Mono', monospace">systematic-debugging</text>
+
+      <line x1="768" y1="492" x2="780" y2="492" stroke="#3a6b8a" stroke-width="1"/>
+      <text x="788" y="496" fill="#1a2a3a" font-size="9" font-weight="600" font-family="'Geist', sans-serif">声称完成前</text>
+      <text x="788" y="508" fill="#5a8aaa" font-size="8" font-family="'Geist Mono', monospace">verification-completion</text>
+
+      <!-- Connecting wait to pipeline -->
+      <line x1="352" y1="284" x2="440" y2="352" stroke="#3a6b8a" stroke-width="1" stroke-dasharray="5,4"/>
+      <rect x="356" y="316" width="80" height="12" rx="2" fill="#f8fafc"/>
+      <text x="396" y="325" fill="#5a8aaa" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">Skill 匹配</text>
+
+      <!-- Connecting wait to iron rules -->
+      <line x1="352" y1="292" x2="760" y2="388" stroke="#3a6b8a" stroke-width="1" stroke-dasharray="5,4"/>
+      <rect x="540" y="328" width="80" height="12" rx="2" fill="#f8fafc"/>
+      <text x="580" y="337" fill="#5a8aaa" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">场景检测</text>
+    </svg>
+  </div>
+</body>
+</html>

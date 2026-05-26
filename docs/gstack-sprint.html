@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>gstack Sprint 工作流</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --color-paper: #f8fafc; --color-ink: #1a2a3a; --color-muted: #3a6b8a;
+      --color-soft: #5a8aaa; --color-accent: #1a5276;
+      --font-sans: 'Geist', system-ui, sans-serif;
+      --font-serif: 'Instrument Serif', serif;
+      --font-mono: 'Geist Mono', ui-monospace, monospace;
+    }
+    body { font-family: var(--font-sans); background: var(--color-paper); color: var(--color-ink); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 3rem 2rem; }
+    .frame { max-width: 1200px; width: 100%; }
+    .eyebrow { font-family: var(--font-mono); font-size: 0.66rem; font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase; color: var(--color-muted); margin-bottom: 0.5rem; }
+    h1 { font-family: var(--font-serif); font-size: clamp(1.5rem, 2.4vw + 0.75rem, 2rem); font-weight: 400; letter-spacing: -0.02em; line-height: 1.15; color: var(--color-ink); margin-bottom: 1.5rem; }
+    svg { width: 100%; min-width: 900px; display: block; }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <p class="eyebrow">Flowchart · gstack</p>
+    <h1>gstack Sprint 工作流</h1>
+
+    <svg viewBox="0 0 960 840" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#3a6b8a"/></marker>
+        <marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#1a5276"/></marker>
+      </defs>
+      <rect width="100%" height="100%" fill="#f8fafc"/>
+
+      <!-- ── PHASE LABELS (left rail) ── -->
+      <rect x="16" y="48" width="68" height="36" rx="4" fill="rgba(26,82,118,0.08)" stroke="rgba(26,82,118,0.20)" stroke-width="0.8"/>
+      <text x="50" y="70" fill="#1a5276" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" font-weight="600" letter-spacing="0.08em">THINK</text>
+
+      <rect x="16" y="140" width="68" height="36" rx="4" fill="rgba(26,42,58,0.04)" stroke="rgba(26,42,58,0.12)" stroke-width="0.8"/>
+      <text x="50" y="162" fill="#3a6b8a" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" font-weight="600" letter-spacing="0.08em">PLAN</text>
+
+      <rect x="16" y="288" width="68" height="36" rx="4" fill="rgba(26,82,118,0.08)" stroke="rgba(26,82,118,0.20)" stroke-width="0.8"/>
+      <text x="50" y="310" fill="#1a5276" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" font-weight="600" letter-spacing="0.08em">BUILD</text>
+
+      <rect x="16" y="388" width="68" height="36" rx="4" fill="rgba(26,42,58,0.04)" stroke="rgba(26,42,58,0.12)" stroke-width="0.8"/>
+      <text x="50" y="410" fill="#3a6b8a" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" font-weight="600" letter-spacing="0.08em">REVIEW</text>
+
+      <rect x="16" y="528" width="68" height="36" rx="4" fill="rgba(26,82,118,0.08)" stroke="rgba(26,82,118,0.20)" stroke-width="0.8"/>
+      <text x="50" y="550" fill="#1a5276" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" font-weight="600" letter-spacing="0.08em">TEST</text>
+
+      <rect x="16" y="668" width="68" height="36" rx="4" fill="rgba(26,42,58,0.04)" stroke="rgba(26,42,58,0.12)" stroke-width="0.8"/>
+      <text x="50" y="690" fill="#3a6b8a" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" font-weight="600" letter-spacing="0.08em">SHIP</text>
+
+      <!-- ── VERTICAL FLOW ── -->
+      <line x1="440" y1="76" x2="440" y2="100" stroke="#3a6b8a" stroke-width="1" marker-end="url(#arrow)"/>
+      <line x1="440" y1="140" x2="440" y2="196" stroke="#3a6b8a" stroke-width="1" marker-end="url(#arrow)"/>
+      <!-- autoplan box → reviews -->
+      <line x1="340" y1="220" x2="200" y2="248" stroke="#3a6b8a" stroke-width="1"/>
+      <line x1="200" y1="248" x2="200" y2="268" stroke="#3a6b8a" stroke-width="1" marker-end="url(#arrow)"/>
+      <line x1="440" y1="236" x2="440" y2="268" stroke="#3a6b8a" stroke-width="1" marker-end="url(#arrow)"/>
+      <line x1="540" y1="220" x2="680" y2="248" stroke="#3a6b8a" stroke-width="1"/>
+      <line x1="680" y1="248" x2="680" y2="268" stroke="#3a6b8a" stroke-width="1" marker-end="url(#arrow)"/>
+      <!-- 4 reviews merge → build -->
+      <line x1="200" y1="308" x2="200" y2="320" stroke="#3a6b8a" stroke-width="1"/>
+      <line x1="440" y1="308" x2="440" y2="320" stroke="#3a6b8a" stroke-width="1"/>
+      <line x1="680" y1="308" x2="680" y2="320" stroke="#3a6b8a" stroke-width="1"/>
+      <line x1="200" y1="320" x2="680" y2="320" stroke="#3a6b8a" stroke-width="1"/>
+      <circle cx="440" cy="320" r="4" fill="#1a2a3a"/>
+      <line x1="440" y1="324" x2="440" y2="352" stroke="#1a5276" stroke-width="1.2" marker-end="url(#arrow-accent)"/>
+
+      <!-- build → 3 review types -->
+      <line x1="440" y1="392" x2="440" y2="420" stroke="#3a6b8a" stroke-width="1"/>
+      <line x1="380" y1="420" x2="240" y2="440" stroke="#3a6b8a" stroke-width="1"/>
+      <line x1="240" y1="440" x2="240" y2="456" stroke="#3a6b8a" stroke-width="1" marker-end="url(#arrow)"/>
+      <line x1="440" y1="420" x2="440" y2="456" stroke="#3a6b8a" stroke-width="1" marker-end="url(#arrow)"/>
+      <line x1="500" y1="420" x2="640" y2="440" stroke="#3a6b8a" stroke-width="1"/>
+      <line x1="640" y1="440" x2="640" y2="456" stroke="#3a6b8a" stroke-width="1" marker-end="url(#arrow)"/>
+
+      <!-- 3 reviews → fix → qa -->
+      <line x1="240" y1="496" x2="240" y2="508" stroke="#3a6b8a" stroke-width="1"/>
+      <line x1="440" y1="496" x2="440" y2="508" stroke="#3a6b8a" stroke-width="1"/>
+      <line x1="640" y1="496" x2="640" y2="508" stroke="#3a6b8a" stroke-width="1"/>
+      <line x1="240" y1="508" x2="640" y2="508" stroke="#3a6b8a" stroke-width="1"/>
+      <circle cx="440" cy="508" r="4" fill="#1a2a3a"/>
+      <line x1="440" y1="512" x2="440" y2="540" stroke="#3a6b8a" stroke-width="1" marker-end="url(#arrow)"/>
+
+      <!-- qa → bug? -->
+      <line x1="440" y1="580" x2="440" y2="604" stroke="#3a6b8a" stroke-width="1"/>
+      <!-- YES: loop back to qa -->
+      <line x1="380" y1="628" x2="152" y2="628" stroke="#3a6b8a" stroke-width="1" stroke-dasharray="5,4"/>
+      <line x1="152" y1="628" x2="152" y2="560" stroke="#3a6b8a" stroke-width="1" stroke-dasharray="5,4"/>
+      <line x1="152" y1="560" x2="360" y2="560" stroke="#3a6b8a" stroke-width="1" stroke-dasharray="5,4"/>
+      <!-- NO: → cso -->
+      <line x1="440" y1="652" x2="440" y2="680" stroke="#1a5276" stroke-width="1.2" marker-end="url(#arrow-accent)"/>
+      <line x1="440" y1="720" x2="440" y2="744" stroke="#3a6b8a" stroke-width="1" marker-end="url(#arrow)"/>
+      <line x1="440" y1="784" x2="440" y2="808" stroke="#3a6b8a" stroke-width="1"/>
+
+      <rect x="348" y="808" width="184" height="32" rx="20" fill="rgba(26,42,58,0.05)" stroke="#3a6b8a" stroke-width="1"/>
+      <text x="440" y="829" fill="#1a2a3a" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Sprint 完成</text>
+
+      <rect x="396" y="612" width="28" height="12" rx="2" fill="#f8fafc"/>
+      <text x="410" y="621" fill="#5a8aaa" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">NO</text>
+      <rect x="448" y="640" width="28" height="12" rx="2" fill="#f8fafc"/>
+      <text x="462" y="649" fill="#5a8aaa" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">NO</text>
+
+      <!-- ── NODES ── -->
+      <!-- /office-hours -->
+      <rect x="340" y="44" width="200" height="32" rx="20" fill="rgba(26,42,58,0.05)" stroke="#3a6b8a" stroke-width="1"/>
+      <text x="440" y="65" fill="#1a2a3a" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">/office-hours</text>
+
+      <!-- design doc -->
+      <rect x="320" y="100" width="240" height="40" rx="6" fill="#ffffff" stroke="#1a2a3a" stroke-width="1"/>
+      <text x="440" y="118" fill="#5a8aaa" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">6 个强制性提问 · 假设公开化</text>
+      <text x="440" y="132" fill="#1a2a3a" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">生成设计文档</text>
+
+      <!-- /autoplan box -->
+      <rect x="340" y="196" width="200" height="40" rx="6" fill="rgba(26,82,118,0.08)" stroke="#1a5276" stroke-width="1.2"/>
+      <text x="440" y="220" fill="#1a2a3a" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">/autoplan 四维审查</text>
+
+      <!-- CEO review -->
+      <rect x="120" y="268" width="160" height="40" rx="6" fill="#ffffff" stroke="#1a2a3a" stroke-width="1"/>
+      <text x="200" y="284" fill="#5a8aaa" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">CEO</text>
+      <text x="200" y="300" fill="#1a2a3a" font-size="10" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">产品范围与战略</text>
+
+      <!-- Design review -->
+      <rect x="360" y="268" width="160" height="40" rx="6" fill="#ffffff" stroke="#1a2a3a" stroke-width="1"/>
+      <text x="440" y="284" fill="#5a8aaa" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">DESIGN</text>
+      <text x="440" y="300" fill="#1a2a3a" font-size="10" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">高级设计师 0-10 评分</text>
+
+      <!-- Eng review -->
+      <rect x="600" y="268" width="160" height="40" rx="6" fill="#ffffff" stroke="#1a2a3a" stroke-width="1"/>
+      <text x="680" y="284" fill="#5a8aaa" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">ENG</text>
+      <text x="680" y="300" fill="#1a2a3a" font-size="10" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">架构、数据流、图表</text>
+
+      <!-- Build -->
+      <rect x="320" y="352" width="240" height="40" rx="6" fill="rgba(26,82,118,0.08)" stroke="#1a5276" stroke-width="1.2"/>
+      <text x="440" y="376" fill="#1a2a3a" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">用户构建功能</text>
+
+      <!-- 3 review types -->
+      <rect x="160" y="456" width="160" height="40" rx="6" fill="#ffffff" stroke="#1a2a3a" stroke-width="1"/>
+      <text x="240" y="472" fill="#5a8aaa" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">/REVIEW</text>
+      <text x="240" y="488" fill="#1a2a3a" font-size="10" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">工程师审查</text>
+
+      <rect x="360" y="456" width="160" height="40" rx="6" fill="#ffffff" stroke="#1a2a3a" stroke-width="1"/>
+      <text x="440" y="472" fill="#5a8aaa" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">/CODEX</text>
+      <text x="440" y="488" fill="#1a2a3a" font-size="10" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">OpenAI 第二意见</text>
+
+      <rect x="560" y="456" width="160" height="40" rx="6" fill="#ffffff" stroke="#1a2a3a" stroke-width="1"/>
+      <text x="640" y="472" fill="#5a8aaa" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">/DESIGN-REVIEW</text>
+      <text x="640" y="488" fill="#1a2a3a" font-size="10" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">设计师审计</text>
+
+      <!-- /qa -->
+      <rect x="360" y="540" width="160" height="40" rx="6" fill="#ffffff" stroke="#1a2a3a" stroke-width="1"/>
+      <text x="440" y="556" fill="#5a8aaa" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">CHROMIUM ~100ms</text>
+      <text x="440" y="572" fill="#1a2a3a" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">/qa 真实浏览器测试</text>
+
+      <!-- Bug diamond -->
+      <polygon points="440,604 500,628 440,652 380,628" fill="#f8fafc" stroke="#1a2a3a" stroke-width="1"/>
+      <text x="440" y="632" fill="#1a2a3a" font-size="9" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">发现 bug？</text>
+
+      <!-- /cso -->
+      <rect x="340" y="680" width="200" height="40" rx="6" fill="#ffffff" stroke="#1a2a3a" stroke-width="1"/>
+      <text x="440" y="696" fill="#5a8aaa" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">OWASP + STRIDE</text>
+      <text x="440" y="712" fill="#1a2a3a" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">/cso 安全审查</text>
+
+      <!-- /ship -->
+      <rect x="340" y="744" width="200" height="40" rx="6" fill="#ffffff" stroke="#1a2a3a" stroke-width="1"/>
+      <text x="440" y="768" fill="#1a2a3a" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">/ship + /canary + /document</text>
+    </svg>
+  </div>
+</body>
+</html>

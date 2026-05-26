@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Archon 工作流执行</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --color-paper: #f8fafc; --color-ink: #1a2a3a; --color-muted: #3a6b8a;
+      --color-soft: #5a8aaa; --color-accent: #1a5276;
+      --font-sans: 'Geist', system-ui, sans-serif;
+      --font-serif: 'Instrument Serif', serif;
+      --font-mono: 'Geist Mono', ui-monospace, monospace;
+    }
+    body { font-family: var(--font-sans); background: var(--color-paper); color: var(--color-ink); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 3rem 2rem; }
+    .frame { max-width: 1200px; width: 100%; }
+    .eyebrow { font-family: var(--font-mono); font-size: 0.66rem; font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase; color: var(--color-muted); margin-bottom: 0.5rem; }
+    h1 { font-family: var(--font-serif); font-size: clamp(1.5rem, 2.4vw + 0.75rem, 2rem); font-weight: 400; letter-spacing: -0.02em; line-height: 1.15; color: var(--color-ink); margin-bottom: 1.5rem; }
+    svg { width: 100%; min-width: 900px; display: block; }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <p class="eyebrow">Flowchart · Archon</p>
+    <h1>Archon 工作流执行全流程</h1>
+
+    <svg viewBox="0 0 960 740" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#3a6b8a"/></marker>
+        <marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#1a5276"/></marker>
+      </defs>
+      <rect width="100%" height="100%" fill="#f8fafc"/>
+
+      <!-- ── MAIN VERTICAL FLOW ── -->
+      <line x1="360" y1="48" x2="360" y2="80" stroke="#3a6b8a" stroke-width="1" marker-end="url(#arrow)"/>
+      <line x1="360" y1="120" x2="360" y2="148" stroke="#3a6b8a" stroke-width="1" marker-end="url(#arrow)"/>
+      <line x1="360" y1="188" x2="360" y2="216" stroke="#1a5276" stroke-width="1.2" marker-end="url(#arrow-accent)"/>
+      <line x1="360" y1="256" x2="360" y2="284" stroke="#3a6b8a" stroke-width="1" marker-end="url(#arrow)"/>
+
+      <!-- implement loop -->
+      <line x1="360" y1="332" x2="360" y2="360" stroke="#3a6b8a" stroke-width="1"/>
+      <!-- not done → loop -->
+      <line x1="420" y1="308" x2="820" y2="308" stroke="#3a6b8a" stroke-width="1" stroke-dasharray="5,4"/>
+      <line x1="820" y1="308" x2="820" y2="308" stroke="#3a6b8a" stroke-width="1" stroke-dasharray="5,4"/>
+      <line x1="300" y1="308" x2="160" y2="308" stroke="#3a6b8a" stroke-width="1" stroke-dasharray="5,4"/>
+      <line x1="160" y1="308" x2="160" y2="236" stroke="#3a6b8a" stroke-width="1" stroke-dasharray="5,4"/>
+      <line x1="160" y1="236" x2="280" y2="236" stroke="#3a6b8a" stroke-width="1" stroke-dasharray="5,4"/>
+      <!-- done → run-tests -->
+      <line x1="360" y1="360" x2="360" y2="388" stroke="#1a5276" stroke-width="1.2" marker-end="url(#arrow-accent)"/>
+
+      <!-- test fail → retry -->
+      <line x1="360" y1="436" x2="360" y2="464" stroke="#3a6b8a" stroke-width="1"/>
+      <line x1="300" y1="412" x2="120" y2="412" stroke="#3a6b8a" stroke-width="1" stroke-dasharray="5,4"/>
+      <line x1="120" y1="412" x2="120" y2="236" stroke="#3a6b8a" stroke-width="1" stroke-dasharray="5,4"/>
+      <line x1="120" y1="236" x2="160" y2="236" stroke="#3a6b8a" stroke-width="1" stroke-dasharray="5,4"/>
+      <!-- pass → review -->
+      <line x1="360" y1="464" x2="360" y2="492" stroke="#1a5276" stroke-width="1.2" marker-end="url(#arrow-accent)"/>
+
+      <line x1="360" y1="532" x2="360" y2="560" stroke="#3a6b8a" stroke-width="1" marker-end="url(#arrow)"/>
+
+      <!-- approve loop -->
+      <line x1="360" y1="608" x2="360" y2="636" stroke="#3a6b8a" stroke-width="1"/>
+      <!-- no → back to review -->
+      <line x1="300" y1="584" x2="120" y2="584" stroke="#3a6b8a" stroke-width="1" stroke-dasharray="5,4"/>
+      <line x1="120" y1="584" x2="120" y2="512" stroke="#3a6b8a" stroke-width="1" stroke-dasharray="5,4"/>
+      <line x1="120" y1="512" x2="280" y2="512" stroke="#3a6b8a" stroke-width="1" stroke-dasharray="5,4"/>
+      <!-- yes → create-pr -->
+      <line x1="360" y1="636" x2="360" y2="664" stroke="#1a5276" stroke-width="1.2" marker-end="url(#arrow-accent)"/>
+
+      <line x1="360" y1="704" x2="360" y2="712" stroke="#3a6b8a" stroke-width="1"/>
+
+      <!-- Labels -->
+      <rect x="340" y="332" width="32" height="12" rx="2" fill="#f8fafc"/>
+      <text x="356" y="341" fill="#5a8aaa" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">YES</text>
+      <rect x="276" y="296" width="28" height="12" rx="2" fill="#f8fafc"/>
+      <text x="290" y="305" fill="#5a8aaa" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">NO</text>
+      <rect x="340" y="440" width="32" height="12" rx="2" fill="#f8fafc"/>
+      <text x="356" y="449" fill="#5a8aaa" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">YES</text>
+      <rect x="276" y="400" width="28" height="12" rx="2" fill="#f8fafc"/>
+      <text x="290" y="409" fill="#5a8aaa" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">NO</text>
+      <rect x="340" y="612" width="32" height="12" rx="2" fill="#f8fafc"/>
+      <text x="356" y="621" fill="#5a8aaa" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">YES</text>
+      <rect x="276" y="572" width="28" height="12" rx="2" fill="#f8fafc"/>
+      <text x="290" y="581" fill="#5a8aaa" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">NO</text>
+
+      <!-- ── NODES ── -->
+      <rect x="260" y="16" width="200" height="32" rx="20" fill="rgba(26,42,58,0.05)" stroke="#3a6b8a" stroke-width="1"/>
+      <text x="360" y="37" fill="#1a2a3a" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">用户意图 → skill 匹配</text>
+
+      <rect x="240" y="80" width="240" height="40" rx="6" fill="#ffffff" stroke="#1a2a3a" stroke-width="1"/>
+      <text x="360" y="104" fill="#1a2a3a" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">创建隔离 worktree</text>
+
+      <rect x="240" y="148" width="240" height="40" rx="6" fill="rgba(26,82,118,0.08)" stroke="#1a5276" stroke-width="1.2"/>
+      <text x="360" y="164" fill="#5a8aaa" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">YAML DAG</text>
+      <text x="360" y="180" fill="#1a2a3a" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">解析 nodes + depends_on</text>
+
+      <!-- Plan -->
+      <rect x="280" y="216" width="160" height="40" rx="6" fill="#ffffff" stroke="#1a2a3a" stroke-width="1"/>
+      <rect x="288" y="222" width="40" height="12" rx="2" fill="transparent" stroke="rgba(26,42,58,0.40)" stroke-width="0.8"/>
+      <text x="308" y="231" fill="rgba(26,42,58,0.80)" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">AI</text>
+      <text x="360" y="248" fill="#1a2a3a" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">plan 生成计划</text>
+
+      <!-- Implement -->
+      <rect x="280" y="284" width="160" height="48" rx="6" fill="rgba(26,82,118,0.08)" stroke="#1a5276" stroke-width="1.2"/>
+      <rect x="288" y="290" width="40" height="12" rx="2" fill="transparent" stroke="rgba(26,82,118,0.40)" stroke-width="0.8"/>
+      <text x="308" y="299" fill="rgba(26,82,118,0.80)" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">AI</text>
+      <text x="360" y="316" fill="#1a2a3a" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">implement 逐任务实现</text>
+      <text x="360" y="328" fill="#5a8aaa" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle">fresh_context: true</text>
+
+      <!-- Run tests -->
+      <rect x="280" y="388" width="160" height="48" rx="6" fill="#ffffff" stroke="#1a2a3a" stroke-width="1"/>
+      <rect x="288" y="394" width="48" height="12" rx="2" fill="transparent" stroke="rgba(26,42,58,0.40)" stroke-width="0.8"/>
+      <text x="312" y="403" fill="rgba(26,42,58,0.80)" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">BASH</text>
+      <text x="360" y="420" fill="#1a2a3a" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">run-tests 确定性验证</text>
+      <text x="360" y="432" fill="#5a8aaa" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle">无 AI · bun run validate</text>
+
+      <!-- Review -->
+      <rect x="280" y="492" width="160" height="40" rx="6" fill="#ffffff" stroke="#1a2a3a" stroke-width="1"/>
+      <rect x="288" y="498" width="40" height="12" rx="2" fill="transparent" stroke="rgba(26,42,58,0.40)" stroke-width="0.8"/>
+      <text x="308" y="507" fill="rgba(26,42,58,0.80)" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">AI</text>
+      <text x="360" y="524" fill="#1a2a3a" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">review 审查变更</text>
+
+      <!-- Approve -->
+      <rect x="280" y="560" width="160" height="48" rx="6" fill="#ffffff" stroke="#1a2a3a" stroke-width="1"/>
+      <rect x="288" y="566" width="72" height="12" rx="2" fill="transparent" stroke="rgba(26,42,58,0.40)" stroke-width="0.8"/>
+      <text x="324" y="575" fill="rgba(26,42,58,0.80)" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">INTERACTIVE</text>
+      <text x="360" y="592" fill="#1a2a3a" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">approve 人工审批</text>
+
+      <!-- Create PR -->
+      <rect x="280" y="664" width="160" height="40" rx="6" fill="#ffffff" stroke="#1a2a3a" stroke-width="1"/>
+      <rect x="288" y="670" width="40" height="12" rx="2" fill="transparent" stroke="rgba(26,42,58,0.40)" stroke-width="0.8"/>
+      <text x="308" y="679" fill="rgba(26,42,58,0.80)" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">AI</text>
+      <text x="360" y="696" fill="#1a2a3a" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">create-pr 创建 PR</text>
+
+      <rect x="288" y="712" width="144" height="28" rx="20" fill="rgba(26,42,58,0.05)" stroke="#3a6b8a" stroke-width="1"/>
+      <text x="360" y="730" fill="#1a2a3a" font-size="10" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Worktree PR 就绪</text>
+
+      <!-- ── SIDE: Multi-platform ── -->
+      <rect x="640" y="80" width="8" height="120" rx="4" fill="rgba(26,42,58,0.06)"/>
+      <text x="672" y="100" fill="#3a6b8a" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.10em" font-weight="600">多平台入口</text>
+      <text x="672" y="120" fill="#5a8aaa" font-size="8" font-family="'Geist', sans-serif">CLI: archon run</text>
+      <text x="672" y="136" fill="#5a8aaa" font-size="8" font-family="'Geist', sans-serif">Web UI: Dashboard</text>
+      <text x="672" y="152" fill="#5a8aaa" font-size="8" font-family="'Geist', sans-serif">Slack / Telegram</text>
+      <text x="672" y="168" fill="#5a8aaa" font-size="8" font-family="'Geist', sans-serif">GitHub Issue Webhook</text>
+
+      <!-- ── SIDE: SQLite ── -->
+      <rect x="640" y="240" width="8" height="120" rx="4" fill="rgba(26,82,118,0.08)"/>
+      <text x="672" y="260" fill="#1a5276" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.10em" font-weight="600">SQLite 持久化</text>
+      <text x="672" y="280" fill="#5a8aaa" font-size="8" font-family="'Geist Mono', monospace">Codebases</text>
+      <text x="672" y="296" fill="#5a8aaa" font-size="8" font-family="'Geist Mono', monospace">Workflow Runs</text>
+      <text x="672" y="312" fill="#5a8aaa" font-size="8" font-family="'Geist Mono', monospace">Sessions</text>
+      <text x="672" y="328" fill="#5a8aaa" font-size="8" font-family="'Geist Mono', monospace">Messages</text>
+      <text x="672" y="344" fill="#5a8aaa" font-size="8" font-family="'Geist Mono', monospace">Workflow Events</text>
+    </svg>
+  </div>
+</body>
+</html>

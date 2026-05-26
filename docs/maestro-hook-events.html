@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Maestro Hook 事件流</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --color-paper:   #f8fafc;
+      --color-ink:     #1a2a3a;
+      --color-muted:   #3a6b8a;
+      --color-soft:    #5a8aaa;
+      --color-accent:  #1a5276;
+      --color-rule:    rgba(26,42,58,0.10);
+      --font-sans:     'Geist', system-ui, sans-serif;
+      --font-serif:    'Instrument Serif', serif;
+      --font-mono:     'Geist Mono', ui-monospace, monospace;
+    }
+    body {
+      font-family: var(--font-sans);
+      background: var(--color-paper);
+      color: var(--color-ink);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 2rem;
+    }
+    .frame { max-width: 1200px; width: 100%; }
+    .eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--color-muted);
+      margin-bottom: 0.5rem;
+    }
+    h1 {
+      font-family: var(--font-serif);
+      font-size: clamp(1.5rem, 2.4vw + 0.75rem, 2rem);
+      font-weight: 400;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      color: var(--color-ink);
+      margin-bottom: 1.5rem;
+    }
+    svg { width: 100%; min-width: 900px; display: block; }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <p class="eyebrow">Event Flow · Maestro Hooks</p>
+    <h1>Hook 安全体系事件流</h1>
+
+    <svg viewBox="0 0 960 680" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#3a6b8a"/></marker>
+        <marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#1a5276"/></marker>
+        <marker id="arrow-block" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#8b3a3a"/></marker>
+      </defs>
+
+      <rect width="100%" height="100%" fill="#f8fafc"/>
+
+      <!-- ═══════ TIMELINE AXIS ═══════ -->
+
+      <!-- Session lifecycle timeline -->
+      <text x="60" y="36" fill="#3a6b8a" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.14em">CLAUDE CODE SESSION LIFECYCLE</text>
+
+      <!-- Timeline bar -->
+      <line x1="100" y1="80" x2="860" y2="80" stroke="rgba(26,42,58,0.15)" stroke-width="2"/>
+      <!-- Arrow at end -->
+      <polygon points="860,74 876,80 860,86" fill="rgba(26,42,58,0.15)"/>
+
+      <!-- Phase markers on timeline -->
+      <!-- SessionStart -->
+      <circle cx="140" cy="80" r="8" fill="rgba(26,82,118,0.15)" stroke="#1a5276" stroke-width="1.5"/>
+      <text x="140" y="84" fill="#1a5276" font-size="7" font-weight="600" font-family="'Geist Mono', monospace" text-anchor="middle">1</text>
+      <text x="140" y="64" fill="#1a2a3a" font-size="9" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">SessionStart</text>
+
+      <!-- PreToolUse Write|Edit -->
+      <circle cx="320" cy="80" r="8" fill="rgba(139,58,58,0.10)" stroke="#8b3a3a" stroke-width="1.5"/>
+      <text x="320" y="84" fill="#8b3a3a" font-size="7" font-weight="600" font-family="'Geist Mono', monospace" text-anchor="middle">2</text>
+      <text x="320" y="64" fill="#1a2a3a" font-size="9" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">PreToolUse</text>
+      <text x="320" y="54" fill="#5a8aaa" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle">Write|Edit</text>
+
+      <!-- Tool Execution -->
+      <rect x="400" y="72" width="120" height="16" rx="8" fill="rgba(26,42,58,0.06)" stroke="rgba(26,42,58,0.20)" stroke-width="0.8"/>
+      <text x="460" y="84" fill="#3a6b8a" font-size="8" font-family="'Geist', sans-serif" text-anchor="middle">Tool 执行</text>
+
+      <!-- PostToolUse Read -->
+      <circle cx="570" cy="80" r="8" fill="rgba(26,42,58,0.10)" stroke="#3a6b8a" stroke-width="1.5"/>
+      <text x="570" y="84" fill="#3a6b8a" font-size="7" font-weight="600" font-family="'Geist Mono', monospace" text-anchor="middle">3</text>
+      <text x="570" y="64" fill="#1a2a3a" font-size="9" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">PostToolUse</text>
+      <text x="570" y="54" fill="#5a8aaa" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle">Read</text>
+
+      <!-- PostToolUse Write|Edit -->
+      <circle cx="710" cy="80" r="8" fill="rgba(26,82,118,0.10)" stroke="#1a5276" stroke-width="1.5"/>
+      <text x="710" y="84" fill="#1a5276" font-size="7" font-weight="600" font-family="'Geist Mono', monospace" text-anchor="middle">4</text>
+      <text x="710" y="64" fill="#1a2a3a" font-size="9" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">PostToolUse</text>
+      <text x="710" y="54" fill="#5a8aaa" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle">Write|Edit</text>
+
+      <!-- PreToolUse Bash -->
+      <circle cx="840" cy="80" r="8" fill="rgba(139,58,58,0.10)" stroke="#8b3a3a" stroke-width="1.5"/>
+      <text x="840" y="84" fill="#8b3a3a" font-size="7" font-weight="600" font-family="'Geist Mono', monospace" text-anchor="middle">5</text>
+      <text x="840" y="64" fill="#1a2a3a" font-size="9" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">PreToolUse</text>
+      <text x="840" y="54" fill="#5a8aaa" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle">Bash</text>
+
+
+      <!-- ═══════ HOOK DETAIL CARDS ═══════ -->
+
+      <!-- Hook 1: session-state -->
+      <line x1="140" y1="88" x2="140" y2="120" stroke="#1a5276" stroke-width="1" stroke-dasharray="3,3"/>
+      <rect x="60" y="120" width="200" height="64" rx="6" fill="rgba(26,82,118,0.06)" stroke="#1a5276" stroke-width="1"/>
+      <text x="160" y="140" fill="#1a5276" font-size="10" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">session-state.js</text>
+      <text x="160" y="156" fill="#5a8aaa" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">读取 workflow.md</text>
+      <text x="160" y="170" fill="#5a8aaa" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">输出进度报告</text>
+      <!-- Type badge -->
+      <rect x="68" y="128" width="48" height="12" rx="2" fill="rgba(26,82,118,0.10)"/>
+      <text x="92" y="138" fill="#1a5276" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">advisory</text>
+
+      <!-- Hook 2: prompt-guard -->
+      <line x1="320" y1="88" x2="320" y2="120" stroke="#8b3a3a" stroke-width="1" stroke-dasharray="3,3"/>
+      <rect x="220" y="210" width="200" height="64" rx="6" fill="rgba(139,58,58,0.04)" stroke="#8b3a3a" stroke-width="1"/>
+      <text x="320" y="230" fill="#8b3a3a" font-size="10" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">prompt-guard.js</text>
+      <text x="320" y="246" fill="#5a8aaa" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">注入攻击检测</text>
+      <text x="320" y="260" fill="#5a8aaa" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">Write/Edit 内容扫描</text>
+      <rect x="228" y="218" width="48" height="12" rx="2" fill="rgba(139,58,58,0.10)"/>
+      <text x="252" y="228" fill="#8b3a3a" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">advisory</text>
+      <!-- Arrow from timeline -->
+      <path d="M320,120 L320,210" fill="none" stroke="#8b3a3a" stroke-width="1" stroke-dasharray="3,3"/>
+
+      <!-- Hook 3: read-injection-scanner -->
+      <line x1="570" y1="88" x2="570" y2="120" stroke="#3a6b8a" stroke-width="1" stroke-dasharray="3,3"/>
+      <rect x="470" y="120" width="200" height="64" rx="6" fill="rgba(26,42,58,0.04)" stroke="#3a6b8a" stroke-width="1"/>
+      <text x="570" y="140" fill="#3a6b8a" font-size="10" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">read-injection-scanner.js</text>
+      <text x="570" y="156" fill="#5a8aaa" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">Read 返回内容扫描</text>
+      <text x="570" y="170" fill="#5a8aaa" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">注入攻击检测</text>
+      <rect x="478" y="128" width="48" height="12" rx="2" fill="rgba(26,42,58,0.08)"/>
+      <text x="502" y="138" fill="#3a6b8a" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">advisory</text>
+
+      <!-- Hook 4a: phase-boundary -->
+      <line x1="710" y1="88" x2="710" y2="120" stroke="#1a5276" stroke-width="1" stroke-dasharray="3,3"/>
+      <rect x="580" y="300" width="200" height="64" rx="6" fill="rgba(26,82,118,0.06)" stroke="#1a5276" stroke-width="1"/>
+      <text x="680" y="320" fill="#1a5276" font-size="10" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">phase-boundary.js</text>
+      <text x="680" y="336" fill="#5a8aaa" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">.planning/ 状态变更检测</text>
+      <text x="680" y="350" fill="#5a8aaa" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">阶段边界提示</text>
+      <rect x="588" y="308" width="48" height="12" rx="2" fill="rgba(26,82,118,0.10)"/>
+      <text x="612" y="318" fill="#1a5276" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">advisory</text>
+
+      <!-- Hook 4b: context-monitor -->
+      <rect x="580" y="380" width="200" height="64" rx="6" fill="rgba(26,82,118,0.06)" stroke="#1a5276" stroke-width="1"/>
+      <text x="680" y="400" fill="#1a5276" font-size="10" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">context-monitor.js</text>
+      <text x="680" y="416" fill="#5a8aaa" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">文件变更监控</text>
+      <text x="680" y="430" fill="#5a8aaa" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">上下文使用建议</text>
+      <rect x="588" y="388" width="48" height="12" rx="2" fill="rgba(26,82,118,0.10)"/>
+      <text x="612" y="398" fill="#1a5276" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">advisory</text>
+
+      <!-- Both hooks share the same event -->
+      <path d="M710,120 L710,200 L740,200 L740,310 L780,310" fill="none" stroke="#1a5276" stroke-width="1" stroke-dasharray="3,3"/>
+      <path d="M710,200 L740,200 L740,390 L780,390" fill="none" stroke="#1a5276" stroke-width="1" stroke-dasharray="3,3"/>
+      <text x="756" y="348" fill="#5a8aaa" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle">×2</text>
+
+      <!-- Hook 5: validate-commit -->
+      <line x1="840" y1="88" x2="840" y2="120" stroke="#8b3a3a" stroke-width="1" stroke-dasharray="3,3"/>
+      <rect x="740" y="210" width="200" height="64" rx="6" fill="rgba(139,58,58,0.08)" stroke="#8b3a3a" stroke-width="1.5"/>
+      <text x="840" y="230" fill="#8b3a3a" font-size="10" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">validate-commit.js</text>
+      <text x="840" y="246" fill="#5a8aaa" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">git commit 格式校验</text>
+      <text x="840" y="260" fill="#5a8aaa" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">commit 命令拦截</text>
+      <!-- Type badge - BLOCKING -->
+      <rect x="748" y="218" width="56" height="12" rx="2" fill="rgba(139,58,58,0.15)"/>
+      <text x="776" y="228" fill="#8b3a3a" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">BLOCKING</text>
+      <path d="M840,120 L840,210" fill="none" stroke="#8b3a3a" stroke-width="1" stroke-dasharray="3,3"/>
+
+
+      <!-- ═══════ DESIGN PRINCIPLES ═══════ -->
+
+      <line x1="60" y1="480" x2="900" y2="480" stroke="rgba(26,42,58,0.10)" stroke-width="0.8"/>
+      <text x="60" y="504" fill="#3a6b8a" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.14em">DESIGN PRINCIPLES</text>
+
+      <!-- Principle cards -->
+      <rect x="60" y="516" width="180" height="56" rx="4" fill="rgba(26,42,58,0.03)" stroke="rgba(26,42,58,0.10)" stroke-width="0.8"/>
+      <text x="150" y="536" fill="#1a2a3a" font-size="10" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">advisory-only</text>
+      <text x="150" y="554" fill="#5a8aaa" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">exit 0，不阻断操作</text>
+      <text x="150" y="566" fill="#5a8aaa" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">仅输出警告信息</text>
+
+      <rect x="260" y="516" width="180" height="56" rx="4" fill="rgba(26,42,58,0.03)" stroke="rgba(26,42,58,0.10)" stroke-width="0.8"/>
+      <text x="350" y="536" fill="#1a2a3a" font-size="10" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">fail-open</text>
+      <text x="350" y="554" fill="#5a8aaa" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">Hook 错误时不拦截</text>
+      <text x="350" y="566" fill="#5a8aaa" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">保证正常流程不受影响</text>
+
+      <rect x="460" y="516" width="180" height="56" rx="4" fill="rgba(26,42,58,0.03)" stroke="rgba(26,42,58,0.10)" stroke-width="0.8"/>
+      <text x="550" y="536" fill="#1a2a3a" font-size="10" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">独立配置</text>
+      <text x="550" y="554" fill="#5a8aaa" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">config.json hooks 节</text>
+      <text x="550" y="566" fill="#5a8aaa" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">各 Hook 独立开关</text>
+
+      <rect x="660" y="516" width="200" height="56" rx="4" fill="rgba(139,58,58,0.04)" stroke="rgba(139,58,58,0.15)" stroke-width="0.8"/>
+      <text x="760" y="536" fill="#8b3a3a" font-size="10" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">唯一阻断型</text>
+      <text x="760" y="554" fill="#5a8aaa" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">validate-commit exit 2</text>
+      <text x="760" y="566" fill="#5a8aaa" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">需显式启用才生效</text>
+
+
+      <!-- ═══════ LEGEND ═══════ -->
+      <line x1="60" y1="600" x2="900" y2="600" stroke="rgba(26,42,58,0.10)" stroke-width="0.8"/>
+      <text x="60" y="624" fill="#3a6b8a" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.14em">LEGEND</text>
+
+      <circle cx="160" cy="620" r="6" fill="rgba(26,82,118,0.15)" stroke="#1a5276" stroke-width="1"/>
+      <text x="176" y="624" fill="#3a6b8a" font-size="9" font-family="'Geist', sans-serif">advisory 事件</text>
+
+      <circle cx="310" cy="620" r="6" fill="rgba(139,58,58,0.10)" stroke="#8b3a3a" stroke-width="1"/>
+      <text x="326" y="624" fill="#3a6b8a" font-size="9" font-family="'Geist', sans-serif">可拦截事件</text>
+
+      <rect x="440" y="614" width="56" height="12" rx="2" fill="rgba(26,42,58,0.06)" stroke="rgba(26,42,58,0.20)" stroke-width="0.8"/>
+      <text x="468" y="624" fill="#3a6b8a" font-size="9" font-family="'Geist', sans-serif">Tool 执行窗口</text>
+
+      <line x1="580" y1="620" x2="616" y2="620" stroke="#3a6b8a" stroke-width="1" stroke-dasharray="3,3"/>
+      <text x="624" y="624" fill="#3a6b8a" font-size="9" font-family="'Geist', sans-serif">Hook 触发连线</text>
+
+    </svg>
+  </div>
+</body>
+</html>

@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Maestro 18 阶段全流程</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --color-paper:   #f8fafc;
+      --color-ink:     #1a2a3a;
+      --color-muted:   #3a6b8a;
+      --color-soft:    #5a8aaa;
+      --color-accent:  #1a5276;
+      --color-rule:    rgba(26,42,58,0.10);
+      --font-sans:     'Geist', system-ui, sans-serif;
+      --font-serif:    'Instrument Serif', serif;
+      --font-mono:     'Geist Mono', ui-monospace, monospace;
+    }
+    body {
+      font-family: var(--font-sans);
+      background: var(--color-paper);
+      color: var(--color-ink);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 2rem;
+    }
+    .frame { max-width: 1200px; width: 100%; }
+    .eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--color-muted);
+      margin-bottom: 0.5rem;
+    }
+    h1 {
+      font-family: var(--font-serif);
+      font-size: clamp(1.5rem, 2.4vw + 0.75rem, 2rem);
+      font-weight: 400;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      color: var(--color-ink);
+      margin-bottom: 1.5rem;
+    }
+    svg { width: 100%; min-width: 900px; display: block; }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <p class="eyebrow">Timeline · Maestro Workflow</p>
+    <h1>18 阶段产研全流程</h1>
+
+    <svg viewBox="0 0 960 640" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#3a6b8a"/></marker>
+        <marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#1a5276"/></marker>
+      </defs>
+
+      <rect width="100%" height="100%" fill="#f8fafc"/>
+
+      <!-- ═══════ Domain Labels (left column) ═══════ -->
+
+      <!-- 产品域 -->
+      <rect x="24" y="32" width="80" height="200" rx="4" fill="rgba(26,82,118,0.05)" stroke="rgba(26,82,118,0.15)" stroke-width="0.8"/>
+      <text x="64" y="56" fill="#1a5276" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.10em" font-weight="600">产品域</text>
+      <text x="64" y="70" fill="#5a8aaa" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle">P01–P09</text>
+
+      <!-- 技术域 -->
+      <rect x="24" y="248" width="80" height="152" rx="4" fill="rgba(26,42,58,0.04)" stroke="rgba(26,42,58,0.12)" stroke-width="0.8"/>
+      <text x="64" y="272" fill="#3a6b8a" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.10em" font-weight="600">技术域</text>
+      <text x="64" y="286" fill="#5a8aaa" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle">P10–P13</text>
+
+      <!-- 开发域 -->
+      <rect x="24" y="416" width="80" height="108" rx="4" fill="rgba(26,42,58,0.04)" stroke="rgba(26,42,58,0.12)" stroke-width="0.8"/>
+      <text x="64" y="440" fill="#3a6b8a" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.10em" font-weight="600">开发域</text>
+      <text x="64" y="454" fill="#5a8aaa" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle">P14–P15</text>
+
+      <!-- 交付域 -->
+      <rect x="24" y="540" width="80" height="72" rx="4" fill="rgba(26,42,58,0.04)" stroke="rgba(26,42,58,0.12)" stroke-width="0.8"/>
+      <text x="64" y="564" fill="#3a6b8a" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.10em" font-weight="600">交付域</text>
+      <text x="64" y="578" fill="#5a8aaa" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle">P16–P18</text>
+
+      <!-- ═══════ CONNECTING ARROWS ═══════ -->
+      <!-- Row 1: P01→P02→P03→P04→P05 (right edge → left edge) -->
+      <line x1="276" y1="68" x2="304" y2="68" stroke="#3a6b8a" stroke-width="1" marker-end="url(#arrow)"/>
+      <line x1="440" y1="68" x2="468" y2="68" stroke="#3a6b8a" stroke-width="1" marker-end="url(#arrow)"/>
+      <line x1="604" y1="68" x2="632" y2="68" stroke="#3a6b8a" stroke-width="1" marker-end="url(#arrow)"/>
+      <line x1="768" y1="68" x2="796" y2="68" stroke="#3a6b8a" stroke-width="1" marker-end="url(#arrow)"/>
+
+      <!-- Row 1→2: P05 center bottom → P06 center top -->
+      <line x1="864" y1="88" x2="864" y2="116" stroke="#3a6b8a" stroke-width="1"/>
+      <line x1="864" y1="116" x2="208" y2="116" stroke="#3a6b8a" stroke-width="1"/>
+      <line x1="208" y1="116" x2="208" y2="144" stroke="#3a6b8a" stroke-width="1" marker-end="url(#arrow)"/>
+
+      <!-- Row 2: P06→P07→P08→P09 -->
+      <line x1="276" y1="164" x2="304" y2="164" stroke="#3a6b8a" stroke-width="1" marker-end="url(#arrow)"/>
+      <line x1="440" y1="164" x2="468" y2="164" stroke="#3a6b8a" stroke-width="1" marker-end="url(#arrow)"/>
+      <line x1="604" y1="164" x2="632" y2="164" stroke="#1a5276" stroke-width="1.2" marker-end="url(#arrow-accent)"/>
+
+      <!-- Row 2→3: P09 center bottom → P10 center top -->
+      <line x1="700" y1="184" x2="700" y2="232" stroke="#3a6b8a" stroke-width="1"/>
+      <line x1="700" y1="232" x2="208" y2="232" stroke="#3a6b8a" stroke-width="1"/>
+      <line x1="208" y1="232" x2="208" y2="280" stroke="#3a6b8a" stroke-width="1" marker-end="url(#arrow)"/>
+
+      <!-- Row 3: P10→P11→P12→P13 -->
+      <line x1="276" y1="300" x2="304" y2="300" stroke="#3a6b8a" stroke-width="1" marker-end="url(#arrow)"/>
+      <line x1="440" y1="300" x2="468" y2="300" stroke="#3a6b8a" stroke-width="1" marker-end="url(#arrow)"/>
+      <line x1="604" y1="300" x2="632" y2="300" stroke="#3a6b8a" stroke-width="1" marker-end="url(#arrow)"/>
+
+      <!-- Row 3→4: P13 center bottom → P14 center top -->
+      <line x1="700" y1="320" x2="700" y2="384" stroke="#3a6b8a" stroke-width="1"/>
+      <line x1="700" y1="384" x2="208" y2="384" stroke="#3a6b8a" stroke-width="1"/>
+      <line x1="208" y1="384" x2="208" y2="448" stroke="#3a6b8a" stroke-width="1" marker-end="url(#arrow)"/>
+
+      <!-- Row 4: P14→P15 -->
+      <line x1="276" y1="468" x2="304" y2="468" stroke="#1a5276" stroke-width="1.2" marker-end="url(#arrow-accent)"/>
+
+      <!-- Row 4→5: P15 center bottom → P16 center top -->
+      <line x1="372" y1="488" x2="372" y2="532" stroke="#3a6b8a" stroke-width="1"/>
+      <line x1="372" y1="532" x2="208" y2="532" stroke="#3a6b8a" stroke-width="1"/>
+      <line x1="208" y1="532" x2="208" y2="572" stroke="#3a6b8a" stroke-width="1" marker-end="url(#arrow)"/>
+
+      <!-- Row 5: P16→P17→P18 -->
+      <line x1="276" y1="592" x2="304" y2="592" stroke="#3a6b8a" stroke-width="1" marker-end="url(#arrow)"/>
+      <line x1="440" y1="592" x2="468" y2="592" stroke="#1a5276" stroke-width="1.2" marker-end="url(#arrow-accent)"/>
+
+      <!-- ═══════ PHASE NODES ═══════ -->
+
+      <!-- Row 1: 产品域 P01-P05 -->
+      <!-- P01 -->
+      <rect x="140" y="48" width="136" height="40" rx="6" fill="#ffffff" stroke="#1a2a3a" stroke-width="1"/>
+      <text x="148" y="64" fill="#5a8aaa" font-size="7" font-family="'Geist Mono', monospace" letter-spacing="0.08em">P01</text>
+      <text x="208" y="78" fill="#1a2a3a" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">需求调研</text>
+
+      <!-- P02 -->
+      <rect x="304" y="48" width="136" height="40" rx="6" fill="#ffffff" stroke="#1a2a3a" stroke-width="1"/>
+      <text x="312" y="64" fill="#5a8aaa" font-size="7" font-family="'Geist Mono', monospace" letter-spacing="0.08em">P02</text>
+      <text x="372" y="78" fill="#1a2a3a" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">业务现状流程图</text>
+
+      <!-- P03 -->
+      <rect x="468" y="48" width="136" height="40" rx="6" fill="#ffffff" stroke="#1a2a3a" stroke-width="1"/>
+      <text x="476" y="64" fill="#5a8aaa" font-size="7" font-family="'Geist Mono', monospace" letter-spacing="0.08em">P03</text>
+      <text x="536" y="78" fill="#1a2a3a" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">会议纪要</text>
+
+      <!-- P04 -->
+      <rect x="632" y="48" width="136" height="40" rx="6" fill="#ffffff" stroke="#1a2a3a" stroke-width="1"/>
+      <text x="640" y="64" fill="#5a8aaa" font-size="7" font-family="'Geist Mono', monospace" letter-spacing="0.08em">P04</text>
+      <text x="700" y="78" fill="#1a2a3a" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">竞品分析</text>
+
+      <!-- P05 -->
+      <rect x="796" y="48" width="136" height="40" rx="6" fill="#ffffff" stroke="#1a2a3a" stroke-width="1"/>
+      <text x="804" y="64" fill="#5a8aaa" font-size="7" font-family="'Geist Mono', monospace" letter-spacing="0.08em">P05</text>
+      <text x="864" y="78" fill="#1a2a3a" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">功能清单</text>
+
+      <!-- Row 2: 产品域 P06-P09 -->
+      <!-- P06 -->
+      <rect x="140" y="144" width="136" height="40" rx="6" fill="rgba(26,82,118,0.08)" stroke="#1a5276" stroke-width="1.2"/>
+      <text x="148" y="160" fill="#5a8aaa" font-size="7" font-family="'Geist Mono', monospace" letter-spacing="0.08em">P06</text>
+      <text x="208" y="174" fill="#1a2a3a" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">原型设计</text>
+
+      <!-- P07 -->
+      <rect x="304" y="144" width="136" height="40" rx="6" fill="#ffffff" stroke="#1a2a3a" stroke-width="1"/>
+      <text x="312" y="160" fill="#5a8aaa" font-size="7" font-family="'Geist Mono', monospace" letter-spacing="0.08em">P07</text>
+      <text x="372" y="174" fill="#1a2a3a" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">原型复核</text>
+
+      <!-- P08 -->
+      <rect x="468" y="144" width="136" height="40" rx="6" fill="#ffffff" stroke="#1a2a3a" stroke-width="1"/>
+      <text x="476" y="160" fill="#5a8aaa" font-size="7" font-family="'Geist Mono', monospace" letter-spacing="0.08em">P08</text>
+      <text x="536" y="174" fill="#1a2a3a" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">UI 设计</text>
+
+      <!-- P09 (focal) -->
+      <rect x="632" y="144" width="136" height="40" rx="6" fill="rgba(26,82,118,0.08)" stroke="#1a5276" stroke-width="1.2"/>
+      <text x="640" y="160" fill="#5a8aaa" font-size="7" font-family="'Geist Mono', monospace" letter-spacing="0.08em">P09</text>
+      <text x="700" y="174" fill="#1a2a3a" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">方案设计</text>
+
+      <!-- Row 3: 技术域 P10-P13 -->
+      <!-- P10 -->
+      <rect x="140" y="280" width="136" height="40" rx="6" fill="rgba(26,82,118,0.08)" stroke="#1a5276" stroke-width="1.2"/>
+      <text x="148" y="296" fill="#5a8aaa" font-size="7" font-family="'Geist Mono', monospace" letter-spacing="0.08em">P10</text>
+      <text x="208" y="310" fill="#1a2a3a" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">架构设计</text>
+
+      <!-- P11 -->
+      <rect x="304" y="280" width="136" height="40" rx="6" fill="#ffffff" stroke="#1a2a3a" stroke-width="1"/>
+      <text x="312" y="296" fill="#5a8aaa" font-size="7" font-family="'Geist Mono', monospace" letter-spacing="0.08em">P11</text>
+      <text x="372" y="310" fill="#1a2a3a" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">架构评审</text>
+
+      <!-- P12 -->
+      <rect x="468" y="280" width="136" height="40" rx="6" fill="#ffffff" stroke="#1a2a3a" stroke-width="1"/>
+      <text x="476" y="296" fill="#5a8aaa" font-size="7" font-family="'Geist Mono', monospace" letter-spacing="0.08em">P12</text>
+      <text x="536" y="310" fill="#1a2a3a" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">架构细化</text>
+
+      <!-- P13 -->
+      <rect x="632" y="280" width="136" height="40" rx="6" fill="#ffffff" stroke="#1a2a3a" stroke-width="1"/>
+      <text x="640" y="296" fill="#5a8aaa" font-size="7" font-family="'Geist Mono', monospace" letter-spacing="0.08em">P13</text>
+      <text x="700" y="310" fill="#1a2a3a" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">详细设计</text>
+
+      <!-- Row 4: 开发域 P14-P15 -->
+      <!-- P14 -->
+      <rect x="140" y="448" width="136" height="40" rx="6" fill="#ffffff" stroke="#1a2a3a" stroke-width="1"/>
+      <text x="148" y="464" fill="#5a8aaa" font-size="7" font-family="'Geist Mono', monospace" letter-spacing="0.08em">P14</text>
+      <text x="208" y="478" fill="#1a2a3a" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">开发任务规划</text>
+
+      <!-- P15 (focal) -->
+      <rect x="304" y="448" width="136" height="40" rx="6" fill="rgba(26,82,118,0.08)" stroke="#1a5276" stroke-width="1.2"/>
+      <text x="312" y="464" fill="#5a8aaa" font-size="7" font-family="'Geist Mono', monospace" letter-spacing="0.08em">P15</text>
+      <text x="372" y="478" fill="#1a2a3a" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">前后端开发</text>
+
+      <!-- Row 5: 交付域 P16-P18 -->
+      <!-- P16 -->
+      <rect x="140" y="572" width="136" height="40" rx="6" fill="#ffffff" stroke="#1a2a3a" stroke-width="1"/>
+      <text x="148" y="588" fill="#5a8aaa" font-size="7" font-family="'Geist Mono', monospace" letter-spacing="0.08em">P16</text>
+      <text x="208" y="602" fill="#1a2a3a" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">系统测试</text>
+
+      <!-- P17 -->
+      <rect x="304" y="572" width="136" height="40" rx="6" fill="#ffffff" stroke="#1a2a3a" stroke-width="1"/>
+      <text x="312" y="588" fill="#5a8aaa" font-size="7" font-family="'Geist Mono', monospace" letter-spacing="0.08em">P17</text>
+      <text x="372" y="602" fill="#1a2a3a" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">验收测试</text>
+
+      <!-- P18 (focal - deploy) -->
+      <rect x="468" y="572" width="136" height="40" rx="6" fill="rgba(26,82,118,0.08)" stroke="#1a5276" stroke-width="1.2"/>
+      <text x="476" y="588" fill="#5a8aaa" font-size="7" font-family="'Geist Mono', monospace" letter-spacing="0.08em">P18</text>
+      <text x="536" y="602" fill="#1a2a3a" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">部署上线</text>
+
+      <!-- ═══════ LEGEND ═══════ -->
+      <line x1="140" y1="632" x2="864" y2="632" stroke="rgba(26,42,58,0.10)" stroke-width="0.8"/>
+      <text x="140" y="652" fill="#3a6b8a" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.14em">LEGEND</text>
+
+      <rect x="220" y="641" width="14" height="12" rx="4" fill="#ffffff" stroke="#1a2a3a" stroke-width="1"/>
+      <text x="240" y="651" fill="#3a6b8a" font-size="9" font-family="'Geist', sans-serif">常规阶段</text>
+
+      <rect x="340" y="641" width="14" height="12" rx="4" fill="rgba(26,82,118,0.08)" stroke="#1a5276" stroke-width="1"/>
+      <text x="360" y="651" fill="#3a6b8a" font-size="9" font-family="'Geist', sans-serif">关键里程碑</text>
+
+      <rect x="480" y="641" width="56" height="12" rx="2" fill="rgba(26,42,58,0.04)" stroke="rgba(26,42,58,0.12)" stroke-width="0.8"/>
+      <text x="544" y="651" fill="#3a6b8a" font-size="9" font-family="'Geist', sans-serif">领域分组</text>
+
+    </svg>
+  </div>
+</body>
+</html>

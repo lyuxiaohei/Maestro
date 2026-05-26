@@ -15,7 +15,7 @@ description: 产研工作流编排引擎，管理18阶段工作流的状态推�
 
 ## 阶段启动检查序列
 
-1. 读取 `.planning/workflow.md` 获取当前 `phase_index` 和 `status`
+1. 读取 `.planning/workflow.md` 获取当前 `phase_index` 和 `workflow_status`
 2. 读取目标阶段 `.planning/phases/P##-STATE.md` 的状态字段（不读完整输出体）
 3. 读取 `references/phase-definitions.md` 获取阶段定义和对应 Skill
 4. **GATE-03 防跳步检查**（优先执行）— 遍历 P01 到 P{target-1} 所有 STATE.md，确认 status 为 COMPLETE 或 SKIPPED
@@ -112,7 +112,7 @@ doc-verifier 发现不一致时反馈给 doc-writer 修正（最多 1 轮）。
 
 ## 跨会话续接
 
-- 首次激活时读取 workflow.md，如 status 为 IN_PROGRESS 或 BLOCKED，从中断点恢复
+- 首次激活时读取 workflow.md，如 workflow_status 为 IN_PROGRESS 或 BLOCKED，从中断点恢复
 - 向用户报告中断位置和待续接步骤，等待确认后继续
 
 ## 独立阶段启动

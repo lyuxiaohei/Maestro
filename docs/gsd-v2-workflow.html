@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GSD v2/v3 核心工作流</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --color-paper: #f8fafc; --color-ink: #1a2a3a; --color-muted: #3a6b8a;
+      --color-soft: #5a8aaa; --color-accent: #1a5276;
+      --font-sans: 'Geist', system-ui, sans-serif;
+      --font-serif: 'Instrument Serif', serif;
+      --font-mono: 'Geist Mono', ui-monospace, monospace;
+    }
+    body { font-family: var(--font-sans); background: var(--color-paper); color: var(--color-ink); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 3rem 2rem; }
+    .frame { max-width: 1200px; width: 100%; }
+    .eyebrow { font-family: var(--font-mono); font-size: 0.66rem; font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase; color: var(--color-muted); margin-bottom: 0.5rem; }
+    h1 { font-family: var(--font-serif); font-size: clamp(1.5rem, 2.4vw + 0.75rem, 2rem); font-weight: 400; letter-spacing: -0.02em; line-height: 1.15; color: var(--color-ink); margin-bottom: 1.5rem; }
+    svg { width: 100%; min-width: 900px; display: block; }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <p class="eyebrow">Flowchart · GSD v2/v3</p>
+    <h1>GSD v2/v3 核心工作流</h1>
+
+    <svg viewBox="0 0 960 800" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#3a6b8a"/></marker>
+        <marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#1a5276"/></marker>
+      </defs>
+      <rect width="100%" height="100%" fill="#f8fafc"/>
+
+      <!-- Main vertical arrows -->
+      <line x1="340" y1="48" x2="340" y2="80" stroke="#3a6b8a" stroke-width="1" marker-end="url(#arrow)"/>
+      <line x1="340" y1="212" x2="340" y2="240" stroke="#3a6b8a" stroke-width="1" marker-end="url(#arrow)"/>
+      <line x1="340" y1="280" x2="340" y2="308" stroke="#3a6b8a" stroke-width="1" marker-end="url(#arrow)"/>
+      <line x1="340" y1="348" x2="340" y2="376" stroke="#1a5276" stroke-width="1.2" marker-end="url(#arrow-accent)"/>
+      <line x1="340" y1="416" x2="340" y2="444" stroke="#3a6b8a" stroke-width="1" marker-end="url(#arrow)"/>
+
+      <!-- Test pass? -->
+      <line x1="340" y1="492" x2="340" y2="520" stroke="#3a6b8a" stroke-width="1"/>
+      <!-- NO: retry -->
+      <line x1="220" y1="468" x2="152" y2="468" stroke="#3a6b8a" stroke-width="1" stroke-dasharray="5,4"/>
+      <line x1="152" y1="468" x2="152" y2="396" stroke="#3a6b8a" stroke-width="1" stroke-dasharray="5,4"/>
+      <line x1="152" y1="396" x2="220" y2="396" stroke="#3a6b8a" stroke-width="1" stroke-dasharray="5,4" marker-end="url(#arrow)"/>
+      <!-- YES -->
+      <line x1="340" y1="520" x2="340" y2="548" stroke="#1a5276" stroke-width="1.2" marker-end="url(#arrow-accent)"/>
+
+      <!-- Slice done? -->
+      <line x1="340" y1="596" x2="340" y2="624" stroke="#3a6b8a" stroke-width="1"/>
+      <!-- NO: loop -->
+      <line x1="400" y1="572" x2="840" y2="572" stroke="#3a6b8a" stroke-width="1" stroke-dasharray="5,4"/>
+      <line x1="840" y1="572" x2="840" y2="328" stroke="#3a6b8a" stroke-width="1" stroke-dasharray="5,4"/>
+      <line x1="840" y1="328" x2="432" y2="328" stroke="#3a6b8a" stroke-width="1" stroke-dasharray="5,4"/>
+      <!-- YES -->
+      <line x1="340" y1="624" x2="340" y2="652" stroke="#1a5276" stroke-width="1.2" marker-end="url(#arrow-accent)"/>
+
+      <!-- Milestone done? -->
+      <line x1="340" y1="700" x2="340" y2="728" stroke="#3a6b8a" stroke-width="1"/>
+      <!-- NO: loop to plan slice -->
+      <line x1="400" y1="676" x2="860" y2="676" stroke="#3a6b8a" stroke-width="1" stroke-dasharray="5,4"/>
+      <line x1="860" y1="676" x2="860" y2="328" stroke="#3a6b8a" stroke-width="1" stroke-dasharray="5,4"/>
+      <line x1="860" y1="328" x2="432" y2="328" stroke="#3a6b8a" stroke-width="1" stroke-dasharray="5,4"/>
+
+      <!-- Labels -->
+      <rect x="160" y="456" width="28" height="12" rx="2" fill="#f8fafc"/>
+      <text x="174" y="465" fill="#5a8aaa" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">NO</text>
+      <rect x="348" y="508" width="32" height="12" rx="2" fill="#f8fafc"/>
+      <text x="364" y="517" fill="#5a8aaa" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">YES</text>
+      <rect x="356" y="604" width="28" height="12" rx="2" fill="#f8fafc"/>
+      <text x="370" y="613" fill="#5a8aaa" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">NO</text>
+      <rect x="348" y="632" width="32" height="12" rx="2" fill="#f8fafc"/>
+      <text x="364" y="641" fill="#5a8aaa" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">YES</text>
+      <rect x="356" y="708" width="28" height="12" rx="2" fill="#f8fafc"/>
+      <text x="370" y="717" fill="#5a8aaa" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">NO</text>
+
+      <!-- ── FIRST RUN? branch ── -->
+      <line x1="400" y1="100" x2="600" y2="100" stroke="#3a6b8a" stroke-width="1"/>
+      <line x1="600" y1="100" x2="600" y2="148" stroke="#3a6b8a" stroke-width="1" marker-end="url(#arrow)"/>
+      <line x1="280" y1="100" x2="120" y2="100" stroke="#3a6b8a" stroke-width="1"/>
+      <line x1="120" y1="100" x2="120" y2="148" stroke="#3a6b8a" stroke-width="1" marker-end="url(#arrow)"/>
+      <line x1="120" y1="188" x2="120" y2="212" stroke="#3a6b8a" stroke-width="1"/>
+      <line x1="600" y1="188" x2="600" y2="212" stroke="#3a6b8a" stroke-width="1"/>
+      <line x1="120" y1="212" x2="600" y2="212" stroke="#3a6b8a" stroke-width="1"/>
+      <circle cx="340" cy="212" r="4" fill="#1a2a3a"/>
+      <rect x="276" y="88" width="24" height="12" rx="2" fill="#f8fafc"/>
+      <text x="288" y="97" fill="#5a8aaa" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">NO</text>
+      <rect x="380" y="88" width="28" height="12" rx="2" fill="#f8fafc"/>
+      <text x="394" y="97" fill="#5a8aaa" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">YES</text>
+
+      <!-- ── NODES ── -->
+      <rect x="268" y="16" width="144" height="32" rx="20" fill="rgba(26,42,58,0.05)" stroke="#3a6b8a" stroke-width="1"/>
+      <text x="340" y="37" fill="#1a2a3a" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">gsd / /gsd auto</text>
+
+      <rect x="260" y="80" width="160" height="40" rx="6" fill="#ffffff" stroke="#1a2a3a" stroke-width="1"/>
+      <text x="340" y="104" fill="#1a2a3a" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">GSD CLI + Pi SDK</text>
+
+      <rect x="32" y="148" width="176" height="40" rx="6" fill="#ffffff" stroke="#1a2a3a" stroke-width="1"/>
+      <text x="120" y="172" fill="#1a2a3a" font-size="10" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">加载 ~/.gsd/ 偏好</text>
+
+      <rect x="508" y="148" width="184" height="40" rx="6" fill="#ffffff" stroke="#1a2a3a" stroke-width="1"/>
+      <text x="600" y="172" fill="#1a2a3a" font-size="10" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Setup Wizard + API keys</text>
+
+      <rect x="220" y="240" width="240" height="40" rx="6" fill="#ffffff" stroke="#1a2a3a" stroke-width="1"/>
+      <text x="340" y="264" fill="#1a2a3a" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">生成 Milestone + Plan Slice</text>
+
+      <rect x="220" y="308" width="212" height="40" rx="6" fill="#ffffff" stroke="#1a2a3a" stroke-width="1"/>
+      <text x="326" y="324" fill="#5a8aaa" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">FRESH 200K CONTEXT</text>
+      <text x="326" y="340" fill="#1a2a3a" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Execute Task</text>
+
+      <rect x="220" y="376" width="240" height="40" rx="6" fill="rgba(26,82,118,0.08)" stroke="#1a5276" stroke-width="1.2"/>
+      <text x="340" y="400" fill="#1a2a3a" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">验证命令通过？</text>
+
+      <rect x="220" y="444" width="240" height="48" rx="6" fill="#ffffff" stroke="#1a2a3a" stroke-width="1"/>
+      <text x="340" y="464" fill="#5a8aaa" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">AUTO RETRY ×3</text>
+      <text x="340" y="480" fill="#1a2a3a" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">自动重试修复</text>
+
+      <rect x="220" y="548" width="240" height="40" rx="6" fill="#ffffff" stroke="#1a2a3a" stroke-width="1"/>
+      <text x="340" y="572" fill="#1a2a3a" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Complete Slice + UAT</text>
+
+      <rect x="220" y="652" width="240" height="40" rx="6" fill="#ffffff" stroke="#1a2a3a" stroke-width="1"/>
+      <text x="340" y="676" fill="#1a2a3a" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Validate Milestone</text>
+
+      <rect x="268" y="728" width="144" height="32" rx="20" fill="rgba(26,42,58,0.05)" stroke="#3a6b8a" stroke-width="1"/>
+      <text x="340" y="749" fill="#1a2a3a" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Squash merge 发布</text>
+
+      <!-- ── SIDE PANELS ── -->
+      <!-- Crash recovery -->
+      <rect x="600" y="440" width="8" height="120" rx="4" fill="rgba(26,82,118,0.10)"/>
+      <text x="628" y="464" fill="#1a5276" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.10em" font-weight="600">崩溃恢复</text>
+      <text x="628" y="484" fill="#5a8aaa" font-size="8" font-family="'Geist Mono', monospace">DB 持久化状态</text>
+      <text x="628" y="500" fill="#5a8aaa" font-size="8" font-family="'Geist Mono', monospace">重启后重建</text>
+      <text x="628" y="516" fill="#5a8aaa" font-size="8" font-family="'Geist Mono', monospace">Lock files</text>
+      <text x="628" y="536" fill="#5a8aaa" font-size="8" font-family="'Geist Mono', monospace">Session forensics</text>
+
+      <!-- Cost control -->
+      <rect x="740" y="440" width="8" height="96" rx="4" fill="rgba(26,42,58,0.06)"/>
+      <text x="768" y="464" fill="#3a6b8a" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.10em" font-weight="600">成本控制</text>
+      <text x="768" y="484" fill="#5a8aaa" font-size="8" font-family="'Geist Mono', monospace">Token Profile</text>
+      <text x="768" y="500" fill="#5a8aaa" font-size="8" font-family="'Geist Mono', monospace">budget/balanced/quality</text>
+      <text x="768" y="520" fill="#5a8aaa" font-size="8" font-family="'Geist Mono', monospace">50%→75%→90% 降级</text>
+    </svg>
+  </div>
+</body>
+</html>
