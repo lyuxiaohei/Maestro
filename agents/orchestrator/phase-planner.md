@@ -19,7 +19,7 @@ isolation: worktree
 3. **分析上游产出物** — 确认上游输出中与本阶段相关的输入项，标注数据流向
 4. **生成任务列表** — 将阶段目标分解为有序任务，标注任务间依赖关系
 5. **定义验收标准** — 每个任务配备可检查的验收标准（文件存在、内容格式、字段完整）
-6. **输出 PLAN.md** — 将规划结果写入 `.planning/phases/P##-PLAN.md`
+6. **输出 PLAN.md** — 将规划结果写入 `{phase_dir}/P##-PLAN.md`（路径由编排器传入的 phase_dir 参数决定）
 
 ## PLAN.md 结构
 
@@ -66,6 +66,7 @@ upstream: [<上游产出物路径>]
 - `phase_index`: 阶段编号（如 06）
 - `skill_name`: 目标领域 Skill 目录名
 - `upstream_outputs`: 上游输出文档路径列表
+- `phase_dir`: 阶段文档目录路径（如 `.planning/workflows/{slug}/phases/design/P06-prototype-design/`）
 
 ## 完成信号
 

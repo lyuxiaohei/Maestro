@@ -8,7 +8,7 @@ Maestro 是一个 Claude Code 插件，将完整的产研工作流（需求调�
 
 **核心隐喻**：Maestro（指挥家）— 编排 18 阶段产研工作流，调度 20 个专业 Agent，协调 21 个领域 Skill，如同指挥家统领整个交响乐团。
 
-![Maestro 18 阶段全流程](docs/maestro-18-phases.png)
+![Maestro 18 阶段全流程](docs/flows/maestro-18-phases.png)
 
 ## 安装
 
@@ -124,7 +124,7 @@ diagram-design → logic-list-spec(Draft) → prototype-design → logic-list-sp
   → GATE-01（人工确认输出）→ 推进下一阶段
 ```
 
-![Maestro 单阶段生命周期](docs/maestro-phase-lifecycle.png)
+![Maestro 单阶段生命周期](docs/flows/maestro-phase-lifecycle.png)
 
 | 门禁 | 名称 | 作用 |
 |------|------|------|
@@ -171,7 +171,7 @@ maestro/
 ├── hooks/
 │   └── hooks.json                  # 6 个 Hook 注册
 ├── scripts/                        # Hook 脚本（6 个）
-└── docs/                           # 流程图和分析文档
+└── docs/                           # README 引用图片
 ```
 
 ## 常用命令

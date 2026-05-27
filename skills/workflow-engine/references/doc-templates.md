@@ -40,6 +40,128 @@ completed: [YYYY-MM-DD]
 
 ---
 
+## context — 阶段上下文文档
+
+编排器在阶段启动时写入，记录阶段范围、决策和上游引用。不使用 doc-writer 管道。
+
+```markdown
+---
+phase: [P##]
+status: [draft|locked]
+created: [YYYY-MM-DD]
+---
+
+# Phase P##: [阶段名称] - Context
+
+## 阶段边界
+
+**包含:** [本阶段交付物范围]
+**不包含:** [明确不在范围内的事项]
+
+## 上下文决策
+
+- **D-01:** [决策内容]
+  - 原因: [决策理由]
+  - 影响: [对上下游的影响]
+
+## 规范参考
+
+下游 Agent 必读文件列表：
+
+- `[文件路径]` — [文件说明]
+
+## 代码上下文
+
+### 可复用资产
+- [已有组件/工具]: [如何复用]
+
+### 已建立模式
+- [模式]: [约束/能力]
+
+### 集成点
+- [新代码与现有系统的连接点]
+
+## 具体想法
+
+[特定实现建议 / "无特定要求"]
+
+## 延迟项
+
+- [本阶段不处理的事项]
+```
+
+---
+
+## output — 阶段交付物文档
+
+phase-executor 在执行完成时写入，记录本阶段产出的交付物、文件变更和需求覆盖。
+
+```markdown
+---
+phase: [P##]
+status: [complete|partial]
+created: [YYYY-MM-DD]
+---
+
+# Phase P##: [阶段名称] - Output
+
+## 交付物清单
+
+### 产出文件
+- `[文件路径]` — [文件描述]
+
+### 产出文档
+- `[文档路径]` — [文档描述]
+
+## 文件变更明细
+
+| 操作 | 文件路径 | 变更说明 |
+|------|----------|----------|
+| 新增 | [路径] | [说明] |
+| 修改 | [路径] | [说明] |
+
+## 需求覆盖表
+
+| 需求编号 | 描述 | 状态 | 产出文件 |
+|----------|------|------|----------|
+| [REQ-01] | [描述] | COVERED | [文件路径] |
+
+## 偏差说明
+
+[无偏差 / 偏差描述及原因]
+```
+
+---
+
+## verification — 阶段验证报告
+
+phase-validator 在验证完成时写入，记录验证结果和问题清单。
+
+```markdown
+---
+phase: [P##]
+result: [PASS|FAIL]
+date: [YYYY-MM-DD]
+---
+
+## 验证结果: [PASS 或 FAIL]
+
+| 检查项 | 结果 | 说明 |
+|--------|------|------|
+| 输出完整性 | [PASS/FAIL] | [是否所有 outputs 项均已产出] |
+| 输入输出一致性 | [PASS/FAIL] | [输出是否与上游输入逻辑衔接] |
+| 版本链完整 | [PASS/FAIL] | [版本号、日期、上游版本是否填写] |
+| 自检状态 | [PASS/FAIL] | [STATE.md 验证记录中自检是否 PASS] |
+| 上游引用完整性 | [PASS/FAIL] | [被引用的上游文件是否存在且有效] |
+| 需求覆盖率 | [PASS/FAIL] | [上游需求条目是否被当前输出覆盖] |
+
+### 问题清单
+
+1. [问题描述]（通过时为空）
+```
+
+---
+
 ## adr — 架构决策记录
 
 ```markdown
@@ -216,3 +338,7 @@ EntityName {
 ## 使用说明
 
 doc-writer Agent 根据 `doc_type` 字段选择对应模板，从 `sources` 中提取数据填充。模板中 `[占位符]` 标记的位置由数据源内容替换，无法填充的标记为 `[待补充]`。
+
+**内联文档模板**（context、output、verification）由各 Agent 直接写入阶段子目录（`.planning/workflows/{slug}/phases/{domain}/P##-{phase-slug}/`），不走 doc-writer 管道。doc-writer 管道用于事后文档整理（summary、adr、prd、spec、changelog）。
+
+`phase_dir` 参数格式：`.planning/workflows/{slug}/phases/{domain}/P##-{phase-slug}/`，由编排器根据 slug 和 domain 构建。

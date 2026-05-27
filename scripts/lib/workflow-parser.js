@@ -1,4 +1,4 @@
-// maestro-hook-version: 0.51.0
+// maestro-hook-version: 0.52.0
 /**
  * workflow-parser.js — Maestro shared workflow state parser
  *
@@ -6,6 +6,8 @@
  *   readWorkflowState(planningDir)   — parse workflow.md current phase info
  *   readMilestone(planningDir)       — parse STATE.md milestone version
  *   scanCompletedPhases(planningDir) — scan P*-STATE.md files for COMPLETE status
+ *   discoverWorkflows(planningDir)   — list workflow slugs under workflows/
+ *   resolveWorkflowDir(planningDir, slug) — build workflow directory path
  *
  * Pure Node.js built-in modules. No npm dependencies.
  */
@@ -15,43 +17,93 @@
 const fs = require('fs');
 const path = require('path');
 
+const DOMAIN_DIRS = ['product', 'design', 'architecture', 'development', 'testing', 'deployment'];
+
+/**
+ * List all workflow slugs under .planning/workflows/.
+ * @param {string} planningDir - absolute path to .planning/ directory
+ * @returns {string[]} sorted array of workflow slugs
+ */
+function discoverWorkflows(planningDir) {
+  try {
+    const workflowsDir = path.join(planningDir, 'workflows');
+    const entries = fs.readdirSync(workflowsDir, { withFileTypes: true });
+    return entries
+      .filter((e) => e.isDirectory())
+      .map((e) => e.name)
+      .sort();
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Build workflow directory path.
+ * @param {string} planningDir
+ * @param {string} slug
+ * @returns {string} absolute path to workflow directory
+ */
+function resolveWorkflowDir(planningDir, slug) {
+  return path.join(planningDir, 'workflows', slug);
+}
+
+/**
+ * Parse workflow.md content to extract phase info.
+ */
+function parseWorkflowMd(raw) {
+  const indexMatch = raw.match(/\*\*phase_index\*\*:\s*(\d+)/);
+  if (!indexMatch) return null;
+  const phaseIndex = indexMatch[1];
+
+  const nameMatch = raw.match(/\*\*phase_name\*\*:\s*(.+)/);
+  const phaseName = nameMatch ? nameMatch[1].trim() : '';
+
+  const statusMatch = raw.match(/\*\*(?:workflow_status|status)\*\*:\s*(.+)/);
+  const status = statusMatch ? statusMatch[1].trim() : '';
+
+  const slugMatch = raw.match(/\*\*workflow_slug\*\*:\s*(.+)/);
+  const slug = slugMatch ? slugMatch[1].trim() : '';
+
+  const lines = raw.split('\n');
+  let totalPhases = 0;
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (/^\|\s*\d+\s*\|/.test(trimmed)) {
+      totalPhases++;
+    }
+  }
+
+  return { phaseIndex, phaseName, status, totalPhases, slug };
+}
+
 /**
  * Read workflow.md from planningDir and extract current phase info.
- * @param {string} planningDir - absolute path to .planning/ directory
- * @returns {{ phaseIndex: string, phaseName: string, status: string, totalPhases: number }|null}
+ * Supports both new (workflows/{slug}/) and legacy (.planning/) paths.
  */
 function readWorkflowState(planningDir) {
   try {
-    const workflowPath = path.join(planningDir, 'workflow.md');
-    const raw = fs.readFileSync(workflowPath, 'utf8');
-
-    // Extract phase_index
-    const indexMatch = raw.match(/\*\*phase_index\*\*:\s*(\d+)/);
-    if (!indexMatch) return null;
-    const phaseIndex = indexMatch[1];
-
-    // Extract phase_name
-    const nameMatch = raw.match(/\*\*phase_name\*\*:\s*(.+)/);
-    const phaseName = nameMatch ? nameMatch[1].trim() : '';
-
-    // Extract status
-    const statusMatch = raw.match(/\*\*status\*\*:\s*(.+)/);
-    const status = statusMatch ? statusMatch[1].trim() : '';
-
-    // Count total phases from 阶段总览 table rows
-    // Table format: | # | 阶段名称 | 状态 | 版本 |
-    // Skip header line (starts with | #) and separator line (starts with |---)
-    const lines = raw.split('\n');
-    let totalPhases = 0;
-    for (const line of lines) {
-      const trimmed = line.trim();
-      // Match data rows: | 01 | ... | (starts with | and a digit)
-      if (/^\|\s*\d+\s*\|/.test(trimmed)) {
-        totalPhases++;
+    // Try new path: discover workflows and read the first active one
+    const workflows = discoverWorkflows(planningDir);
+    if (workflows.length > 0) {
+      for (const slug of workflows) {
+        const wfPath = path.join(resolveWorkflowDir(planningDir, slug), 'workflow.md');
+        try {
+          const raw = fs.readFileSync(wfPath, 'utf8');
+          const state = parseWorkflowMd(raw);
+          if (state) {
+            state.slug = state.slug || slug;
+            return state;
+          }
+        } catch {
+          continue;
+        }
       }
     }
 
-    return { phaseIndex, phaseName, status, totalPhases };
+    // Fallback: legacy .planning/workflow.md
+    const workflowPath = path.join(planningDir, 'workflow.md');
+    const raw = fs.readFileSync(workflowPath, 'utf8');
+    return parseWorkflowMd(raw);
   } catch {
     return null;
   }
@@ -59,8 +111,6 @@ function readWorkflowState(planningDir) {
 
 /**
  * Read STATE.md milestone field from planningDir.
- * @param {string} planningDir - absolute path to .planning/ directory
- * @returns {string|null} milestone string (e.g., "v0.7") or null if missing
  */
 function readMilestone(planningDir) {
   try {
@@ -74,42 +124,59 @@ function readMilestone(planningDir) {
 }
 
 /**
- * Scan P*-STATE.md files in planningDir/phases/ for COMPLETE status.
- * @param {string} planningDir - absolute path to .planning/ directory
- * @returns {string[]} sorted array of completed phase IDs (e.g., ['P01', 'P14'])
+ * Scan P*-STATE.md files for COMPLETE status.
+ * Supports both new (workflows/{slug}/phases/{domain}/) and legacy (phases/) paths.
  */
 function scanCompletedPhases(planningDir) {
+  const completed = [];
+
+  // Try new path: scan workflows/*/phases/{domain}/P##-{slug}/P##-STATE.md
+  const workflows = discoverWorkflows(planningDir);
+  if (workflows.length > 0) {
+    for (const slug of workflows) {
+      const phasesDir = path.join(resolveWorkflowDir(planningDir, slug), 'phases');
+      for (const domain of DOMAIN_DIRS) {
+        const domainDir = path.join(phasesDir, domain);
+        try {
+          const entries = fs.readdirSync(domainDir, { withFileTypes: true });
+          for (const entry of entries) {
+            if (!entry.isDirectory()) continue;
+            const stateFile = path.join(domainDir, entry.name, `${entry.name.split('-')[0]}-STATE.md`);
+            // The state file name matches the directory prefix: P##-STATE.md
+            const stateMatch = entry.name.match(/^(P\d+)-/);
+            if (!stateMatch) continue;
+            const statePath = path.join(domainDir, entry.name, `${stateMatch[1]}-STATE.md`);
+            try {
+              const content = fs.readFileSync(statePath, 'utf8');
+              if (/- \*\*status\*\*:\s*COMPLETE/.test(content)) {
+                completed.push(stateMatch[1]);
+              }
+            } catch { /* skip */ }
+          }
+        } catch { /* domain dir missing */ }
+      }
+    }
+  }
+
+  // Fallback: legacy .planning/phases/P*-STATE.md
   try {
     const phasesDir = path.join(planningDir, 'phases');
     const entries = fs.readdirSync(phasesDir);
-    const completed = [];
-
     for (const entry of entries) {
       const match = entry.match(/^(P\d+)-STATE\.md$/);
       if (!match) continue;
-
       try {
         const filePath = path.join(phasesDir, entry);
         const content = fs.readFileSync(filePath, 'utf8');
         if (/- \*\*status\*\*:\s*COMPLETE/.test(content)) {
-          completed.push(match[1]);
+          if (!completed.includes(match[1])) completed.push(match[1]);
         }
-      } catch {
-        // Skip unreadable files
-      }
+      } catch { /* skip */ }
     }
+  } catch { /* phases dir missing */ }
 
-    // Sort by numeric index
-    completed.sort((a, b) => {
-      const numA = parseInt(a.substring(1), 10);
-      const numB = parseInt(b.substring(1), 10);
-      return numA - numB;
-    });
-
-    return completed;
-  } catch {
-    return [];
-  }
+  completed.sort((a, b) => parseInt(a.substring(1), 10) - parseInt(b.substring(1), 10));
+  return completed;
 }
 
-module.exports = { readWorkflowState, readMilestone, scanCompletedPhases };
+module.exports = { readWorkflowState, readMilestone, scanCompletedPhases, discoverWorkflows, resolveWorkflowDir };

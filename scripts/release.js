@@ -69,8 +69,8 @@ const WHITELIST = [
  * Only these files are synced — no analysis docs, no competitor diagrams.
  */
 const DOCS_IMAGES = [
-  'docs/maestro-18-phases.png',
-  'docs/maestro-phase-lifecycle.png',
+  'docs/flows/maestro-18-phases.png',
+  'docs/flows/maestro-phase-lifecycle.png',
 ];
 
 /**

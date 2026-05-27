@@ -7,37 +7,55 @@ description: 产研工作流编排引擎，管理18阶段工作流的状态推�
 
 ## 触发条件
 
-- 开始或继续产研工作流
-- 推进到某个特定阶段（如 "开始阶段 06"）
-- 跳过某个阶段（如 "跳过阶段 04"、"skip P04"）
-- 查看工作流当前状态
-- 执行产研阶段相关任务
+- `/workflow-engine {slug}` — 指定或创建工作流（slug 为 kebab-case 标识符）
+- `/workflow-engine` — 列出已有工作流或创建新工作流
+- `/workflow-engine {slug} start P{N}` — 在指定工作流中启动阶段
+- 推进到某个特定阶段、跳过阶段、查看状态
+
+## 工作流初始化
+
+1. 解析 slug 参数。无 slug 时列出 `.planning/workflows/` 下所有工作流供选择
+2. 检查 `{workflow_base}`（`.planning/workflows/{slug}/`）是否存在
+3. 不存在则创建：6 个域子目录 + 18 个阶段目录骨架 + 写入 workflow.md（使用 `references/state-schema.md` 模板）
+4. 存在则读取该工作流的 workflow.md
+5. **旧路径迁移** — 首次启动时检测旧路径（`.planning/phases/P*-STATE.md` 和 `.planning/workflow.md`），自动迁移到 `workflows/default/`（详见 `references/migration.md`）
+
+## 路径构建
+
+路径由 `slug` + `domain`（from phase-definitions.md）+ `phase-slug` 构成。完整路径模板见 `references/state-schema.md`。
+
+- `{workflow_base}` = `.planning/workflows/{slug}/`
+- `{phase_dir}` = `{workflow_base}phases/{domain}/P##-{phase-slug}/`
+- STATE.md = `{phase_dir}/P##-STATE.md`
+
+跨工作流引用格式：`{workflow-slug}@P{phase}@V{version}`，编排器解析 slug 定位目标工作流目录。
 
 ## 阶段启动检查序列
 
-1. 读取 `.planning/workflow.md` 获取当前 `phase_index` 和 `workflow_status`
-2. 读取目标阶段 `.planning/phases/P##-STATE.md` 的状态字段（不读完整输出体）
-3. 读取 `references/phase-definitions.md` 获取阶段定义和对应 Skill
-4. **GATE-03 防跳步检查**（优先执行）— 遍历 P01 到 P{target-1} 所有 STATE.md，确认 status 为 COMPLETE 或 SKIPPED
+1. 读取 `{workflow_base}/workflow.md` 获取当前 `phase_index` 和 `workflow_status`
+2. 读取目标阶段 `{phase_dir}/P##-STATE.md` 的状态字段（不读完整输出体）
+3. 读取 `references/phase-definitions.md` 获取阶段定义、domain 和对应 Skill
+4. **GATE-03 防跳步检查**（优先执行）— 遍历当前工作流 P01 到 P{target-1} 所有 STATE.md，确认 status 为 COMPLETE 或 SKIPPED
 5. GATE-03 发现未完成阶段时，询问用户是否跳过（详见 `references/gate-rules.md` 跳过处理流程）
 6. 加载目标领域 Skill（单个 turn 内不超过 2-3 个，超出则分多 turn 执行）
 7. 读取上游 STATE.md 的输出部分，作为当前阶段输入传递给 Skill（SKIPPED 阶段读取 alternative_inputs）
 8. 将阶段状态设为 IN_PROGRESS，写入 started_at
+9. 创建阶段子目录 `{phase_dir}/`，写入 `P##-CONTEXT.md`（范围、决策、上游引用），更新 STATE.md 阶段文档节 CONTEXT 状态为 WRITTEN
 
 ## 阶段规划流水线
 
 GATE-03 通过后，按以下三步流水线执行：
 
-1. **spawn phase-planner**（见 `agents/orchestrator/phase-planner.md`）— 传入 phase_index、skill_name、upstream_outputs
-2. planner 返回 `## PLANNING COMPLETE` 后，**spawn plan-checker**（见 `agents/orchestrator/plan-checker.md`）— 传入 phase_index、plan_path
+1. **spawn phase-planner**（见 `agents/orchestrator/phase-planner.md`）— 传入 phase_index、skill_name、upstream_outputs、phase_dir（阶段子目录路径）
+2. planner 返回 `## PLANNING COMPLETE` 后，更新 STATE.md 阶段文档节 PLAN 状态为 WRITTEN，**spawn plan-checker**
 3. checker 返回 `## ISSUES FOUND` 时，将问题清单反馈给 planner 重新规划（最多 2 轮修订）
 4. checker 返回 `## VERIFICATION PASSED` 后，进入"阶段完成提交序列"中的 executor 执行流程
 
 ## 阶段完成提交序列
 
-1. 收集 Skill 输出，写入当前阶段 STATE.md 的输出部分和版本链
+1. 收集 Skill 输出，写入当前阶段 STATE.md 的输出部分和版本链；phase-executor 同时写入 `P##-OUTPUT.md` 和 `P##-SUMMARY.md` 到阶段子目录（见 `references/doc-templates.md`），更新 STATE.md 阶段文档节 OUTPUT/SUMMARY 状态为 WRITTEN
 2. **GATE-02 自检** — 对照 phase-definitions.md outputs 检查完整性、版本号、STATE.md 非空
-3. 自检 PASS 后调用 **phase-validator Agent**（见 `agents/orchestrator/phase-validator.md`）进行独立验证（GATE-05），传入 phase_index 和 upstream_outputs
+3. 自检 PASS 后调用 **phase-validator Agent**（见 `agents/orchestrator/phase-validator.md`）进行独立验证（GATE-05），传入 phase_index、upstream_outputs、phase_dir；validator 写入 `P##-VERIFICATION.md`，更新 STATE.md 阶段文档节 VERIFICATION 状态为 WRITTEN
 4. Agent 返回完成信号（见 `references/agent-contracts.md`），失败时按模型升级协议重试（见 `references/model-profiles.md`）
 4. **GATE-01 人工确认** — 向用户展示输出摘要，等待用户明确回复"确认"或"修改"
 5. 用户确认后更新 workflow.md 的 `phase_index`，推进到下一阶段
@@ -56,7 +74,7 @@ GATE-03 通过后，按以下三步流水线执行：
    - `alternative_inputs`: 替代输入文档路径列表（可为空）
    - `human_confirmed`: true
    - `completed_at`: 当前时间
-6. 更新 `workflow.md` 阶段总览中阶段 N 的状态为 SKIPPED
+6. 更新当前工作流的 `workflow.md` 阶段总览中阶段 N 的状态为 SKIPPED
 7. 跳过 GATE-02（自检）和 GATE-05（Agent 验证）
 
 ## Checkpoint 续接流程
@@ -92,16 +110,9 @@ GATE-03 通过后，按以下三步流水线执行：
 - **P15-P16（开发/测试）**: spawn `integration-reviewer`（见 `agents/domain/integration-reviewer.md`），传入模块路径和设计文档
 - 专项验证结果与 phase-validator 结果合并，统一进入 GATE-01 人工确认
 
-## 文档管道
+## 文档管道（可选）
 
-GATE-05（phase-validator）通过后，GATE-01 人工确认前，运行四步文档管道：
-
-1. **spawn doc-classifier**（见 `agents/orchestrator/doc-classifier.md`）— 对本阶段产出的规划文档逐一分类，输出 ADR/PRD/SPEC/DOC/UNKNOWN
-2. **spawn doc-synthesizer**（见 `agents/orchestrator/doc-synthesizer.md`）— 合并已分类文档，消重、标注冲突、生成 INGEST-CONFLICTS.md
-3. **spawn doc-writer**（见 `agents/orchestrator/doc-writer.md`）— 按模板生成阶段摘要文档，传入 doc_assignment（doc_type=summary, sources=STATE.md+PLAN.md）
-4. **spawn doc-verifier**（见 `agents/orchestrator/doc-verifier.md`）— 校验生成文档中的事实性声明是否与代码库一致
-
-doc-verifier 发现不一致时反馈给 doc-writer 修正（最多 1 轮）。
+GATE-05 通过后可选运行 doc-classifier → doc-synthesizer → doc-writer → doc-verifier 四步管道，用于事后文档整理。阶段内联文档（CONTEXT/PLAN/OUTPUT/SUMMARY/VERIFICATION）由各 Agent 直接写入，不走管道。
 
 ## 执行中中断处理（GATE-04）
 
@@ -112,7 +123,7 @@ doc-verifier 发现不一致时反馈给 doc-writer 修正（最多 1 轮）。
 
 ## 跨会话续接
 
-- 首次激活时读取 workflow.md，如 workflow_status 为 IN_PROGRESS 或 BLOCKED，从中断点恢复
+- 首次激活时读取当前工作流 workflow.md，如 workflow_status 为 IN_PROGRESS 或 BLOCKED，从中断点恢复
 - 向用户报告中断位置和待续接步骤，等待确认后继续
 
 ## 独立阶段启动
@@ -131,4 +142,5 @@ doc-verifier 发现不一致时反馈给 doc-writer 修正（最多 1 轮）。
 | `references/state-schema.md` | STATE.md 模板、字段规范和编排器交互规则 |
 | `references/agent-contracts.md` | Agent 调用协议（传参、返回格式、完成信号） |
 | `references/model-profiles.md` | Agent 模型分级策略和失败升级机制 |
-| `references/doc-templates.md` | doc-writer 使用的标准化文档模板（summary/adr/prd/spec/changelog） |
+| `references/doc-templates.md` | 阶段文档模板（context/plan/output/summary/verification/adr/prd/spec/changelog） |
+| `references/migration.md` | 旧路径到多工作流结构的迁移指南 |

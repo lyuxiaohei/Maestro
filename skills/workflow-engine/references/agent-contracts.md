@@ -11,7 +11,7 @@
 | Agent | 目录 | 模型 | 工具权限 | 上下文隔离 |
 |-------|------|------|----------|-----------|
 | phase-executor | `orchestrator/` | sonnet | Read, Write, Edit, Glob, Grep | worktree |
-| phase-validator | `orchestrator/` | sonnet | Read, Grep, Glob | worktree |
+| phase-validator | `orchestrator/` | sonnet | Read, Write, Grep, Glob | worktree |
 | phase-planner | `orchestrator/` | sonnet | Read, Write, Glob, Grep | worktree |
 | plan-checker | `orchestrator/` | sonnet | Read, Grep, Glob | worktree |
 | research-synthesizer | `orchestrator/` | sonnet | Read, Write, Glob, Grep | worktree |
@@ -49,11 +49,15 @@
 
 - **phase_index**: 06
 - **skill_name**: prototype-design
+- **workflow_slug**: user-center
 - **upstream_outputs**:
-  - P05@V1.0: .planning/phases/P05-STATE.md (功能清单)
+  - P05@V1.0: .planning/workflows/user-center/phases/design/P05-feature-list/P05-STATE.md (功能清单)
   - P09@V1.0: doc/V0.3/logic-list-draft.md (逻辑清单草案)
 - **task_description**: 执行阶段 06「原型设计」，根据逻辑清单生成原型 HTML
 ```
+
+**参数说明：**
+- `workflow_slug`: 当前工作流标识符，编排器在所有 Agent 调用时传递，用于跨工作流引用解析
 
 ### Agent 返回格式
 
@@ -70,7 +74,7 @@
 - 输出文件:
   - prototype-order-list.html
   - prototype-cart.html
-- 写入: .planning/phases/P06-STATE.md
+- 写入: {phase_dir}/P06-STATE.md
 ```
 
 #### 阻塞
@@ -110,7 +114,7 @@
   3. [步骤名称]
   4. [步骤名称]
 - **中间产物路径**:
-  - .planning/phases/P##-STATE.md (部分更新)
+  - {phase_dir}/P##-STATE.md (部分更新)
   - [其他中间文件路径]
 - **当前任务进度**: 2/4
 ```
@@ -161,16 +165,16 @@
 ### phase-executor
 
 - **触发时机**: GATE-03 通过后、阶段任务开始前
-- **传参**: phase_index, skill_name, upstream_outputs, task_description, checkpoint_context（续接时可选）
+- **传参**: phase_index, skill_name, workflow_slug, upstream_outputs, task_description, phase_dir, phase_slug, checkpoint_context（续接时可选）
 - **返回**: PHASE EXECUTION COMPLETE / BLOCKED / PARTIAL / CHECKPOINT REACHED
-- **写入权限**: 可写入 STATE.md 输出部分和版本链
+- **写入权限**: 可写入 {phase_dir}/ 下的 STATE.md 输出部分和版本链、P##-OUTPUT.md、P##-SUMMARY.md
 
 ### phase-validator
 
 - **触发时机**: GATE-02 自检通过后（GATE-05）
-- **传参**: phase_index, upstream_outputs（前序阶段产出物路径列表）
+- **传参**: phase_index, workflow_slug, upstream_outputs, phase_dir
 - **返回**: VERIFICATION PASSED / VERIFICATION FAILED + 问题清单
-- **写入权限**: 只读，不修改任何文件
+- **写入权限**: 可写入 {phase_dir}/P##-VERIFICATION.md，不可修改其他文件（Edit 禁用）
 
 ### domain-researcher
 
@@ -189,14 +193,14 @@
 ### phase-planner
 
 - **触发时机**: GATE-03 通过后，阶段执行前（规划流水线第 1 步）
-- **传参**: phase_index, skill_name, upstream_outputs
+- **传参**: phase_index, skill_name, workflow_slug, upstream_outputs, phase_dir
 - **返回**: PLANNING COMPLETE / PHASE BLOCKED
-- **写入权限**: 可写入 `.planning/phases/P##-PLAN.md`
+- **写入权限**: 可写入 `{phase_dir}/P##-PLAN.md`
 
 ### plan-checker
 
 - **触发时机**: phase-planner 返回 PLANNING COMPLETE 后（规划流水线第 2 步）
-- **传参**: phase_index, plan_path
+- **传参**: phase_index, plan_path（如 `{phase_dir}/P##-PLAN.md`）
 - **返回**: VERIFICATION PASSED / ISSUES FOUND + 结构化问题清单
 - **写入权限**: 只读，不修改任何文件
 

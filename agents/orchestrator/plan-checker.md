@@ -53,7 +53,7 @@ isolation: worktree
 
 编排器通过 Agent() 调用时传入参数：
 - `phase_index`: 阶段编号（如 06）
-- `plan_path`: PLAN.md 文件路径（如 `.planning/phases/P06-PLAN.md`）
+- `plan_path`: PLAN.md 文件路径（如 `.planning/workflows/{slug}/phases/design/P06-prototype-design/P06-PLAN.md`）
 
 ## 完成信号
 

@@ -1,4 +1,4 @@
-// maestro-hook-version: 0.51.0
+// maestro-hook-version: 0.52.0
 /**
  * session-state.js — Maestro SessionStart hook
  *
@@ -39,11 +39,13 @@ function getPlanningDir() {
   return process.env.PLANNING_DIR || path.join(__dirname, '..', '.planning');
 }
 
-function updateStatusline(phaseIndex, totalPhases, phaseName, status, completed) {
+function updateStatusline(phaseIndex, totalPhases, phaseName, status, completed, slug) {
   try {
     const statuslinePath = path.join(__dirname, 'statusline.js');
     const completedStr = completed.length > 0 ? completed.join('-') : '--';
-    const args = [statuslinePath, phaseIndex, String(totalPhases), phaseName, status, completedStr];
+    const slugPrefix = slug ? `[${slug}] ` : '';
+    const displayPhase = `${slugPrefix}P${phaseIndex}/${totalPhases} ${phaseName} (${status})`;
+    const args = [statuslinePath, String(phaseIndex), String(totalPhases), displayPhase, status, completedStr];
     const child = execFile(process.execPath, args, () => {
       // Ignore errors — fire-and-forget
     });
@@ -68,6 +70,7 @@ async function main() {
 
   // 3. Import workflow parser
   const { readWorkflowState, readMilestone, scanCompletedPhases } = require('./lib/workflow-parser');
+  const { discoverWorkflows } = require('./lib/workflow-parser');
 
   // 4. Get planning directory
   const planningDir = getPlanningDir();
@@ -95,10 +98,15 @@ async function main() {
   const completed = scanCompletedPhases(planningDir);
 
   // 9. Build pure text summary
-  const { phaseIndex, phaseName, status, totalPhases } = workflowState;
+  const { phaseIndex, phaseName, status, totalPhases, slug } = workflowState;
   const completedStr = completed.length > 0 ? completed.join(', ') : '-';
 
-  let summary = `Maestro 工作流状态: 阶段 ${phaseIndex}/${totalPhases} ${phaseName} (${status})`;
+  let summary;
+  if (slug) {
+    summary = `Maestro 工作流状态: [${slug}] 阶段 ${phaseIndex}/${totalPhases} ${phaseName} (${status})`;
+  } else {
+    summary = `Maestro 工作流状态: 阶段 ${phaseIndex}/${totalPhases} ${phaseName} (${status})`;
+  }
 
   // Cross-validate (D-02): check if workflow.md phase is marked COMPLETE in P*-STATE.md
   const phasePrefix = `P${phaseIndex.padStart(2, '0')}`;
@@ -116,7 +124,7 @@ async function main() {
   summary = summary.substring(0, 2000);
 
   // 10. Call updateStatusline (HOOK6-04)
-  updateStatusline(phaseIndex, totalPhases, phaseName, status, completed);
+  updateStatusline(phaseIndex, totalPhases, phaseName, status, completed, slug || null);
 
   // 11. Output JSON
   const output = JSON.stringify({

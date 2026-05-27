@@ -8,7 +8,8 @@
 
 - 阶段状态文件：`P##-STATE.md`，其中 `##` 为两位数字（01-18）
 - 全局状态文件：`workflow.md`
-- 文件位置：`.planning/phases/` 目录下
+- 文件位置：`.planning/workflows/{slug}/phases/{domain}/P##-{phase-slug}/` 目录下
+- `{slug}` 为工作流标识符（kebab-case），`{domain}` 为阶段所属域（product/design/architecture/development/testing/deployment），由 `phase-definitions.md` 的 domain 字段决定
 
 ---
 
@@ -48,6 +49,16 @@
 - **自检**: PENDING
 - **Agent验证**: PENDING
 - **人工确认**: PENDING
+
+## 阶段文档
+
+| 文档 | 路径 | 状态 |
+|------|------|------|
+| CONTEXT | `.planning/workflows/{slug}/phases/{domain}/P##-{phase-slug}/P##-CONTEXT.md` | PENDING |
+| PLAN | `.planning/workflows/{slug}/phases/{domain}/P##-{phase-slug}/P##-PLAN.md` | PENDING |
+| OUTPUT | `.planning/workflows/{slug}/phases/{domain}/P##-{phase-slug}/P##-OUTPUT.md` | PENDING |
+| SUMMARY | `.planning/workflows/{slug}/phases/{domain}/P##-{phase-slug}/P##-SUMMARY.md` | PENDING |
+| VERIFICATION | `.planning/workflows/{slug}/phases/{domain}/P##-{phase-slug}/P##-VERIFICATION.md` | PENDING |
 ```
 
 ---
@@ -99,6 +110,24 @@
 | `Agent验证` | `PASS` / `FAIL` / `PENDING` | GATE-05 Agent 验证结果 |
 | `人工确认` | `PASS` / `PENDING` | GATE-01 人工确认结果 |
 
+### 阶段文档字段
+
+| 列 | 说明 |
+|-----|------|
+| `文档` | 文档类型：CONTEXT / PLAN / OUTPUT / SUMMARY / VERIFICATION |
+| `路径` | 阶段子目录下的文档路径，格式 `.planning/workflows/{slug}/phases/{domain}/P##-{phase-slug}/P##-{TYPE}.md` |
+| `状态` | `PENDING`（未写入）/ `WRITTEN`（文件已存在且非空） |
+
+文档写入职责分配：
+
+| 文档 | 写入者 | 写入时机 |
+|------|--------|----------|
+| CONTEXT | 编排器（workflow-engine） | 阶段启动时（GATE-03 通过后） |
+| PLAN | phase-planner | 规划完成时 |
+| OUTPUT | phase-executor | 执行完成时 |
+| SUMMARY | phase-executor | 执行完成时（与 OUTPUT 同步） |
+| VERIFICATION | phase-validator | 验证完成时（GATE-05） |
+
 ### BLOCKED 状态额外字段
 
 当阶段状态为 `BLOCKED` 时，在状态部分追加以下字段：
@@ -144,8 +173,10 @@ Agent 验证失败时：
 
 ### 编排器写入规则
 
-- 编排器写入以下字段：status、version、started_at、completed_at、human_confirmed、输出部分、版本链
+- 编排器写入以下字段：status、version、started_at、completed_at、human_confirmed、输出部分、版本链、阶段文档状态
 - 写入时机：阶段启动时写 status=IN_PROGRESS 和 started_at；阶段完成时写输出部分、版本链、completed_at
+- 阶段初始化时创建阶段子目录 `.planning/workflows/{slug}/phases/{domain}/P##-{phase-slug}/` 并写入 P##-CONTEXT.md，更新 STATE.md 阶段文档节
+- 阶段文档状态更新：各文档写入后，将对应行的状态从 PENDING 更新为 WRITTEN
 - 跳过时写入：status=SKIPPED、skip_reason、alternative_inputs、human_confirmed=true、completed_at，跳过 GATE-02 和 GATE-05
 - 版本链追加：每次输出变更时在版本链表格中追加一行，不修改已有行
 
@@ -157,43 +188,78 @@ Agent 验证失败时：
 - 如果上游阶段有多个版本，默认传递最新版本
 - 如果上游阶段状态为 SKIPPED 且有 alternative_inputs，传递 alternative_inputs 中列出的文档路径；如 alternative_inputs 为空，传递空输入，下游 Skill 需自行判断
 
+### 跨工作流引用
+
+- 跨工作流引用格式：`{workflow-slug}@P{phase}@V{version}`，如 `user-center@P05@V1.0`
+- 编排器通过 slug 定位 `.planning/workflows/{slug}/` 目录
+- 同工作流内引用保持 `P{upstream_index}@V{version}` 格式不变
+- 跨工作流引用时，编排器读取目标工作流 `.planning/workflows/{target-slug}/phases/{domain}/P##-{phase-slug}/P##-STATE.md` 的输出部分
+
 ---
 
 ## workflow.md 全局状态模板
 
 ```markdown
-# 产研工作流状态
+# 产研工作流状态 — {slug}
 
 ## 当前阶段
 
+- **workflow_slug**: {slug}
 - **phase_index**: 01
 - **phase_name**: 需求调研
 - **workflow_status**: NOT_STARTED
 
 ## 阶段总览
 
-| # | 阶段名称 | phase_status | 版本 |
-|---|----------|------|------|
-| 01 | 需求调研 | NOT_STARTED | - |
+### product（需求域）
+
+| # | 阶段名称 | 域 | phase_status | 版本 |
+|---|----------|----|------|------|
+| 01 | 需求调研 | product | NOT_STARTED | - |
+| 02 | 业务现状流程图 | product | NOT_STARTED | - |
+| 03 | 会议纪要 | product | NOT_STARTED | - |
+| 04 | 竞品分析 | product | NOT_STARTED | - |
 
 > **状态值说明**：`NOT_STARTED`（未开始）→ `IN_PROGRESS`（进行中）→ `COMPLETE`（已完成）→ `SKIPPED`（已跳过）→ `BLOCKED`（已阻塞）
-| 02 | 业务现状流程图 | NOT_STARTED | - |
-| 03 | 会议纪要 | NOT_STARTED | - |
-| 04 | 竞品分析 | NOT_STARTED | - |
-| 05 | 功能清单 | NOT_STARTED | - |
-| 06 | 原型设计 | NOT_STARTED | - |
-| 07 | 原型复核 | NOT_STARTED | - |
-| 08 | UI 设计 | NOT_STARTED | - |
-| 09 | 方案设计 | NOT_STARTED | - |
-| 10 | 架构设计 | NOT_STARTED | - |
-| 11 | 架构评审 | NOT_STARTED | - |
-| 12 | 架构细化 | NOT_STARTED | - |
-| 13 | 详细设计 | NOT_STARTED | - |
-| 14 | 开发任务规划 | NOT_STARTED | - |
-| 15 | 前后端开发 | NOT_STARTED | - |
-| 16 | 系统测试 | NOT_STARTED | - |
-| 17 | 验收测试 | NOT_STARTED | - |
-| 18 | 部署上线 | NOT_STARTED | - |
+
+### design（设计域）
+
+| # | 阶段名称 | 域 | phase_status | 版本 |
+|---|----------|----|------|------|
+| 05 | 功能清单 | design | NOT_STARTED | - |
+| 06 | 原型设计 | design | NOT_STARTED | - |
+| 07 | 原型复核 | design | NOT_STARTED | - |
+| 08 | UI 设计 | design | NOT_STARTED | - |
+
+### architecture（架构域）
+
+| # | 阶段名称 | 域 | phase_status | 版本 |
+|---|----------|----|------|------|
+| 09 | 方案设计 | architecture | NOT_STARTED | - |
+| 10 | 架构设计 | architecture | NOT_STARTED | - |
+| 11 | 架构评审 | architecture | NOT_STARTED | - |
+| 12 | 架构细化 | architecture | NOT_STARTED | - |
+| 13 | 详细设计 | architecture | NOT_STARTED | - |
+
+### development（开发域）
+
+| # | 阶段名称 | 域 | phase_status | 版本 |
+|---|----------|----|------|------|
+| 14 | 开发任务规划 | development | NOT_STARTED | - |
+| 15 | 前后端开发 | development | NOT_STARTED | - |
+
+### testing（测试域）
+
+| # | 阶段名称 | 域 | phase_status | 版本 |
+|---|----------|----|------|------|
+| 16 | 系统测试 | testing | NOT_STARTED | - |
+| 17 | 验收测试 | testing | NOT_STARTED | - |
+
+### deployment（部署域）
+
+| # | 阶段名称 | 域 | phase_status | 版本 |
+|---|----------|----|------|------|
+| 18 | 部署上线 | deployment | NOT_STARTED | - |
 
 ## 最后更新
 
