@@ -49,15 +49,20 @@ node scripts/install.js
 
 ### 首次使用
 
-启动 Claude Code 后输入 `/workflow-engine` 初始化工作流，自动创建 `.planning/` 状态文件：
+启动 Claude Code 后输入 `/workflow-engine {slug}` 创建或继续工作流（slug 为工作流标识，如 `user-center`），自动创建多工作流状态文件：
 
 ```
 .planning/
-├── workflow.md              # 全局状态：当前阶段索引、阶段总览
-└── phases/
-    ├── P01-STATE.md         # 每个阶段独立状态文件
-    ├── P02-STATE.md
-    └── ...P18-STATE.md
+└── workflows/
+    └── {slug}/                          # 每条工作流独立目录
+        ├── workflow.md                  # 工作流全局状态（6 域分组阶段总览）
+        └── phases/
+            ├── product/                 # P01-P04 需求域
+            ├── design/                  # P05-P08 设计域
+            ├── architecture/            # P09-P13 架构域
+            ├── development/             # P14-P15 开发域
+            ├── testing/                 # P16-P17 测试域
+            └── deployment/              # P18 部署域
 ```
 
 之后每次新会话启动时，SessionStart Hook 自动报告当前进度。
@@ -178,7 +183,7 @@ maestro/
 
 | 命令 | 说明 |
 |------|------|
-| `/workflow-engine` | 初始化或继续工作流 |
+| `/workflow-engine {slug}` | 创建或继续指定工作流（无参数时列出已有工作流） |
 | `开始阶段 N` | 推进到指定阶段 |
 | `跳过阶段 N` | 跳过指定阶段（需确认原因，可提供替代输入） |
 | `查看工作流状态` | 报告当前进度 |
@@ -229,7 +234,7 @@ Maestro 内置 6 个 Claude Code Hook，覆盖安全防护、上下文监控、�
 ## 技术约束
 
 - 纯 Markdown Skills + Agent 定义 + Hook 脚本，零外部依赖
-- SKILL.md 控制在 100 行内，细节放 `references/`
+- SKILL.md 控制在 150 行内，细节放 `references/`
 - 编排器单次不同时加载超过 2-3 个 Skill
 - 已有 Skill 复制而非修改（保持原始文件不动）
 
