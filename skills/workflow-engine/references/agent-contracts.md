@@ -27,12 +27,12 @@
 | domain-researcher | `domain/` | sonnet | Read, Grep, Glob, WebSearch | worktree |
 | competitive-researcher | `domain/` | sonnet | Read, Grep, Glob, WebSearch | — |
 | requirement-analyst | `domain/` | sonnet | Read, Grep, Glob, WebSearch | — |
-| prototype-reviewer | `domain/` | sonnet | Read, Grep, Glob | — |
-| architecture-reviewer | `domain/` | opus | Read, Grep, Glob | worktree |
-| frontend-engineer | `domain/` | sonnet | Read, Grep, Glob | — |
-| backend-engineer | `domain/` | sonnet | Read, Grep, Glob | — |
-| test-engineer | `domain/` | sonnet | Read, Grep, Glob | — |
-| ops | `domain/` | sonnet | Read, Grep, Glob | — |
+| product-manager | `domain/` | opus | Read, Write, Grep, Glob | worktree |
+| architect | `domain/` | opus | Read, Write, Grep, Glob | worktree |
+| frontend-developer | `domain/` | opus | Read, Write, Grep, Glob | worktree |
+| backend-developer | `domain/` | opus | Read, Write, Grep, Glob | worktree |
+| test-engineer | `domain/` | opus | Read, Write, Grep, Glob | worktree |
+| ops-engineer | `domain/` | opus | Read, Write, Grep, Glob | worktree |
 | security-reviewer | `domain/` | sonnet | Read, Grep, Glob | worktree |
 | integration-reviewer | `domain/` | sonnet | Read, Grep, Glob | worktree |
 
@@ -132,6 +132,7 @@
 | `## PHASE PARTIAL` | 部分完成 | 记录已完成步骤，等待用户补充信息后续接 |
 | `## PHASE SKIPPED` | 阶段已跳过 | 标记 STATE.md status=SKIPPED，直接推进到下一阶段 |
 | `## VERIFICATION PASSED` | 验证通过 | 进入 GATE-01 人工确认 |
+| `## VERIFICATION CONDITIONAL` | 验证有条件通过 | 合并域问题清单展示给用户，用户决定是否继续 |
 | `## VERIFICATION FAILED` | 验证失败 | 标记 STATE.md 验证记录 FAIL，反馈问题清单 |
 | `## RESEARCH COMPLETE` | 调研完成 | 将调研结果传递给目标 Skill |
 | `## RESEARCH BLOCKED` | 调研受阻 | 向用户报告，请求补充调研方向 |
@@ -252,3 +253,51 @@
 - **传参**: doc_path
 - **返回**: DOC VERIFICATION COMPLETE / DOC VERIFICATION FAILED
 - **写入权限**: 只读，不修改任何文件
+
+---
+
+## 岗位 Agent 专用协议
+
+岗位 Agent 以双模式接入编排器：规划时作为域顾问（plan_advisor）审阅计划，验证时作为域审核者（verification_reviewer）并行运行。所有岗位 Agent 统一使用 opus 模型，工具权限为 Read, Write, Grep, Glob（Write 仅限 `{phase_dir}/P##-VERIFICATION.md`）。
+
+### product-manager
+
+- **触发时机**: phase-planner 规划审阅（D-08）+ GATE-05 岗位验证（D-09）
+- **传参**: phase_index, workflow_slug, upstream_outputs, phase_dir, review_mode (plan_advisor | verification_reviewer)
+- **返回**: VERIFICATION PASSED / VERIFICATION CONDITIONAL / VERIFICATION FAILED + 产品域评审报告
+- **写入权限**: 可写入 {phase_dir}/P##-VERIFICATION.md，不可修改其他文件
+
+### architect
+
+- **触发时机**: phase-planner 规划审阅（D-08）+ GATE-05 岗位验证（D-09）
+- **传参**: phase_index, workflow_slug, upstream_outputs, phase_dir, review_mode (plan_advisor | verification_reviewer)
+- **返回**: VERIFICATION PASSED / VERIFICATION CONDITIONAL / VERIFICATION FAILED + 架构域评审报告
+- **写入权限**: 可写入 {phase_dir}/P##-VERIFICATION.md，不可修改其他文件
+
+### frontend-developer
+
+- **触发时机**: phase-planner 规划审阅（D-08）+ GATE-05 岗位验证（D-09）
+- **传参**: phase_index, workflow_slug, upstream_outputs, phase_dir, review_mode (plan_advisor | verification_reviewer)
+- **返回**: VERIFICATION PASSED / VERIFICATION CONDITIONAL / VERIFICATION FAILED + 前端域评审报告
+- **写入权限**: 可写入 {phase_dir}/P##-VERIFICATION.md，不可修改其他文件
+
+### backend-developer
+
+- **触发时机**: phase-planner 规划审阅（D-08）+ GATE-05 岗位验证（D-09）
+- **传参**: phase_index, workflow_slug, upstream_outputs, phase_dir, review_mode (plan_advisor | verification_reviewer)
+- **返回**: VERIFICATION PASSED / VERIFICATION CONDITIONAL / VERIFICATION FAILED + 后端域评审报告
+- **写入权限**: 可写入 {phase_dir}/P##-VERIFICATION.md，不可修改其他文件
+
+### test-engineer
+
+- **触发时机**: phase-planner 规划审阅（D-08）+ GATE-05 岗位验证（D-09）
+- **传参**: phase_index, workflow_slug, upstream_outputs, phase_dir, review_mode (plan_advisor | verification_reviewer)
+- **返回**: VERIFICATION PASSED / VERIFICATION CONDITIONAL / VERIFICATION FAILED + 测试域评审报告
+- **写入权限**: 可写入 {phase_dir}/P##-VERIFICATION.md，不可修改其他文件
+
+### ops-engineer
+
+- **触发时机**: phase-planner 规划审阅（D-08）+ GATE-05 岗位验证（D-09）
+- **传参**: phase_index, workflow_slug, upstream_outputs, phase_dir, review_mode (plan_advisor | verification_reviewer)
+- **返回**: VERIFICATION PASSED / VERIFICATION CONDITIONAL / VERIFICATION FAILED + 运维域评审报告
+- **写入权限**: 可写入 {phase_dir}/P##-VERIFICATION.md，不可修改其他文件

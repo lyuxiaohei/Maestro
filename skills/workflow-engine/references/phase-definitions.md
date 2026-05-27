@@ -10,6 +10,7 @@
 - **phase_name**: 需求调研
 - **phase_slug**: requirement-research
 - **domain**: product
+- **role**: product-manager
 - **description**: 通过用户访谈、文档分析等方式收集原始需求，整理访谈记录，分类需求条目，排列优先级。
 - **inputs**: 用户口头/书面需求描述、业务背景资料
 - **outputs**: 需求调研报告、访谈记录、需求分类表、优先级排序列表
@@ -27,6 +28,7 @@
 - **phase_name**: 业务现状流程图
 - **phase_slug**: business-flow-chart
 - **domain**: product
+- **role**: product-manager
 - **description**: 绘制当前业务流程的现状图，识别痛点、冗余环节和优化机会。
 - **inputs**: 需求调研报告（Phase 01 输出）
 - **outputs**: 业务现状流程图（HTML/SVG）、流程分析说明、优化建议
@@ -44,6 +46,7 @@
 - **phase_name**: 会议纪要
 - **phase_slug**: meeting-minutes
 - **domain**: product
+- **role**: product-manager
 - **description**: 根据会议内容自动生成结构化会议纪要，包括议题、讨论要点、决议和行动项。
 - **inputs**: 会议内容记录（音频转写文本/手动记录）
 - **outputs**: 结构化会议纪要、行动项列表、议题跟踪表
@@ -65,6 +68,7 @@
 - **phase_name**: 竞品分析
 - **phase_slug**: competitive-analysis
 - **domain**: product
+- **role**: product-manager
 - **description**: 对竞品进行功能、体验、技术维度的系统分析，生成竞品对比报告和差异化策略建议。
 - **inputs**: 竞品名单、需求调研报告（Phase 01 输出）
 - **outputs**: 竞品分析报告、功能对比矩阵、差异化策略建议
@@ -85,6 +89,7 @@
 - **phase_name**: 功能清单
 - **phase_slug**: feature-list
 - **domain**: design
+- **role**: product-manager
 - **description**: 从需求文档和调研结果中提取功能清单，评估功能覆盖度，生成功能优先级矩阵。
 - **inputs**: 需求调研报告（Phase 01）、会议纪要（Phase 03）、竞品分析报告（Phase 04）
 - **outputs**: 功能清单、覆盖度报告、功能优先级矩阵
@@ -103,6 +108,7 @@
 - **phase_name**: 原型设计
 - **phase_slug**: prototype-design
 - **domain**: design
+- **role**: product-manager
 - **description**: 根据功能清单和业务逻辑清单设计交互原型，生成可预览的 HTML 原型页面。
 - **inputs**: 功能清单（Phase 05）、业务逻辑清单（logic-list-spec Draft 输出）
 - **outputs**: 原型 HTML 文件、交互说明文档
@@ -121,6 +127,7 @@
 - **phase_name**: 原型复核
 - **phase_slug**: prototype-review
 - **domain**: design
+- **role**: product-manager
 - **description**: 对原型进行多维度复核，包括功能覆盖度、交互合理性、视觉一致性，问题按严重程度分级输出。
 - **inputs**: 原型 HTML（Phase 06）、功能清单（Phase 05）
 - **outputs**: 复核报告、问题清单（按严重程度分级）、改进建议
@@ -140,6 +147,7 @@
 - **phase_name**: UI 设计
 - **phase_slug**: ui-design
 - **domain**: design
+- **role**: product-manager
 - **description**: 根据原型和功能清单制定 UI 设计规范，生成颜色、字体、间距、组件库等设计要素。
 - **inputs**: 原型 HTML（Phase 06）、复核报告（Phase 07）、功能清单（Phase 05）
 - **outputs**: UI 设计规范文档、设计稿、组件库定义
@@ -159,6 +167,7 @@
 - **phase_name**: 方案设计
 - **phase_slug**: solution-design
 - **domain**: architecture
+- **role**: architect
 - **description**: 综合需求和设计约束，产出技术方案概要，明确技术路线和关键决策点。
 - **inputs**: 功能清单（Phase 05）、UI 设计规范（Phase 08）、竞品分析报告（Phase 04）
 - **outputs**: 方案设计文档、技术路线图、关键决策记录
@@ -177,6 +186,7 @@
 - **phase_name**: 架构设计
 - **phase_slug**: architecture-design
 - **domain**: architecture
+- **role**: architect
 - **description**: 完成系统架构设计，包括模块拆解、数据库设计、API 设计、流程设计，形成架构评审基线。
 - **inputs**: 方案设计文档（Phase 09）
 - **outputs**: 架构设计文档、模块拆解图、数据库 ER 图、API 设计文档、流程设计图
@@ -198,6 +208,7 @@
 - **phase_name**: 架构评审
 - **phase_slug**: architecture-review
 - **domain**: architecture
+- **role**: architect
 - **description**: 对架构设计进行结构化评审，检查技术可行性、扩展性和安全性，输出评审意见。
 - **inputs**: 架构设计文档（Phase 10）
 - **outputs**: 架构评审报告、问题清单、改进建议
@@ -217,6 +228,7 @@
 - **phase_name**: 架构细化
 - **phase_slug**: architecture-refinement
 - **domain**: architecture
+- **role**: architect
 - **description**: 根据架构评审意见细化架构设计，修正问题，输出最终架构文档。
 - **inputs**: 架构评审报告（Phase 11）、架构设计文档（Phase 10）
 - **outputs**: 细化后的架构文档、架构变更记录
@@ -235,6 +247,7 @@
 - **phase_name**: 详细设计
 - **phase_slug**: detailed-design
 - **domain**: architecture
+- **role**: architect
 - **description**: 完成详细设计，包括需求拆解、技术选型、模块/接口/数据库/流程详细设计、测试策略制定。
 - **inputs**: 最终架构文档（Phase 12）
 - **outputs**: 详细设计文档、接口定义、数据库 DDL、流程详细设计、测试策略
@@ -256,6 +269,7 @@
 - **phase_name**: 开发任务规划
 - **phase_slug**: dev-task-planner
 - **domain**: development
+- **role**: frontend-developer, backend-developer
 - **description**: 将详细设计拆解为开发任务，分配资源和排期，明确依赖关系和交付里程碑。
 - **inputs**: 详细设计文档（Phase 13）
 - **outputs**: 开发任务列表、资源分配表、排期计划、依赖关系图
@@ -279,6 +293,7 @@
 - **phase_name**: 前后端开发
 - **phase_slug**: development
 - **domain**: development
+- **role**: frontend-developer, backend-developer
 - **description**: 按开发任务规划执行前后端开发，包含接口层、服务层、持久层、前端路由、状态管理等环节。
 - **inputs**: 开发任务列表（Phase 14）、详细设计文档（Phase 13）
 - **outputs**: 源代码、API 实现文档、前后端联调记录
@@ -306,6 +321,7 @@
 - **phase_name**: 系统测试
 - **phase_slug**: system-testing
 - **domain**: testing
+- **role**: test-engineer
 - **description**: 执行系统级测试，包括用例编写、冒烟测试、功能测试、回归测试和缺陷管理。
 - **inputs**: 源代码（Phase 15）、详细设计文档（Phase 13）、测试策略（Phase 13）
 - **outputs**: 测试用例、测试报告、缺陷列表、回归测试记录
@@ -329,6 +345,7 @@
 - **phase_name**: 验收测试
 - **phase_slug**: acceptance-testing
 - **domain**: testing
+- **role**: test-engineer
 - **description**: 组织验收测试，按模块逐项验收，修复验收问题，最终完成集成验收。
 - **inputs**: 测试报告（Phase 16）、功能清单（Phase 05）
 - **outputs**: 验收报告、验收问题清单、验收签核记录
@@ -350,6 +367,7 @@
 - **phase_name**: 部署上线
 - **phase_slug**: deployment
 - **domain**: deployment
+- **role**: ops-engineer
 - **description**: 完成上线准备、生产环境配置、灰度发布和全量发布，确保系统稳定运行。
 - **inputs**: 验收报告（Phase 17）、架构文档（Phase 12）
 - **outputs**: 部署方案、上线检查清单、灰度发布记录、全量发布记录
@@ -415,3 +433,16 @@
 | Phase 7 ✅ | dev-task-planner, backend-dev, frontend-dev, code-review | 4 |
 | Phase 8 ✅ | test-engineering, training-materials, acceptance-testing, deployment | 4 |
 | **合计** | | **21** |
+
+---
+
+## 岗位映射总览
+
+| 岗位 Agent | 覆盖阶段 | 规划时关注点 | 验证时关注点 |
+|-----------|---------|-------------|-------------|
+| product-manager | P01-P08 | 需求可追溯性、功能覆盖度 | 需求完整性、用户价值交付 |
+| architect | P09-P13 | 技术选型合理性、模块边界 | 架构可行性、扩展性、安全性 |
+| frontend-developer | P14-P15 | 前端任务拆解粒度 | 组件设计、状态管理、安全性 |
+| backend-developer | P14-P15 | 后端任务拆解、接口依赖 | API 安全性、性能、规范 |
+| test-engineer | P16-P17 | 测试策略完整性 | 覆盖度、缺陷管理、验收覆盖 |
+| ops-engineer | P18 | 部署方案完整性 | 生产安全、回滚能力、监控 |

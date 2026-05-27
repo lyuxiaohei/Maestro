@@ -25,12 +25,12 @@
 | domain-researcher | `domain/` | sonnet | standard | 调研需要综合能力 |
 | competitive-researcher | `domain/` | sonnet | standard | Web 搜索和整理 |
 | requirement-analyst | `domain/` | sonnet | standard | 需求分析 |
-| prototype-reviewer | `domain/` | sonnet | standard | 原型复核 |
-| architecture-reviewer | `domain/` | opus | heavy | 架构评审需要深度推理 |
-| frontend-engineer | `domain/` | sonnet | standard | 前端开发任务执行 |
-| backend-engineer | `domain/` | sonnet | standard | 后端接口/服务层实现 |
-| test-engineer | `domain/` | sonnet | standard | 测试用例编写与执行 |
-| ops | `domain/` | sonnet | standard | 部署与环境配置 |
+| product-manager | `domain/` | opus | heavy | 产品经理岗位，覆盖 P01-P08，规划审阅+域验证 |
+| architect | `domain/` | opus | heavy | 架构师岗位，覆盖 P09-P13，深度推理 |
+| frontend-developer | `domain/` | opus | heavy | 前端开发岗位，覆盖 P14-P15，规划审阅+代码验证 |
+| backend-developer | `domain/` | opus | heavy | 后端开发岗位，覆盖 P14-P15，规划审阅+代码验证 |
+| test-engineer | `domain/` | opus | heavy | 测试工程师岗位，覆盖 P16-P17，规划审阅+验证 |
+| ops-engineer | `domain/` | opus | heavy | 运维工程师岗位，覆盖 P18，部署验证 |
 | research-synthesizer | `orchestrator/` | sonnet | standard | 合并多 researcher 输出，消重和标注矛盾 |
 | security-reviewer | `domain/` | sonnet | standard | OWASP Top 10 安全审计 |
 | integration-reviewer | `domain/` | sonnet | standard | 跨模块集成验证 |

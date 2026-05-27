@@ -90,12 +90,6 @@ node scripts/install.js
 | P17 | 验收测试 | acceptance-testing |
 | P18 | 部署上线 | deployment |
 
-### 最小闭环链路
-
-```
-diagram-design → logic-list-spec(Draft) → prototype-design → logic-list-spec(Extract) → prd-auto-generator
-```
-
 ## 20 个 Agent
 
 | Agent | 域 | 模型 | 职责 |
@@ -112,12 +106,12 @@ diagram-design → logic-list-spec(Draft) → prototype-design → logic-list-sp
 | domain-researcher | 产品 | sonnet | 调研项目领域背景 |
 | competitive-researcher | 产品 | sonnet | Web 搜索竞品信息 |
 | requirement-analyst | 产品 | sonnet | 结构化需求分析 |
-| prototype-reviewer | 设计 | sonnet | 原型多维度复核 |
-| architecture-reviewer | 架构 | opus | 架构技术审查（深度推理） |
-| frontend-engineer | 前端 | sonnet | 前端代码审核 |
-| backend-engineer | 后端 | sonnet | 后端代码审核 |
-| test-engineer | 测试 | sonnet | 测试覆盖度和质量审核 |
-| ops | 运维 | sonnet | 部署方案和环境审核 |
+| product-manager | 产品/设计 | opus | 产品域+设计域规划审阅和验证（P01-P08） |
+| architect | 架构 | opus | 架构域规划审阅和验证（P09-P13） |
+| frontend-developer | 开发 | opus | 前端开发规划审阅和代码验证（P14-P15） |
+| backend-developer | 开发 | opus | 后端开发规划审阅和代码验证（P14-P15） |
+| test-engineer | 测试 | opus | 测试域规划审阅和验证（P16-P17） |
+| ops-engineer | 部署 | opus | 部署域规划审阅和验证（P18） |
 | security-reviewer | 安全 | sonnet | OWASP Top 10 安全审计 |
 | integration-reviewer | 测试 | sonnet | 跨模块集成验证 |
 

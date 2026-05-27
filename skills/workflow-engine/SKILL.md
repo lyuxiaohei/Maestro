@@ -44,12 +44,13 @@ description: 产研工作流编排引擎，管理18阶段工作流的状态推�
 
 ## 阶段规划流水线
 
-GATE-03 通过后，按以下三步流水线执行：
+GATE-03 通过后，按以下流水线执行：
 
-1. **spawn phase-planner**（见 `agents/orchestrator/phase-planner.md`）— 传入 phase_index、skill_name、upstream_outputs、phase_dir（阶段子目录路径）
+1. **spawn phase-planner**（见 `agents/orchestrator/phase-planner.md`）— 传入 phase_index、skill_name、upstream_outputs、phase_dir
 2. planner 返回 `## PLANNING COMPLETE` 后，更新 STATE.md 阶段文档节 PLAN 状态为 WRITTEN，**spawn plan-checker**
 3. checker 返回 `## ISSUES FOUND` 时，将问题清单反馈给 planner 重新规划（最多 2 轮修订）
-4. checker 返回 `## VERIFICATION PASSED` 后，进入"阶段完成提交序列"中的 executor 执行流程
+4. checker 通过后，根据 phase-definitions.md 的 `role` 字段确定岗位 Agent，spawn 对应岗位 Agent 以 `plan_advisor` 模式审阅计划。返回 CONDITIONAL/FAILED 时反馈给 planner 修订（最多 1 轮），修订后重新 spawn plan-checker
+5. 岗位顾问审阅通过后，进入"阶段完成提交序列"中的 executor 执行流程
 
 ## 阶段完成提交序列
 
@@ -104,11 +105,12 @@ GATE-03 通过后，按以下三步流水线执行：
 
 ## 专项验证调度
 
-在特定阶段自动 spawn 专项验证 Agent（与 phase-validator 并行运行）：
+在 GATE-05 环节，编排器根据 phase-definitions.md 的 `role` 字段 spawn 对应岗位 Agent（verification_reviewer 模式），与 phase-validator 并行运行：
 
-- **P13（详细设计）**: spawn `security-reviewer`（见 `agents/domain/security-reviewer.md`），传入代码设计产物路径
-- **P15-P16（开发/测试）**: spawn `integration-reviewer`（见 `agents/domain/integration-reviewer.md`），传入模块路径和设计文档
-- 专项验证结果与 phase-validator 结果合并，统一进入 GATE-01 人工确认
+1. 确定当前阶段的 `role` 字段（如 P10 → architect），spawn 岗位 Agent + phase-validator 并行
+2. 合并两者结果：phase-validator 提供结构化检查（完整性/格式/版本号），岗位 Agent 提供域视角审核
+3. 专项验证 Agent（security-reviewer 在 P13、integration-reviewer 在 P15-P16）继续按原规则并行运行
+4. 所有验证结果统一合并进入 GATE-01 人工确认
 
 ## 文档管道（可选）
 

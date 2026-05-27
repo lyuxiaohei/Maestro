@@ -19,12 +19,6 @@ Claude Code 插件，将完整产研工作流（需求调研 → 部署上线，
 | prd-auto-generator | v0.51 | PRD 自动生成 |
 | diagram-design | - | 流程图/架构图生成 |
 
-## 最小闭环链路
-
-```
-diagram-design → logic-list-spec(Draft) → prototype-design → logic-list-spec(Extract) → prd-auto-generator
-```
-
 ## 语言规范
 
 - 用户输出：中文
@@ -54,12 +48,12 @@ diagram-design → logic-list-spec(Draft) → prototype-design → logic-list-sp
 | domain-researcher | 调研项目领域背景 | 产品域 | sonnet |
 | competitive-researcher | Web 搜索竞品信息 | 产品域 | sonnet |
 | requirement-analyst | 结构化需求分析 | 产品域 | sonnet |
-| prototype-reviewer | 原型多维度复核 | 设计域 | sonnet |
-| architecture-reviewer | 架构技术审查 | 架构域 | opus |
-| frontend-engineer | 前端代码审核 | 前端域 | sonnet |
-| backend-engineer | 后端代码审核 | 后端域 | sonnet |
-| test-engineer | 测试覆盖度和质量审核 | 测试域 | sonnet |
-| ops | 部署方案和环境审核 | 运维域 | sonnet |
+| product-manager | 产品域+设计域规划审阅和验证（P01-P08） | 产品/设计域 | opus |
+| architect | 架构域规划审阅和验证（P09-P13） | 架构域 | opus |
+| frontend-developer | 前端开发规划审阅和代码验证（P14-P15） | 开发域 | opus |
+| backend-developer | 后端开发规划审阅和代码验证（P14-P15） | 开发域 | opus |
+| test-engineer | 测试域规划审阅和验证（P16-P17） | 测试域 | opus |
+| ops-engineer | 部署域规划审阅和验证（P18） | 部署域 | opus |
 | security-reviewer | OWASP Top 10 安全审计 | 安全域 | sonnet |
 | integration-reviewer | 跨模块集成验证 | 测试域 | sonnet |
 

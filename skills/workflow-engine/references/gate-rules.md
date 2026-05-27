@@ -146,17 +146,22 @@
 ### check_procedure
 
 1. 编排器将阶段编号（如 P06）传递给 phase-validator Agent
-2. Agent 在独立上下文窗口中读取该阶段 STATE.md
-3. Agent 对照 phase-definitions.md 的 outputs 列表逐项验证
-4. Agent 返回验证报告（PASS 或 FAIL + 问题清单），同时写入 P##-VERIFICATION.md 到 `{phase_dir}/`
-5. 确认 P##-VERIFICATION.md 已生成且验证结果与报告内容一致
-6. 编排器根据验证结果决定：
-   - **PASS** → 进入人工确认环节（GATE-01）
-   - **FAIL** → 将问题清单展示给用户，标记阶段状态为 BLOCKED，要求修正输出后重新提交自检和验证
+2. 编排器读取 phase-definitions.md 中该阶段的 `role` 字段，确定对应岗位 Agent
+3. 编排器并行 spawn phase-validator（结构化检查）和岗位 Agent（域视角审核，verification_reviewer 模式）
+4. phase-validator 在独立上下文窗口中读取该阶段 STATE.md，对照 phase-definitions.md 的 outputs 列表逐项验证
+5. 岗位 Agent 在独立上下文窗口中从域专业角度审阅阶段产出物
+6. 两者分别返回验证报告，phase-validator 写入 P##-VERIFICATION.md 到 `{phase_dir}/`
+7. 确认 P##-VERIFICATION.md 已生成且验证结果与报告内容一致
+8. 岗位 Agent 返回域评审报告（PASS/CONDITIONAL/FAIL + 域问题清单），结果与 phase-validator 结果合并
+9. 编排器根据合并结果决定：
+   - **两者均 PASS** → 进入人工确认环节（GATE-01）
+   - **任一 FAIL 或 CONDITIONAL** → 合并问题清单展示给用户，标记阶段状态为 BLOCKED
 
 ### 失败处理
 
 - 验证结果为 FAIL：编排器将 Agent 返回的问题清单展示给用户
+- 岗位 Agent 返回 CONDITIONAL：列出域问题，允许用户决定是否继续
+- 岗位 Agent 返回 FAIL：与 phase-validator FAIL 相同处理
 - VERIFICATION.md 未生成：检查 phase-validator 是否正确接收 phase_dir 参数和 Write 工具权限
 - 将阶段状态标记为 BLOCKED，在 STATE.md 中记录 blocked_reason（问题摘要）
 - 要求修正输出后重新执行：自检（GATE-02）→ Agent 验证（GATE-05）→ 人工确认（GATE-01）
