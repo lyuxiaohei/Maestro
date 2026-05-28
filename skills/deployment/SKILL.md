@@ -1,6 +1,9 @@
 ---
 name: deployment
-description: 部署技能。完成上线准备、生产环境配置、灰度发布和全量发布的完整部署流程。当用户提到部署、上线、发布、deployment时触发。
+description: "部署技能。完成上线准备、生产环境配置、灰度发布和全量发布的完整部署流程。当用户提到部署、上线、发布、deployment时触发。"
+risk: low
+source: project
+version: "1.0"
 ---
 
 # 部署

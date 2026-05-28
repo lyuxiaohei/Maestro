@@ -1,6 +1,9 @@
 ---
 name: acceptance-testing
-description: 验收测试技能。完成验收排期到集成验收的完整验收流程，含模块验收、问题修复和验收签核。当用户提到验收、验收测试、acceptance-testing时触发。
+description: "验收测试技能。完成验收排期到集成验收的完整验收流程，含模块验收、问题修复和验收签核。当用户提到验收、验收测试、acceptance-testing时触发。"
+risk: low
+source: project
+version: "1.0"
 ---
 
 # 验收测试

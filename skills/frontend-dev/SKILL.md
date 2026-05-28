@@ -1,6 +1,9 @@
 ---
 name: frontend-dev
-description: 前端开发技能。按路由、类型、逻辑、API、状态、安全、AI审核、联调自测顺序指导前端开发。当用户提到前端开发、页面开发、frontend-dev时触发。
+description: "前端开发技能。按路由、类型、逻辑、API、状态、安全、AI审核、联调自测顺序指导前端开发。当用户提到前端开发、页面开发、frontend-dev时触发。"
+risk: low
+source: project
+version: "1.0"
 ---
 
 # 前端开发

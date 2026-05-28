@@ -1,6 +1,9 @@
 ---
 name: feature-list
-description: 功能清单技能。从需求文档提取功能条目，分类归组，评估覆盖度，生成优先级矩阵。当用户提到功能清单、功能列表、功能梳理、feature-list时触发。
+description: "功能清单技能。从需求文档提取功能条目，分类归组，评估覆盖度，生成优先级矩阵。当用户提到功能清单、功能列表、功能梳理、feature-list时触发。"
+risk: low
+source: project
+version: "1.0"
 ---
 
 # 功能清单

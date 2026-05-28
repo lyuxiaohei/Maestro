@@ -1,6 +1,9 @@
 ---
 name: backend-dev
-description: 后端开发技能。按接口层、服务层、持久层、中间件、异常处理顺序指导后端开发，含AI代码审核。当用户提到后端开发、接口开发、backend-dev时触发。
+description: "后端开发技能。按接口层、服务层、持久层、中间件、异常处理顺序指导后端开发，含AI代码审核。当用户提到后端开发、接口开发、backend-dev时触发。"
+risk: low
+source: project
+version: "1.0"
 ---
 
 # 后端开发

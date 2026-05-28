@@ -3,6 +3,8 @@ name: prototype-design
 description: "原型设计技能。支持口述和草案双模式，包含后台管理和小程序两套设计规范。当用户提到原型设计、页面原型、HTML原型时触发。"
 version: "0.50"
 date_added: "2026-04-24"
+risk: low
+source: project
 ---
 
 # 原型设计规范 V0.50

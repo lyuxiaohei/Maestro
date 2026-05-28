@@ -1,6 +1,9 @@
 ---
 name: dev-task-planner
-description: 开发任务规划技能。将详细设计拆解为开发任务，分配资源和排期，明确依赖关系和交付里程碑。当用户提到开发任务、任务拆解、排期、dev-task-planner时触发。
+description: "开发任务规划技能。将详细设计拆解为开发任务，分配资源和排期，明确依赖关系和交付里程碑。当用户提到开发任务、任务拆解、排期、dev-task-planner时触发。"
+risk: low
+source: project
+version: "1.0"
 ---
 
 # 开发任务规划

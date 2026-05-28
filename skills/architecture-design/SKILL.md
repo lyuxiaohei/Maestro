@@ -1,6 +1,9 @@
 ---
 name: architecture-design
-description: 架构设计技能。完成系统架构设计，包括模块拆解、数据库设计、API设计和流程设计。当用户提到架构设计、系统架构、architecture-design时触发。
+description: "架构设计技能。完成系统架构设计，包括模块拆解、数据库设计、API设计和流程设计。当用户提到架构设计、系统架构、architecture-design时触发。"
+risk: low
+source: project
+version: "1.0"
 ---
 
 # 架构设计

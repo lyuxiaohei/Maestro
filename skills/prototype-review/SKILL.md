@@ -1,6 +1,9 @@
 ---
 name: prototype-review
-description: 原型复核技能。多维度复核原型质量，包括功能覆盖度、交互合理性、视觉一致性，问题按严重程度分级输出。当用户提到原型复核、原型评审、prototype-review时触发。
+description: "原型复核技能。多维度复核原型质量，包括功能覆盖度、交互合理性、视觉一致性，问题按严重程度分级输出。当用户提到原型复核、原型评审、prototype-review时触发。"
+risk: low
+source: project
+version: "1.0"
 ---
 
 # 原型复核

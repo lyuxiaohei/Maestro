@@ -1,6 +1,9 @@
 ---
 name: ui-design
 description: "UI设计技能。根据原型和功能清单制定UI设计规范，生成颜色、字体、间距、组件库等设计要素。当用户提到UI设计、界面设计、设计规范、ui-design时触发。"
+risk: low
+source: project
+version: "1.0"
 ---
 
 # UI 设计

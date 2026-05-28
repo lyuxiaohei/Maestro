@@ -1,6 +1,9 @@
 ---
 name: detailed-design
-description: 详细设计技能。完成需求拆解、技术选型、模块/接口/数据库/流程详细设计和测试策略。当用户提到详细设计、接口设计、detailed-design时触发。
+description: "详细设计技能。完成需求拆解、技术选型、模块/接口/数据库/流程详细设计和测试策略。当用户提到详细设计、接口设计、detailed-design时触发。"
+risk: low
+source: project
+version: "1.0"
 ---
 
 # 详细设计

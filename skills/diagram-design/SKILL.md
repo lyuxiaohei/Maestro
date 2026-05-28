@@ -1,9 +1,10 @@
 ---
 name: diagram-design
 description: "技术图表和产品图表生成技能。支持14种图表类型（流程图、架构图、时序图等）。当用户提到流程图、架构图、图表绘制、diagram时触发。"
+risk: low
+source: project
+version: "1.0"
 license: UNLICENSED
-metadata:
-  version: "1.0"
 ---
 
 # Diagram Design

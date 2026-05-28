@@ -1,6 +1,9 @@
 ---
 name: code-review
-description: 代码审核技能。对前后端代码进行AI审核，检查安全、性能、规范问题，按严重程度分级输出。当用户提到代码审核、代码审查、code-review时触发。
+description: "代码审核技能。对前后端代码进行AI审核，检查安全、性能、规范问题，按严重程度分级输出。当用户提到代码审核、代码审查、code-review时触发。"
+risk: low
+source: project
+version: "1.0"
 ---
 
 # 代码审核

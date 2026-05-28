@@ -1,6 +1,9 @@
 ---
 name: test-engineering
-description: 测试工程技能。覆盖需求评审到测试报告的完整测试流程，包括用例编写、功能测试、回归测试和缺陷管理。当用户提到测试、测试用例、test-engineering时触发。
+description: "测试工程技能。覆盖需求评审到测试报告的完整测试流程，包括用例编写、功能测试、回归测试和缺陷管理。当用户提到测试、测试用例、test-engineering时触发。"
+risk: low
+source: project
+version: "1.0"
 ---
 
 # 测试工程

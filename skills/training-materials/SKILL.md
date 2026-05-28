@@ -1,6 +1,9 @@
 ---
 name: training-materials
-description: 培训材料技能。生成操作手册、FAQ、培训PPT和视频教程脚本，帮助团队快速上手系统。当用户提到培训材料、操作手册、FAQ、training-materials时触发。
+description: "培训材料技能。生成操作手册、FAQ、培训PPT和视频教程脚本，帮助团队快速上手系统。当用户提到培训材料、操作手册、FAQ、training-materials时触发。"
+risk: low
+source: project
+version: "1.0"
 ---
 
 # 培训材料

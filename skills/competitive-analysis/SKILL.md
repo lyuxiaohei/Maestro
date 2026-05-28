@@ -1,6 +1,9 @@
 ---
 name: competitive-analysis
-description: 竞品分析技能。对竞品进行功能、体验、技术维度的系统分析，生成竞品对比报告和差异化策略建议。当用户提到竞品分析、竞品对比、竞品调研、competitive-analysis时触发。
+description: "竞品分析技能。对竞品进行功能、体验、技术维度的系统分析，生成竞品对比报告和差异化策略建议。当用户提到竞品分析、竞品对比、竞品调研、competitive-analysis时触发。"
+risk: low
+source: project
+version: "1.0"
 ---
 
 # 竞品分析

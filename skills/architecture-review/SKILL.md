@@ -1,6 +1,9 @@
 ---
 name: architecture-review
-description: 架构评审技能。对架构设计进行结构化评审，检查技术可行性、扩展性和安全性。当用户提到架构评审、架构审查、architecture-review时触发。
+description: "架构评审技能。对架构设计进行结构化评审，检查技术可行性、扩展性和安全性。当用户提到架构评审、架构审查、architecture-review时触发。"
+risk: low
+source: project
+version: "1.0"
 ---
 
 # 架构评审

@@ -1,6 +1,9 @@
 ---
 name: architecture-refinement
-description: 架构细化技能。根据架构评审意见细化架构设计，修正问题，输出最终架构文档。当用户提到架构细化、架构修正、architecture-refinement时触发。
+description: "架构细化技能。根据架构评审意见细化架构设计，修正问题，输出最终架构文档。当用户提到架构细化、架构修正、architecture-refinement时触发。"
+risk: low
+source: project
+version: "1.0"
 ---
 
 # 架构细化

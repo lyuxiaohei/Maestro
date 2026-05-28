@@ -1,6 +1,9 @@
 ---
 name: meeting-minutes
-description: 会议纪要自动生成技能。从会议内容中提取议题、讨论要点、决议和行动项，生成结构化会议纪要。当用户提到会议纪要、会议记录、会议总结、meeting-minutes时触发。
+description: "会议纪要自动生成技能。从会议内容中提取议题、讨论要点、决议和行动项，生成结构化会议纪要。当用户提到会议纪要、会议记录、会议总结、meeting-minutes时触发。"
+risk: low
+source: project
+version: "1.0"
 ---
 
 # 会议纪要
