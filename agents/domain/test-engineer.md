@@ -91,7 +91,7 @@ isolation: worktree
 - 阶段编号: `phase_index`（如 P16）
 - 工作流标识: `workflow_slug`
 - 上游产出物: `upstream_outputs`（前序阶段产出物路径列表）
-- 阶段文档目录: `phase_dir`（如 `.planning/workflows/{slug}/phases/testing/P16-system-testing/`）
+- 阶段文档目录: `phase_dir`（如 `.planning/workflows/{slug}/phases/test-engineer/P16-system-testing/`）
 - 阶段定义: `skills/workflow-engine/references/phase-definitions.md`
 
 ## 完成信号

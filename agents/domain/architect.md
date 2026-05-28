@@ -93,7 +93,7 @@ isolation: worktree
 - 阶段编号: `phase_index`（如 P10）
 - 工作流标识: `workflow_slug`
 - 上游产出物: `upstream_outputs`（前序阶段产出物路径列表）
-- 阶段文档目录: `phase_dir`（如 `.planning/workflows/{slug}/phases/architecture/P10-architecture-design/`）
+- 阶段文档目录: `phase_dir`（如 `.planning/workflows/{slug}/phases/architect/P10-architecture-design/`）
 - 阶段定义: `skills/workflow-engine/references/phase-definitions.md`
 
 ## 完成信号

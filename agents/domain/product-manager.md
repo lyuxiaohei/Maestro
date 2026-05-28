@@ -96,7 +96,7 @@ isolation: worktree
 - 阶段编号: `phase_index`（如 P06）
 - 工作流标识: `workflow_slug`
 - 上游产出物: `upstream_outputs`（前序阶段产出物路径列表）
-- 阶段文档目录: `phase_dir`（如 `.planning/workflows/{slug}/phases/design/P06-prototype-design/`）
+- 阶段文档目录: `phase_dir`（如 `.planning/workflows/{slug}/phases/product-manager/P06-prototype-design/`）
 - 阶段定义: `skills/workflow-engine/references/phase-definitions.md`
 
 ## 完成信号

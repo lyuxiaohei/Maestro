@@ -17,7 +17,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const DOMAIN_DIRS = ['product', 'design', 'architecture', 'development', 'testing', 'deployment'];
+const DOMAIN_DIRS = ['product-manager', 'architect', 'development', 'test-engineer', 'ops-engineer'];
 
 /**
  * List all workflow slugs under .planning/workflows/.
@@ -141,17 +141,41 @@ function scanCompletedPhases(planningDir) {
           const entries = fs.readdirSync(domainDir, { withFileTypes: true });
           for (const entry of entries) {
             if (!entry.isDirectory()) continue;
-            const stateFile = path.join(domainDir, entry.name, `${entry.name.split('-')[0]}-STATE.md`);
-            // The state file name matches the directory prefix: P##-STATE.md
             const stateMatch = entry.name.match(/^(P\d+)-/);
             if (!stateMatch) continue;
-            const statePath = path.join(domainDir, entry.name, `${stateMatch[1]}-STATE.md`);
-            try {
-              const content = fs.readFileSync(statePath, 'utf8');
-              if (/- \*\*status\*\*:\s*COMPLETE/.test(content)) {
-                completed.push(stateMatch[1]);
+
+            // P15 under development/ uses frontend/backend subdirectories
+            if (domain === 'development' && entry.name.startsWith('P15-')) {
+              for (const subDir of ['frontend', 'backend']) {
+                const subPath = path.join(domainDir, entry.name, subDir);
+                try {
+                  const subStatePath = path.join(subPath, 'P15-STATE.md');
+                  const content = fs.readFileSync(subStatePath, 'utf8');
+                  if (/- \*\*status\*\*:\s*COMPLETE/.test(content)) {
+                    completed.push(stateMatch[1]);
+                    break; // one match per P15 entry is enough
+                  }
+                } catch {
+                  // fallback: try STATE.md
+                  try {
+                    const altPath = path.join(subPath, 'STATE.md');
+                    const content = fs.readFileSync(altPath, 'utf8');
+                    if (/- \*\*status\*\*:\s*COMPLETE/.test(content)) {
+                      completed.push(stateMatch[1]);
+                      break;
+                    }
+                  } catch { /* skip */ }
+                }
               }
-            } catch { /* skip */ }
+            } else {
+              const statePath = path.join(domainDir, entry.name, `${stateMatch[1]}-STATE.md`);
+              try {
+                const content = fs.readFileSync(statePath, 'utf8');
+                if (/- \*\*status\*\*:\s*COMPLETE/.test(content)) {
+                  completed.push(stateMatch[1]);
+                }
+              } catch { /* skip */ }
+            }
           }
         } catch { /* domain dir missing */ }
       }
@@ -179,4 +203,4 @@ function scanCompletedPhases(planningDir) {
   return completed;
 }
 
-module.exports = { readWorkflowState, readMilestone, scanCompletedPhases, discoverWorkflows, resolveWorkflowDir };
+module.exports = { readWorkflowState, readMilestone, scanCompletedPhases, discoverWorkflows, resolveWorkflowDir, DOMAIN_DIRS };

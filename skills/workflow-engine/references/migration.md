@@ -20,14 +20,39 @@
 
 ## Domain 映射
 
-| Domain | 阶段范围 |
-|--------|----------|
-| product | P01-P04 |
-| design | P05-P08 |
-| architecture | P09-P13 |
-| development | P14-P15 |
-| testing | P16-P17 |
-| deployment | P18 |
+从旧 6 域目录迁移到新 5 域目录：
+
+| 旧目录 | 新目录 | 阶段范围 | 说明 |
+|--------|--------|----------|------|
+| product/ | product-manager/ | P01-P04 | 目录重命名 |
+| design/ | 合并到 product-manager/ | P05-P08 | design/ 下的阶段目录移入 product-manager/ |
+| architecture/ | architect/ | P09-P13 | 目录重命名 |
+| development/ | development/ | P14-P15 | 不变（P15 使用 frontend/backend 子目录） |
+| testing/ | test-engineer/ | P16-P17 | 目录重命名 |
+| deployment/ | ops-engineer/ | P18 | 目录重命名 |
+
+### design/ 合并迁移步骤
+
+design/ 目录下的阶段（P05-P08）需要移入 product-manager/ 目录：
+
+1. 创建 `product-manager/` 目录（如果不存在）
+2. 将 `design/` 下所有 `P05-*`、`P06-*`、`P07-*`、`P08-*` 子目录移到 `product-manager/`
+3. 删除空的 `design/` 目录
+4. 更新相关 STATE.md 和 workflow.md 中的路径引用
+
+### P15 子目录结构
+
+P15 在 development 目录内使用 `frontend/` 和 `backend/` 子目录区分前端和后端工作：
+
+```
+development/
+  P14-dev-task-planner/
+  P15-*/
+    frontend/        # 前端开发工作目录
+      P15-STATE.md
+    backend/         # 后端开发工作目录
+      P15-STATE.md
+```
 
 ## 回滚策略
 

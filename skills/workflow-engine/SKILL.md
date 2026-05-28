@@ -16,26 +16,28 @@ description: 产研工作流编排引擎，管理18阶段工作流的状态推�
 
 1. 解析 slug 参数。无 slug 时列出 `.planning/workflows/` 下所有工作流供选择
 2. 检查 `{workflow_base}`（`.planning/workflows/{slug}/`）是否存在
-3. 不存在则创建：6 个域子目录 + 18 个阶段目录骨架 + 写入 workflow.md（使用 `references/state-schema.md` 模板）
+3. 不存在则创建：5 个域子目录（product-manager/architect/development/test-engineer/ops-engineer）+ 阶段目录骨架 + 写入 workflow.md（使用 `references/state-schema.md` 模板）。P14 域为 development，编排器调度 frontend-developer + backend-developer（D-04）
 4. 存在则读取该工作流的 workflow.md
 5. **旧路径迁移** — 首次启动时检测旧路径（`.planning/phases/P*-STATE.md` 和 `.planning/workflow.md`），自动迁移到 `workflows/default/`（详见 `references/migration.md`）
 
+## 工作流模板选择
+
+1. `/workflow-engine {slug}` 带 `--template {name}` 时使用指定模板（config.json `templates.built_in` 或 `.planning/templates/{name}.json`）
+2. 无 `--template` 时交互选择：列出内置模板（zero-to-one/hotfix）+ 自定义模板 +「自定义」选项，默认「从零到一」
+3. 自定义流程：选岗位 → 系统按 phase-definitions.md role 字段筛选阶段 → 用户确认并保存到 `.planning/templates/{name}.json`
+4. 详细说明见 `references/template-guide.md`
+
 ## 路径构建
 
-路径由 `slug` + `domain`（from phase-definitions.md）+ `phase-slug` 构成。完整路径模板见 `references/state-schema.md`。
-
-- `{workflow_base}` = `.planning/workflows/{slug}/`
-- `{phase_dir}` = `{workflow_base}phases/{domain}/P##-{phase-slug}/`
-- STATE.md = `{phase_dir}/P##-STATE.md`
-
-跨工作流引用格式：`{workflow-slug}@P{phase}@V{version}`，编排器解析 slug 定位目标工作流目录。
+- `{workflow_base}` = `.planning/workflows/{slug}/`，`{phase_dir}` = `{workflow_base}phases/{domain}/P##-{phase-slug}/`，STATE.md = `{phase_dir}/P##-STATE.md`
+- 跨工作流引用：`{workflow-slug}@P{phase}@V{version}`
 
 ## 阶段启动检查序列
 
 1. 读取 `{workflow_base}/workflow.md` 获取当前 `phase_index` 和 `workflow_status`
 2. 读取目标阶段 `{phase_dir}/P##-STATE.md` 的状态字段（不读完整输出体）
 3. 读取 `references/phase-definitions.md` 获取阶段定义、domain 和对应 Skill
-4. **GATE-03 防跳步检查**（优先执行）— 遍历当前工作流 P01 到 P{target-1} 所有 STATE.md，确认 status 为 COMPLETE 或 SKIPPED
+4. **GATE-03 防跳步检查**（优先执行）— 遍历当前工作流活跃阶段列表中 phase_index 小于目标阶段的所有 STATE.md，确认 status 为 COMPLETE 或 SKIPPED（仅检查模板范围内的阶段，详见 `references/gate-rules.md`）
 5. GATE-03 发现未完成阶段时，询问用户是否跳过（详见 `references/gate-rules.md` 跳过处理流程）
 6. 加载目标领域 Skill（单个 turn 内不超过 2-3 个，超出则分多 turn 执行）
 7. 读取上游 STATE.md 的输出部分，作为当前阶段输入传递给 Skill（SKIPPED 阶段读取 alternative_inputs）
@@ -123,17 +125,11 @@ GATE-05 通过后可选运行 doc-classifier → doc-synthesizer → doc-writer 
 - 编排器严禁自行编造或推断缺失信息
 - 中断时将阶段状态标记为 BLOCKED，记录阻塞原因
 
-## 跨会话续接
+## 跨会话续接与独立启动
 
-- 首次激活时读取当前工作流 workflow.md，如 workflow_status 为 IN_PROGRESS 或 BLOCKED，从中断点恢复
-- 向用户报告中断位置和待续接步骤，等待确认后继续
-
-## 独立阶段启动
-
-- 用户指定阶段编号时，先执行 GATE-03 检查所有前序阶段
-- 前序阶段全部为 COMPLETE 或 SKIPPED 时，按"阶段启动检查序列"正常启动
-- 前序阶段存在未完成时，询问用户是否跳过未完成阶段，确认后按"阶段跳过序列"处理
-- 用户也可直接请求跳过特定阶段，按"阶段跳过序列"处理
+- 首次激活时读取 workflow.md，如 workflow_status 为 IN_PROGRESS 或 BLOCKED，从中断点恢复，报告中断位置待确认后续接
+- 用户指定阶段编号时，先执行 GATE-03 检查所有前序阶段（全部 COMPLETE/SKIPPED 时正常启动，否则询问跳过）
+- 用户可直接请求跳过特定阶段，按"阶段跳过序列"处理
 
 ## 引用文件
 
@@ -145,4 +141,5 @@ GATE-05 通过后可选运行 doc-classifier → doc-synthesizer → doc-writer 
 | `references/agent-contracts.md` | Agent 调用协议（传参、返回格式、完成信号） |
 | `references/model-profiles.md` | Agent 模型分级策略和失败升级机制 |
 | `references/doc-templates.md` | 阶段文档模板（context/plan/output/summary/verification/adr/prd/spec/changelog） |
+| `references/template-guide.md` | 工作流模板选择、自定义模板创建和存储规则 |
 | `references/migration.md` | 旧路径到多工作流结构的迁移指南 |

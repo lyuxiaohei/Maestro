@@ -51,7 +51,7 @@
 - **skill_name**: prototype-design
 - **workflow_slug**: user-center
 - **upstream_outputs**:
-  - P05@V1.0: .planning/workflows/user-center/phases/design/P05-feature-list/P05-STATE.md (功能清单)
+  - P05@V1.0: .planning/workflows/user-center/phases/product-manager/P05-feature-list/P05-STATE.md (功能清单)
   - P09@V1.0: doc/V0.3/logic-list-draft.md (逻辑清单草案)
 - **task_description**: 执行阶段 06「原型设计」，根据逻辑清单生成原型 HTML
 ```

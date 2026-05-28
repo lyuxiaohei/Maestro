@@ -9,7 +9,7 @@
 - 阶段状态文件：`P##-STATE.md`，其中 `##` 为两位数字（01-18）
 - 全局状态文件：`workflow.md`
 - 文件位置：`.planning/workflows/{slug}/phases/{domain}/P##-{phase-slug}/` 目录下
-- `{slug}` 为工作流标识符（kebab-case），`{domain}` 为阶段所属域（product/design/architecture/development/testing/deployment），由 `phase-definitions.md` 的 domain 字段决定
+- `{slug}` 为工作流标识符（kebab-case），`{domain}` 为阶段所属域（product-manager/architect/development/test-engineer/ops-engineer），由 `phase-definitions.md` 的 domain 字段决定
 
 ---
 
@@ -211,35 +211,30 @@ Agent 验证失败时：
 
 ## 阶段总览
 
-### product（需求域）
+### product-manager（产品域）
 
 | # | 阶段名称 | 域 | phase_status | 版本 |
 |---|----------|----|------|------|
-| 01 | 需求调研 | product | NOT_STARTED | - |
-| 02 | 业务现状流程图 | product | NOT_STARTED | - |
-| 03 | 会议纪要 | product | NOT_STARTED | - |
-| 04 | 竞品分析 | product | NOT_STARTED | - |
+| 01 | 需求调研 | product-manager | NOT_STARTED | - |
+| 02 | 业务现状流程图 | product-manager | NOT_STARTED | - |
+| 03 | 会议纪要 | product-manager | NOT_STARTED | - |
+| 04 | 竞品分析 | product-manager | NOT_STARTED | - |
+| 05 | 功能清单 | product-manager | NOT_STARTED | - |
+| 06 | 原型设计 | product-manager | NOT_STARTED | - |
+| 07 | 原型复核 | product-manager | NOT_STARTED | - |
+| 08 | UI 设计 | product-manager | NOT_STARTED | - |
 
 > **状态值说明**：`NOT_STARTED`（未开始）→ `IN_PROGRESS`（进行中）→ `COMPLETE`（已完成）→ `SKIPPED`（已跳过）→ `BLOCKED`（已阻塞）
 
-### design（设计域）
+### architect（架构域）
 
 | # | 阶段名称 | 域 | phase_status | 版本 |
 |---|----------|----|------|------|
-| 05 | 功能清单 | design | NOT_STARTED | - |
-| 06 | 原型设计 | design | NOT_STARTED | - |
-| 07 | 原型复核 | design | NOT_STARTED | - |
-| 08 | UI 设计 | design | NOT_STARTED | - |
-
-### architecture（架构域）
-
-| # | 阶段名称 | 域 | phase_status | 版本 |
-|---|----------|----|------|------|
-| 09 | 方案设计 | architecture | NOT_STARTED | - |
-| 10 | 架构设计 | architecture | NOT_STARTED | - |
-| 11 | 架构评审 | architecture | NOT_STARTED | - |
-| 12 | 架构细化 | architecture | NOT_STARTED | - |
-| 13 | 详细设计 | architecture | NOT_STARTED | - |
+| 09 | 方案设计 | architect | NOT_STARTED | - |
+| 10 | 架构设计 | architect | NOT_STARTED | - |
+| 11 | 架构评审 | architect | NOT_STARTED | - |
+| 12 | 架构细化 | architect | NOT_STARTED | - |
+| 13 | 详细设计 | architect | NOT_STARTED | - |
 
 ### development（开发域）
 
@@ -248,18 +243,18 @@ Agent 验证失败时：
 | 14 | 开发任务规划 | development | NOT_STARTED | - |
 | 15 | 前后端开发 | development | NOT_STARTED | - |
 
-### testing（测试域）
+### test-engineer（测试域）
 
 | # | 阶段名称 | 域 | phase_status | 版本 |
 |---|----------|----|------|------|
-| 16 | 系统测试 | testing | NOT_STARTED | - |
-| 17 | 验收测试 | testing | NOT_STARTED | - |
+| 16 | 系统测试 | test-engineer | NOT_STARTED | - |
+| 17 | 验收测试 | test-engineer | NOT_STARTED | - |
 
-### deployment（部署域）
+### ops-engineer（部署域）
 
 | # | 阶段名称 | 域 | phase_status | 版本 |
 |---|----------|----|------|------|
-| 18 | 部署上线 | deployment | NOT_STARTED | - |
+| 18 | 部署上线 | ops-engineer | NOT_STARTED | - |
 
 ## 最后更新
 

@@ -70,8 +70,9 @@
 
 ### check_procedure
 
+0. 确定当前工作流的活跃阶段列表（来自模板定义或自定义工作流）。如果使用模板，仅检查模板包含的阶段。不在活跃阶段列表中的阶段不检查 — 跳过的阶段不视为未完成。示例：热修复模板包含 P14-P18。当启动 P16 时，仅检查 P14 和 P15 的完成状态，P01-P13 不在模板范围内故不检查。
 1. 用户请求执行阶段 N 时，编排器获取目标阶段索引 N
-2. 编排器遍历当前工作流 `{workflow_base}/phases/{domain}/P##-{phase-slug}/P##-STATE.md`（按 phase_index 排序，从 P01 到 P{N-1}）
+2. 编排器遍历活跃阶段列表中 phase_index 小于 N 的所有阶段，读取对应 `{workflow_base}/phases/{domain}/P##-{phase-slug}/P##-STATE.md`（仅检查活跃阶段列表内的前序阶段，不检查列表外的阶段）
 3. 读取每个前序 STATE.md 的 `status` 字段（仅读取状态部分，不读完整输出体）
 4. 检查条件：每个前序阶段的 `status` 必须为 `COMPLETE` 或 `SKIPPED`，且 `human_confirmed` 必须为 `true`
 5. 如所有前序阶段均满足条件，允许执行阶段 N

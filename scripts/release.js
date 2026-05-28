@@ -83,6 +83,9 @@ const EXCLUDED_FILES = new Set([
   'CHANGELOG.md',
 ]);
 
+const MARKETPLACE_REPO_URL = process.env.MAESTRO_MARKETPLACE_REPO_URL ||
+  'https://github.com/lyuxiaohei/maestro-marketplace.git';
+
 /**
  * Check if a root-level file should be excluded based on analysis doc patterns.
  */
@@ -347,6 +350,97 @@ function gitCommitAndPush(targetDir, version) {
   }
 }
 
+/**
+ * Sync marketplace repo: update sha in marketplace.json and push.
+ *
+ * @param {string} releaseDir  - Local clone of the release repo (to get HEAD sha)
+ * @param {string} version     - Version string for commit message
+ */
+function syncMarketplace(releaseDir, version) {
+  // 1. Get HEAD sha from release repo
+  let sha;
+  try {
+    sha = execSync('git rev-parse HEAD', { cwd: releaseDir, encoding: 'utf8' }).trim();
+  } catch {
+    console.log('Warning: Could not get release repo sha — skipping marketplace sync.');
+    return;
+  }
+
+  // 2. Clone or pull marketplace repo
+  const homeDir = os.homedir();
+  const mktDir = path.join(homeDir, '.maestro-release', 'maestro-marketplace');
+
+  if (fs.existsSync(mktDir) && fs.existsSync(path.join(mktDir, '.git'))) {
+    console.log('Pulling marketplace repo...');
+    try {
+      execSync('git pull --ff-only', { cwd: mktDir, stdio: 'pipe' });
+    } catch {
+      console.log('Warning: marketplace pull failed — continuing with local state.');
+    }
+  } else {
+    console.log('Cloning marketplace repo...');
+    const parentDir = path.dirname(mktDir);
+    fs.mkdirSync(parentDir, { recursive: true });
+    try {
+      execSync(`git clone ${JSON.stringify(MARKETPLACE_REPO_URL)} ${JSON.stringify(mktDir)}`, {
+        cwd: parentDir,
+        stdio: 'pipe',
+      });
+    } catch {
+      if (!fs.existsSync(mktDir)) {
+        console.log('Warning: marketplace repo not accessible — skipping marketplace sync.');
+        return;
+      }
+    }
+  }
+
+  // 3. Update marketplace.json sha
+  const mktJsonPath = path.join(mktDir, '.claude-plugin', 'marketplace.json');
+  if (!fs.existsSync(mktJsonPath)) {
+    // First time — copy from template
+    const templatePath = path.join(getSrcRoot(), 'marketplace', '.claude-plugin', 'marketplace.json');
+    if (fs.existsSync(templatePath)) {
+      fs.mkdirSync(path.dirname(mktJsonPath), { recursive: true });
+      fs.copyFileSync(templatePath, mktJsonPath);
+    } else {
+      console.log('Warning: marketplace template not found — skipping marketplace sync.');
+      return;
+    }
+  }
+
+  let mktData;
+  try {
+    mktData = JSON.parse(fs.readFileSync(mktJsonPath, 'utf8'));
+  } catch {
+    console.log('Warning: marketplace.json parse failed — skipping marketplace sync.');
+    return;
+  }
+
+  // Update sha for maestro plugin
+  if (mktData.plugins && mktData.plugins[0] && mktData.plugins[0].source) {
+    mktData.plugins[0].source.sha = sha;
+  }
+  fs.writeFileSync(mktJsonPath, JSON.stringify(mktData, null, 2) + '\n', 'utf8');
+
+  // 4. Commit and push
+  try {
+    execSync('git add -A', { cwd: mktDir, stdio: 'pipe' });
+    execSync(`git commit -m ${JSON.stringify('update maestro sha: ' + sha.substring(0, 8) + ' (v' + version + ')')}`, {
+      cwd: mktDir,
+      stdio: 'pipe',
+    });
+    execSync('git push', { cwd: mktDir, stdio: 'pipe' });
+    console.log(`Marketplace synced: sha ${sha.substring(0, 8)} (v${version})`);
+  } catch (err) {
+    const stderr = err.stderr || '';
+    if (stderr.includes('nothing to commit')) {
+      console.log('Marketplace: no changes to commit.');
+    } else {
+      console.log('Warning: marketplace push failed — manual sync needed.');
+    }
+  }
+}
+
 // --- Main ---
 
 function main() {
@@ -402,6 +496,9 @@ function main() {
     gitSync(targetDir, repoUrl, version);
     syncFiles(srcRoot, targetDir);
     gitCommitAndPush(targetDir, version);
+
+    // Sync marketplace repo with updated sha
+    syncMarketplace(targetDir, version);
   }
 }
 
