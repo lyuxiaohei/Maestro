@@ -26,12 +26,6 @@
 - **阶段**：P01-P18（全部 18 个阶段）
 - **适用场景**：全新项目或大版本迭代
 
-### 热修复（hotfix）
-
-- **描述**：快速修复流程，覆盖开发、测试和部署
-- **阶段**：P14（开发任务规划）、P15（前后端开发）、P16（系统测试）、P17（验收测试）、P18（部署上线）
-- **适用场景**：线上问题修复、紧急补丁发布
-
 ---
 
 ## 自定义模板创建流程
@@ -85,7 +79,7 @@
 
 不传 `--template` 参数时，编排器展示选择列表：
 
-1. 列出内置模板（zero-to-one、hotfix）
+1. 列出内置模板（zero-to-one）
 2. 扫描 `.planning/templates/` 目录，列出所有自定义模板
 3. 提供「自定义」选项（进入自定义创建流程）
 4. 默认选中「从零到一」（与当前 18 阶段行为一致）
@@ -96,7 +90,7 @@
 /workflow {slug} --template {name}
 ```
 
-- `{name}` 为内置模板名（如 `hotfix`）时，从 config.json `templates.built_in` 读取
+- `{name}` 为内置模板名（如 `zero-to-one`）时，从 config.json `templates.built_in` 读取
 - `{name}` 为自定义模板名时，从 `.planning/templates/{name}.json` 读取
 - 模板不存在时报错并列出可用模板
 

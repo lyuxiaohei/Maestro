@@ -26,7 +26,7 @@ version: "1.0"
 ## 工作流模板选择
 
 1. `/workflow {slug}` 带 `--template {name}` 时使用指定模板（config.json `templates.built_in` 或 `.planning/templates/{name}.json`）
-2. 无 `--template` 时交互选择：列出内置模板（zero-to-one/hotfix/lite）+ 自定义模板 +「自定义」选项，默认「从零到一」
+2. 无 `--template` 时交互选择：列出内置模板（zero-to-one/lite）+ 自定义模板 +「自定义」选项，默认「从零到一」
 3. 选择 **lite（轻量工作流）** 时，转调 `/workflow-lite {slug}`，进入 discuss→plan→execute→verify 迭代循环，不使用18阶段状态机
 4. 自定义流程：选岗位 → 系统按 phase-definitions.md role 字段筛选阶段 → 用户确认并保存到 `.planning/templates/{name}.json`
 4. 详细说明见 `references/template-guide.md`
