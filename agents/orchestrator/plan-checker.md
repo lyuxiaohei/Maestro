@@ -1,6 +1,6 @@
 ---
 name: plan-checker
-description: 计划校验器，对 PLAN.md 做预执行校验（目标可达性、依赖完整性、与上游产出物对齐）。由 workflow-engine 编排器在 planner 输出后调用。
+description: 计划校验器，对 PLAN.md 做预执行校验（目标可达性、依赖完整性、与上游产出物对齐）。由 workflow 编排器在 planner 输出后调用。
 model: sonnet
 effort: medium
 maxTurns: 10

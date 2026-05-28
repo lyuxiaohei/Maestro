@@ -104,7 +104,7 @@ N+1、页面导航      [必选]
 | 叙述体和表格说同一件事 | 叙述体说 why，表格说 what |
 | 跳过质量检查直接输出 | 生成后必须执行检查项 |
 | 流程图未保留 Mermaid 备份 | 必须在 `<details>` 中保留 |
-| diagram-design 可用却使用 Mermaid | 优先 diagram-design |
+| maestro-diagram-design 可用却使用 Mermaid | 优先 maestro-diagram-design |
 
 ---
 

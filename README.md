@@ -49,7 +49,7 @@ node scripts/install.js
 
 ### 首次使用
 
-启动 Claude Code 后输入 `/workflow-engine {slug}` 创建或继续工作流（slug 为工作流标识，如 `user-center`），自动创建多工作流状态文件：
+启动 Claude Code 后输入 `/workflow {slug}` 创建或继续工作流（slug 为工作流标识，如 `user-center`），自动创建多工作流状态文件：
 
 ```
 .planning/
@@ -140,7 +140,7 @@ maestro/
 ├── .claude-plugin/
 │   └── plugin.json                 # 插件清单
 ├── skills/                         # 22 个 Skill（21 领域 + 1 编排器）
-│   ├── workflow-engine/            #   中央编排器
+│   ├── workflow/            #   中央编排器
 │   │   ├── SKILL.md
 │   │   └── references/             #   5 个参考文件
 │   ├── diagram-design/             #   流程图/架构图（14 种图表）
@@ -177,7 +177,7 @@ maestro/
 
 | 命令 | 说明 |
 |------|------|
-| `/workflow-engine {slug}` | 创建或继续指定工作流（无参数时列出已有工作流） |
+| `/workflow {slug}` | 创建或继续指定工作流（无参数时列出已有工作流） |
 | `开始阶段 N` | 推进到指定阶段 |
 | `跳过阶段 N` | 跳过指定阶段（需确认原因，可提供替代输入） |
 | `查看工作流状态` | 报告当前进度 |

@@ -57,7 +57,7 @@ isolation: worktree
 
 编排器通过 Agent() 调用时传入参数：
 - `doc_assignment`: 文档生成任务分配块（含 doc_type, mode, target_path, sources, context）
-- `template_ref`: 模板文件路径（默认 `skills/workflow-engine/references/doc-templates.md`）
+- `template_ref`: 模板文件路径（默认 `skills/workflow/references/doc-templates.md`）
 
 ## 完成信号
 

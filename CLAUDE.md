@@ -4,7 +4,7 @@ Claude Code 插件，将完整产研工作流（需求调研 → 部署上线，
 
 ## 核心架构
 
-- **中央编排器**: workflow-engine skill 管理 18 阶段生命周期
+- **中央编排器**: workflow skill 管理 18 阶段生命周期
 - **状态即 Markdown**: `.planning/workflow.md` 跟踪当前阶段
 - **铁律内嵌 Skill**: 门禁规则在编排器内强制执行（GATE-03 支持用户确认后跳过阶段）
 - **Agent-as-Validator**: 独立上下文 agent 验证阶段输出

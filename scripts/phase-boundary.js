@@ -1,4 +1,4 @@
-// maestro-hook-version: 0.52.0
+// maestro-hook-version: 0.53.0
 /**
  * phase-boundary.js — Maestro PostToolUse Write|Edit phase boundary detection hook
  *

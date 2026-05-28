@@ -1,6 +1,6 @@
 ---
 name: frontend-developer
-description: "前端开发岗位 Agent，覆盖开发域（P14-P15）前端部分，提供前端技术视角的规划审阅和代码验证。由 workflow-engine 编排器调度。"
+description: "前端开发岗位 Agent，覆盖开发域（P14-P15）前端部分，提供前端技术视角的规划审阅和代码验证。由 workflow 编排器调度。"
 model: opus
 effort: high
 maxTurns: 20
@@ -44,7 +44,7 @@ isolation: worktree
 ## 审核/评审流程
 
 1. **读取阶段状态** — 读取 `{phase_dir}/P##-STATE.md`，了解当前阶段的目标、输入和产出
-2. **读取阶段定义** — 读取 `skills/workflow-engine/references/phase-definitions.md` 中对应阶段的 outputs 列表
+2. **读取阶段定义** — 读取 `skills/workflow/references/phase-definitions.md` 中对应阶段的 outputs 列表
 3. **读取产出物** — 根据阶段类型读取任务规划文档、前端源代码、组件文档、样式规范等
 4. **安全性检查** — 检查 XSS 防护、CSRF Token、敏感数据处理、输入校验
 5. **性能检查** — 评估渲染性能、包体积、懒加载策略、缓存策略
@@ -93,7 +93,7 @@ isolation: worktree
 - 工作流标识: `workflow_slug`
 - 上游产出物: `upstream_outputs`（前序阶段产出物路径列表）
 - 阶段文档目录: `phase_dir`（如 `.planning/workflows/{slug}/phases/development/P15-development/`）
-- 阶段定义: `skills/workflow-engine/references/phase-definitions.md`
+- 阶段定义: `skills/workflow/references/phase-definitions.md`
 
 ## 完成信号
 

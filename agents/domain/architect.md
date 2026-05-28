@@ -1,6 +1,6 @@
 ---
 name: architect
-description: "架构师岗位 Agent，覆盖架构域（P09-P13），提供技术架构视角的规划审阅和阶段验证。由 workflow-engine 编排器调度。"
+description: "架构师岗位 Agent，覆盖架构域（P09-P13），提供技术架构视角的规划审阅和阶段验证。由 workflow 编排器调度。"
 model: opus
 effort: high
 maxTurns: 20
@@ -46,7 +46,7 @@ isolation: worktree
 ## 审核/评审流程
 
 1. **读取阶段状态** — 读取 `{phase_dir}/P##-STATE.md`，了解当前阶段的目标、输入和产出
-2. **读取阶段定义** — 读取 `skills/workflow-engine/references/phase-definitions.md` 中对应阶段的 outputs 列表
+2. **读取阶段定义** — 读取 `skills/workflow/references/phase-definitions.md` 中对应阶段的 outputs 列表
 3. **读取产出物** — 根据阶段类型读取方案文档、架构图、模块图、ER 图、API 文档、详细设计等
 4. **技术可行性审查** — 评估架构风格与业务需求匹配度，检查技术选型成熟度和实现风险
 5. **扩展性与安全性审查** — 评估模块边界是否支持独立演进，检查认证鉴权、数据加密、接口安全等
@@ -94,7 +94,7 @@ isolation: worktree
 - 工作流标识: `workflow_slug`
 - 上游产出物: `upstream_outputs`（前序阶段产出物路径列表）
 - 阶段文档目录: `phase_dir`（如 `.planning/workflows/{slug}/phases/architect/P10-architecture-design/`）
-- 阶段定义: `skills/workflow-engine/references/phase-definitions.md`
+- 阶段定义: `skills/workflow/references/phase-definitions.md`
 
 ## 完成信号
 

@@ -1,6 +1,6 @@
 ---
 name: competitive-researcher
-description: "竞品调研 Agent，通过 Web 搜索收集竞品信息，辅助竞品分析阶段。由 competitive-analysis Skill 或 workflow-engine 调用。"
+description: "竞品调研 Agent，通过 Web 搜索收集竞品信息，辅助竞品分析阶段。由 competitive-analysis Skill 或 workflow 调用。"
 model: sonnet
 effort: medium
 maxTurns: 20

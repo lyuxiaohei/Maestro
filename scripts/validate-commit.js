@@ -1,4 +1,4 @@
-// maestro-hook-version: 0.51.0
+// maestro-hook-version: 0.53.0
 /**
  * validate-commit.js — Maestro PreToolUse Bash commit format validator hook
  *

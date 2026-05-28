@@ -1,6 +1,6 @@
 ---
 name: phase-validator
-description: 独立上下文验证器，检查产研工作流阶段输出的完整性和质量。由 workflow-engine 在阶段完成时调用。
+description: 独立上下文验证器，检查产研工作流阶段输出的完整性和质量。由 workflow 在阶段完成时调用。
 model: sonnet
 effort: medium
 maxTurns: 15
@@ -16,7 +16,7 @@ isolation: worktree
 ## 验证流程
 
 1. **读取阶段状态** — 读取指定阶段的 `{phase_dir}/P##-STATE.md`，关注 status、输出部分、版本链
-2. **读取验收标准** — 读取 `skills/workflow-engine/references/phase-definitions.md` 中该阶段的定义，以 `outputs` 列表作为验收标准
+2. **读取验收标准** — 读取 `skills/workflow/references/phase-definitions.md` 中该阶段的定义，以 `outputs` 列表作为验收标准
 3. **上游产出物引用校验** — 检查 upstream_outputs 中的被引用文件：
    - 文件存在性验证：每个引用路径对应的文件是否存在
    - 需求覆盖率验证：上游产出物中的需求条目是否被当前阶段输出覆盖
@@ -54,7 +54,7 @@ isolation: worktree
 
 编排器调用时传入阶段编号（如 P06）和上游产出物路径列表：
 - 状态文件: `{phase_dir}/P##-STATE.md`
-- 阶段定义: `skills/workflow-engine/references/phase-definitions.md`
+- 阶段定义: `skills/workflow/references/phase-definitions.md`
 - 上游产出物: upstream_outputs（前序阶段的产出物路径列表）
 - 阶段文档目录: phase_dir（如 `.planning/workflows/{slug}/phases/design/P06-prototype-design/`）
 

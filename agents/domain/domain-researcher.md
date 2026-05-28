@@ -1,6 +1,6 @@
 ---
 name: domain-researcher
-description: "领域调研 Agent，调研项目所在行业的技术背景和业务知识。由 workflow-engine 在工作流启动时调用。"
+description: "领域调研 Agent，调研项目所在行业的技术背景和业务知识。由 workflow 在工作流启动时调用。"
 model: sonnet
 effort: medium
 maxTurns: 20

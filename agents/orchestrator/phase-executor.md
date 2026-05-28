@@ -1,6 +1,6 @@
 ---
 name: phase-executor
-description: 阶段执行器，在独立上下文中执行产研工作流的单个阶段任务。由 workflow-engine 编排器调用。
+description: 阶段执行器，在独立上下文中执行产研工作流的单个阶段任务。由 workflow 编排器调用。
 model: sonnet
 effort: medium
 maxTurns: 15

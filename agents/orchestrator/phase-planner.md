@@ -1,6 +1,6 @@
 ---
 name: phase-planner
-description: 阶段规划器，接收 skill_name + upstream_outputs，输出结构化 PLAN.md（任务列表 + 依赖关系 + 验收标准）。由 workflow-engine 编排器在阶段执行前调用。
+description: 阶段规划器，接收 skill_name + upstream_outputs，输出结构化 PLAN.md（任务列表 + 依赖关系 + 验收标准）。由 workflow 编排器在阶段执行前调用。
 model: sonnet
 effort: medium
 maxTurns: 15

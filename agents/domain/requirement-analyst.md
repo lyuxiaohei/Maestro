@@ -1,6 +1,6 @@
 ---
 name: requirement-analyst
-description: "需求分析 Agent，分析和结构化需求文本，辅助需求分类和优先级排序。由 workflow-engine 或 meeting-minutes Skill 调用。"
+description: "需求分析 Agent，分析和结构化需求文本，辅助需求分类和优先级排序。由 workflow 或 meeting-minutes Skill 调用。"
 model: sonnet
 effort: medium
 maxTurns: 20

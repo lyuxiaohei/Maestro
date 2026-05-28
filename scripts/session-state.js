@@ -1,4 +1,4 @@
-// maestro-hook-version: 0.52.0
+// maestro-hook-version: 0.53.0
 /**
  * session-state.js — Maestro SessionStart hook
  *
@@ -80,7 +80,7 @@ async function main() {
 
   // 6. If workflow.md missing: output fallback (HOOK6-03)
   if (!workflowState) {
-    const fallback = 'Maestro 会话状态: 未找到工作流 -- 运行 /workflow-engine 初始化';
+    const fallback = 'Maestro 会话状态: 未找到工作流 -- 运行 /workflow 初始化';
     const output = JSON.stringify({
       hookSpecificOutput: {
         hookEventName: 'SessionStart',
