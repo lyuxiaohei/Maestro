@@ -1,4 +1,4 @@
-// maestro-hook-version: 0.53.0
+// maestro-hook-version: 20250529.0
 /**
  * context-monitor.js — Maestro PostToolUse Write|Edit context usage monitor hook
  *

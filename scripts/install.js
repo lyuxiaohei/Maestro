@@ -687,6 +687,21 @@ function doGithubInstall() {
 // --- Update ---
 
 /**
+ * Compare two CalVer version strings (YYYYMMDD.PATCH format).
+ * Returns: negative if a < b, 0 if equal, positive if a > b.
+ */
+function compareVersions(a, b) {
+  const pa = a.split('.').map(Number);
+  const pb = b.split('.').map(Number);
+  for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
+    const na = pa[i] || 0;
+    const nb = pb[i] || 0;
+    if (na !== nb) return na - nb;
+  }
+  return 0;
+}
+
+/**
  * Fetch latest version from GitHub raw URL without cloning.
  */
 function fetchLatestVersion() {
@@ -739,7 +754,7 @@ function doUpdate() {
     process.exit(1);
   }
 
-  if (latestVersion === currentVersion) {
+  if (compareVersions(latestVersion, currentVersion) <= 0) {
     // Still clean old caches even if up to date
     const removed = cleanOldCaches(currentVersion);
     if (removed > 0) {
