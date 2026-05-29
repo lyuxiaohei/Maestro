@@ -50,7 +50,7 @@
    - `输出版本` 字段是否已填写版本号（如 V1.0）
 4. 检查版本链表格首行是否包含有效数据
 5. 编排器在 STATE.md 验证记录中写入自检结果（`PASS` 或 `FAIL`）
-6. 检查阶段文档完整性：确认 P##-CONTEXT.md、P##-PLAN.md、P##-OUTPUT.md、P##-SUMMARY.md 存在于 `{phase_dir}/` 且内容非空
+6. 检查阶段文档完整性：确认 CONTEXT.md、PLAN.md、OUTPUT.md、SUMMARY.md 存在于 `{phase_dir}/` 且内容非空
 7. 自检 `PASS` 后，编排器才可触发 Agent-as-Validator（GATE-05）
 
 ### 失败处理
@@ -72,7 +72,7 @@
 
 0. 确定当前工作流的活跃阶段列表（来自模板定义或自定义工作流）。如果使用模板，仅检查模板包含的阶段。不在活跃阶段列表中的阶段不检查 — 跳过的阶段不视为未完成。示例：热修复模板包含 P14-P18。当启动 P16 时，仅检查 P14 和 P15 的完成状态，P01-P13 不在模板范围内故不检查。
 1. 用户请求执行阶段 N 时，编排器获取目标阶段索引 N
-2. 编排器遍历活跃阶段列表中 phase_index 小于 N 的所有阶段，读取对应 `{workflow_base}/phases/{domain}/P##-{phase-slug}/P##-STATE.md`（仅检查活跃阶段列表内的前序阶段，不检查列表外的阶段）
+2. 编排器遍历活跃阶段列表中 phase_index 小于 N 的所有阶段，读取对应 `{workflow_base}/P##-{phase-slug}/STATE.md`（仅检查活跃阶段列表内的前序阶段，不检查列表外的阶段）
 3. 读取每个前序 STATE.md 的 `status` 字段（仅读取状态部分，不读完整输出体）
 4. 检查条件：每个前序阶段的 `status` 必须为 `COMPLETE` 或 `SKIPPED`，且 `human_confirmed` 必须为 `true`
 5. 如所有前序阶段均满足条件，允许执行阶段 N
@@ -151,8 +151,8 @@
 3. 编排器并行 spawn phase-validator（结构化检查）和岗位 Agent（域视角审核，verification_reviewer 模式）
 4. phase-validator 在独立上下文窗口中读取该阶段 STATE.md，对照 phase-definitions.md 的 outputs 列表逐项验证
 5. 岗位 Agent 在独立上下文窗口中从域专业角度审阅阶段产出物
-6. 两者分别返回验证报告，phase-validator 写入 P##-VERIFICATION.md 到 `{phase_dir}/`
-7. 确认 P##-VERIFICATION.md 已生成且验证结果与报告内容一致
+6. 两者分别返回验证报告，phase-validator 写入 VERIFICATION.md 到 `{phase_dir}/`
+7. 确认 VERIFICATION.md 已生成且验证结果与报告内容一致
 8. 岗位 Agent 返回域评审报告（PASS/CONDITIONAL/FAIL + 域问题清单），结果与 phase-validator 结果合并
 9. 编排器根据合并结果决定：
    - **两者均 PASS** → 进入人工确认环节（GATE-01）

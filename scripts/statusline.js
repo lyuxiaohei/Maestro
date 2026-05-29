@@ -22,33 +22,77 @@ const os = require('os');
 // --- Workflow state reader ---------------------------------------------------
 
 /**
- * Walk up from dir looking for .planning/workflows/ and find active workflow.
+ * Read current_milestone from STATE.md.
+ */
+function readCurrentMilestone(planningDir) {
+  try {
+    const statePath = path.join(planningDir, 'STATE.md');
+    const raw = fs.readFileSync(statePath, 'utf8');
+    const match = raw.match(/^current_milestone:\s*["']?(.+?)["']?\s*$/m);
+    if (match) return match[1].trim();
+  } catch { /* no STATE.md */ }
+
+  // Fallback: find newest version directory
+  try {
+    const entries = fs.readdirSync(planningDir, { withFileTypes: true });
+    const versionDirs = entries
+      .filter(e => e.isDirectory() && /^\d{6}\.\d+$/.test(e.name))
+      .sort()
+      .reverse();
+    return versionDirs.length > 0 ? versionDirs[0].name : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Walk up from dir looking for .planning/ and find active workflow.
+ * Searches version-based paths first, then falls back to old workflows/ structure.
  * Returns { slug, phase_index, workflow_status, current_phase } or null.
  */
 function readMaestroState(dir) {
   const home = os.homedir();
   let current = dir;
   for (let i = 0; i < 10; i++) {
-    const workflowsDir = path.join(current, '.planning', 'workflows');
-    if (fs.existsSync(workflowsDir)) {
-      try {
-        const entries = fs.readdirSync(workflowsDir, { withFileTypes: true });
-        for (const entry of entries) {
-          if (!entry.isDirectory()) continue;
-          const wfPath = path.join(workflowsDir, entry.name, 'workflow.md');
-          if (!fs.existsSync(wfPath)) continue;
-          const state = parseWorkflowMd(fs.readFileSync(wfPath, 'utf8'));
-          if (state) {
-            state.slug = entry.name;
-            return state;
-          }
-        }
-      } catch { /* swallow */ }
+    const planningDir = path.join(current, '.planning');
+    if (fs.existsSync(planningDir)) {
+      // Try version-based: .planning/{version}/workflows/
+      const milestone = readCurrentMilestone(planningDir);
+      if (milestone) {
+        const workflowsDir = path.join(planningDir, milestone, 'workflows');
+        const state = scanWorkflowsDir(workflowsDir);
+        if (state) return state;
+      }
+
+      // Fallback: old .planning/workflows/
+      const oldWorkflowsDir = path.join(planningDir, 'workflows');
+      const state = scanWorkflowsDir(oldWorkflowsDir);
+      if (state) return state;
     }
     const parent = path.dirname(current);
     if (parent === current || current === home) break;
     current = parent;
   }
+  return null;
+}
+
+/**
+ * Scan a workflows directory for an active workflow.
+ */
+function scanWorkflowsDir(workflowsDir) {
+  try {
+    const entries = fs.readdirSync(workflowsDir, { withFileTypes: true });
+    for (const entry of entries) {
+      if (!entry.isDirectory()) continue;
+      const wfPath = path.join(workflowsDir, entry.name, 'workflow.md');
+      if (!fs.existsSync(wfPath)) continue;
+      const state = parseWorkflowMd(fs.readFileSync(wfPath, 'utf8'));
+      if (state) {
+        state.slug = entry.name;
+        return state;
+      }
+    }
+  } catch { /* swallow */ }
   return null;
 }
 

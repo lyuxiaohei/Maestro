@@ -1,5 +1,7 @@
 # Phase Definitions: 18阶段产研工作流定义
 
+**注意**: domain 字段仅用于角色分配和岗位 Agent 映射，不参与路径构建。阶段目录结构为 `P##-{phase-slug}/`，无 domain 中间层。domain 信息存储在 STATE.md 元数据中。
+
 本文档定义产研工作流的 18 个阶段，每个阶段包含索引、名称、标识符、描述、输入输出、子步骤和对应 Skill。
 
 ---

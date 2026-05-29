@@ -18,6 +18,7 @@ version: "1.1"
 
 ### 步骤 1：加载上下文
 
+- 读取 `.planning/STATE.md` 获取 `current_milestone`，确定 `{workflow_base}` = `.planning/{current_milestone}/workflows/{slug}/`
 - 读取 `{workflow_base}/workflow.md` 获取工作流状态
 - 检测工作流模式：有 `phase_index` 为全量，有 `mode` 为 lite
 - 全量模式：读取 `references/phase-definitions.md` 获取目标阶段定义，读取上游 STATE.md 输出
@@ -60,7 +61,7 @@ version: "1.1"
 
 ### 步骤 5：写入 CONTEXT.md
 
-写入 `{phase_dir}/P##-CONTEXT.md`（全量）或 `{workflow_base}/CONTEXT.md`（lite），包含三节：
+写入 `{workflow_base}P##-{phase-slug}/CONTEXT.md`（全量）或 `{workflow_base}/CONTEXT.md`（lite），包含三节：
 
 ```markdown
 ## Locked Decisions（必须实现）
@@ -87,7 +88,7 @@ version: "1.1"
 
 | 产物 | 路径 | 说明 |
 |------|------|------|
-| CONTEXT.md | `{phase_dir}/P##-CONTEXT.md` 或 `{workflow_base}/CONTEXT.md` | 三级分类决策上下文 |
+| CONTEXT.md | `{workflow_base}P##-{phase-slug}/CONTEXT.md` 或 `{workflow_base}/CONTEXT.md` | 三级分类决策上下文 |
 
 ## 引用文件
 

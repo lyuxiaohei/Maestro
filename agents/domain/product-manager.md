@@ -48,13 +48,13 @@ isolation: worktree
 
 ## 审核/评审流程
 
-1. **读取阶段状态** — 读取 `{phase_dir}/P##-STATE.md`，了解当前阶段的目标、输入和产出
+1. **读取阶段状态** — 读取 `{phase_dir}/STATE.md`，了解当前阶段的目标、输入和产出
 2. **读取阶段定义** — 读取 `skills/workflow/references/phase-definitions.md` 中对应阶段的 outputs 列表
 3. **读取产出物** — 根据阶段类型读取需求文档、流程图、功能清单、原型文件、设计规范等
 4. **需求可追溯性检查** — 验证每个产出物中的功能点/需求点是否可追溯到原始需求
 5. **用户价值评估** — 从用户角度评估产出是否解决用户痛点、覆盖核心场景
 6. **输出审核报告** — 按问题严重程度分级输出结构化报告
-7. **写入验证文档** — 将审核报告写入 `{phase_dir}/P##-VERIFICATION.md`
+7. **写入验证文档** — 将审核报告写入 `{phase_dir}/VERIFICATION.md`
 
 ## 报告格式
 
@@ -96,7 +96,7 @@ isolation: worktree
 - 阶段编号: `phase_index`（如 P06）
 - 工作流标识: `workflow_slug`
 - 上游产出物: `upstream_outputs`（前序阶段产出物路径列表）
-- 阶段文档目录: `phase_dir`（如 `.planning/workflows/{slug}/phases/product-manager/P06-prototype-design/`）
+- 阶段文档目录: `phase_dir`（如 `.planning/{version}/workflows/{slug}/P06-prototype-design/`）
 - 阶段定义: `skills/workflow/references/phase-definitions.md`
 
 ## 完成信号

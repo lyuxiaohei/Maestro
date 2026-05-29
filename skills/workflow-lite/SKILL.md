@@ -16,11 +16,12 @@ version: "1.0"
 
 ## 初始化
 
-1. 解析 slug。无 slug 时列出 `.planning/workflows/` 下所有工作流供选择或输入新名称
-2. 检查 `{workflow_base}`（`.planning/workflows/{slug}/`）是否存在
-3. **已存在**：读取 workflow.md。检测到 `phase_index` 字段（全量工作流）时提示"此工作流使用18阶段模式，请用 /workflow 继续"。检测到 `mode` 字段（轻量工作流）时从中断点恢复
-4. **不存在**：用 AskUserQuestion 交互获取目标描述和工作模式（single/multi），写入 workflow.md（模板见 [lite-state-schema.md](references/lite-state-schema.md)）
-5. 初始化后进入迭代流水线的 discuss 步骤
+1. 读取 `.planning/STATE.md` 获取 `current_milestone`，确定版本基路径 `{version_base}` = `.planning/{current_milestone}/`
+2. 解析 slug。无 slug 时列出 `{version_base}workflows/` 下所有工作流供选择或输入新名称
+3. 检查 `{workflow_base}`（`{version_base}workflows/{slug}/`）是否存在
+4. **已存在**：读取 workflow.md。检测到 `phase_index` 字段（全量工作流）时提示"此工作流使用18阶段模式，请用 /workflow 继续"。检测到 `mode` 字段（轻量工作流）时从中断点恢复
+5. **不存在**：用 AskUserQuestion 交互获取目标描述和工作模式（single/multi），写入 workflow.md（模板见 [lite-state-schema.md](references/lite-state-schema.md)）
+6. 初始化后进入迭代流水线的 discuss 步骤
 
 ## 迭代流水线
 

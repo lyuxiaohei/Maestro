@@ -3,13 +3,16 @@
  * phase-boundary.js — Maestro PostToolUse Write|Edit phase boundary detection hook
  *
  * Detects when phase state files (STATE.md) are modified and outputs an advisory
- * reminder to sync workflow.md. Supports both new multi-workflow paths and legacy paths.
+ * reminder to sync workflow.md. Supports version-based, old multi-workflow, and legacy paths.
+ *
+ * Path formats recognized:
+ *   New:     .planning/{version}/workflows/{slug}/P##-{slug}/STATE.md
+ *   Old:     .planning/workflows/{slug}/phases/{domain}/P##-{slug}/P##-STATE.md
+ *   Legacy:  .planning/phases/P##-STATE.md or .planning/phases/P##-slug/P##-STATE.md
  *
  * Hook protocol: reads JSON from stdin, writes JSON to stdout.
  * stdin timeout: 5 seconds.
  * Always exits 0 — advisory only, never blocks tool calls.
- *
- * Pure Node.js built-in modules. No npm dependencies.
  */
 
 'use strict';
@@ -35,21 +38,27 @@ function readStdin() {
 
 /**
  * Check if a file path points to a phase state file.
- * Matches both new multi-workflow and legacy paths:
- *   New: .planning/workflows/{slug}/phases/{domain}/P##-{slug}/P##-STATE.md
- *   Legacy: .planning/phases/P##-STATE.md or .planning/phases/P##-slug/P##-STATE.md
+ * Matches version-based, old multi-workflow, and legacy paths.
  */
 function isPhaseStateFile(filePath) {
   const normalized = filePath.replace(/\\/g, '/');
 
-  // New multi-workflow path: .planning/workflows/{slug}/phases/{domain}/P##-{slug}/P##-STATE.md
-  const newPattern = /\/\.planning\/workflows\/[^/]+\/phases\/[^/]+\/P\d+-[^/]+\/P\d+-STATE\.md$/;
-  if (newPattern.test(normalized)) return true;
+  // Version-based: .planning/{YYYYMM.PATCH}/workflows/{slug}/P##-{slug}/STATE.md
+  const versionPattern = /\/\.planning\/\d{6}\.\d+\/workflows\/[^/]+\/P\d+-[^/]+\/STATE\.md$/;
+  if (versionPattern.test(normalized)) return true;
 
-  // New path segment check
+  // Version-based segment check
+  if (/\/\.planning\/\d{6}\.\d+\/workflows\//.test(normalized)) {
+    if (/P\d+-[^/]+\/STATE\.md$/.test(normalized)) return true;
+  }
+
+  // Old multi-workflow: .planning/workflows/{slug}/phases/{domain}/P##-{slug}/P##-STATE.md
+  const oldPattern = /\/\.planning\/workflows\/[^/]+\/phases\/[^/]+\/P\d+-[^/]+\/P\d+-STATE\.md$/;
+  if (oldPattern.test(normalized)) return true;
+
+  // Old path segment check
   if (normalized.includes('/.planning/workflows/')) {
-    const segmentPattern = /P\d+-[^/]+\/P\d+-STATE\.md$/;
-    if (segmentPattern.test(normalized)) return true;
+    if (/P\d+-[^/]+\/P?\d+-STATE\.md$/.test(normalized)) return true;
   }
 
   // Legacy: .planning/phases/P##-slug/P##-STATE.md (Phase 21 subdirectory format)
@@ -62,20 +71,32 @@ function isPhaseStateFile(filePath) {
 
   // Legacy segment check
   if (normalized.includes('/.planning/phases/')) {
-    const segmentPattern = /P\d+-STATE\.md$/;
-    if (segmentPattern.test(normalized)) return true;
+    if (/P\d+-STATE\.md$/.test(normalized)) return true;
   }
 
   return false;
 }
 
 /**
- * Extract workflow slug from new path format.
+ * Extract workflow slug and version from path.
+ * Returns { slug, version } or { slug } for old/legacy paths.
  */
-function extractWorkflowSlug(filePath) {
+function extractContext(filePath) {
   const normalized = filePath.replace(/\\/g, '/');
-  const match = normalized.match(/\/\.planning\/workflows\/([^/]+)\//);
-  return match ? match[1] : null;
+
+  // Version-based: extract version and slug
+  const versionMatch = normalized.match(/\/\.planning\/(\d{6}\.\d+)\/workflows\/([^/]+)\//);
+  if (versionMatch) {
+    return { version: versionMatch[1], slug: versionMatch[2] };
+  }
+
+  // Old format: extract slug
+  const oldMatch = normalized.match(/\/\.planning\/workflows\/([^/]+)\//);
+  if (oldMatch) {
+    return { slug: oldMatch[1] };
+  }
+
+  return {};
 }
 
 async function main() {
@@ -95,11 +116,13 @@ async function main() {
   if (!isPhaseStateFile(filePath)) process.exit(0);
 
   const basename = path.basename(filePath);
-  const slug = extractWorkflowSlug(filePath);
+  const ctx = extractContext(filePath);
 
   let msg;
-  if (slug) {
-    msg = `⚠ Maestro 阶段边界: 检测到工作流 [${slug}] 的阶段状态文件 ${basename} 被修改。请确认 workflow.md 阶段总览已同步更新。`;
+  if (ctx.version && ctx.slug) {
+    msg = `⚠ Maestro 阶段边界: 检测到版本 [${ctx.version}] 工作流 [${ctx.slug}] 的阶段状态文件 ${basename} 被修改。请确认 workflow.md 阶段总览已同步更新。`;
+  } else if (ctx.slug) {
+    msg = `⚠ Maestro 阶段边界: 检测到工作流 [${ctx.slug}] 的阶段状态文件 ${basename} 被修改。请确认 workflow.md 阶段总览已同步更新。`;
   } else {
     msg = `⚠ Maestro 阶段边界: 检测到阶段状态文件 ${basename} 被修改。请确认 workflow.md 阶段总览已同步更新。`;
   }

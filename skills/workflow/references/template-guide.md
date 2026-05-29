@@ -34,14 +34,16 @@
 
 用户从以下岗位中选择参与工作流的角色：
 
-| 岗位 | 阶段范围 | 域目录 |
-|------|----------|--------|
-| product-manager | P01-P08 | product-manager |
-| architect | P09-P13 | architect |
-| frontend-developer | P14-P15 | development |
-| backend-developer | P14-P15 | development |
-| test-engineer | P16-P17 | test-engineer |
-| ops-engineer | P18 | ops-engineer |
+| 岗位 | 阶段范围 |
+|------|----------|
+| product-manager | P01-P08 |
+| architect | P09-P13 |
+| frontend-developer | P14-P15 |
+| backend-developer | P14-P15 |
+| test-engineer | P16-P17 |
+| ops-engineer | P18 |
+
+domain 仅用于角色分配，不参与路径构建。阶段目录结构为 `P##-{phase-slug}/`，无 domain 中间层。
 
 ### 2. 按 role 字段筛选阶段
 

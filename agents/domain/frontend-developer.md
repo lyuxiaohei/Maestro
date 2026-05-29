@@ -43,14 +43,14 @@ isolation: worktree
 
 ## 审核/评审流程
 
-1. **读取阶段状态** — 读取 `{phase_dir}/P##-STATE.md`，了解当前阶段的目标、输入和产出
+1. **读取阶段状态** — 读取 `{phase_dir}/STATE.md`，了解当前阶段的目标、输入和产出
 2. **读取阶段定义** — 读取 `skills/workflow/references/phase-definitions.md` 中对应阶段的 outputs 列表
 3. **读取产出物** — 根据阶段类型读取任务规划文档、前端源代码、组件文档、样式规范等
 4. **安全性检查** — 检查 XSS 防护、CSRF Token、敏感数据处理、输入校验
 5. **性能检查** — 评估渲染性能、包体积、懒加载策略、缓存策略
 6. **交互体验检查** — 检查错误处理友好性、边界情况覆盖、无障碍合规
 7. **输出审核报告** — 按问题严重程度分级输出结构化报告
-8. **写入验证文档** — 将审核报告写入 `{phase_dir}/P##-VERIFICATION.md`
+8. **写入验证文档** — 将审核报告写入 `{phase_dir}/VERIFICATION.md`
 
 ## 报告格式
 
@@ -92,7 +92,7 @@ isolation: worktree
 - 阶段编号: `phase_index`（如 P15）
 - 工作流标识: `workflow_slug`
 - 上游产出物: `upstream_outputs`（前序阶段产出物路径列表）
-- 阶段文档目录: `phase_dir`（如 `.planning/workflows/{slug}/phases/development/P15-development/`）
+- 阶段文档目录: `phase_dir`（如 `.planning/{version}/workflows/{slug}/P15-development/`）
 - 阶段定义: `skills/workflow/references/phase-definitions.md`
 
 ## 完成信号

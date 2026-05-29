@@ -339,6 +339,6 @@ EntityName {
 
 doc-writer Agent 根据 `doc_type` 字段选择对应模板，从 `sources` 中提取数据填充。模板中 `[占位符]` 标记的位置由数据源内容替换，无法填充的标记为 `[待补充]`。
 
-**内联文档模板**（context、output、verification）由各 Agent 直接写入阶段子目录（`.planning/workflows/{slug}/phases/{domain}/P##-{phase-slug}/`），不走 doc-writer 管道。doc-writer 管道用于事后文档整理（summary、adr、prd、spec、changelog）。
+**内联文档模板**（context、output、verification）由各 Agent 直接写入阶段子目录（`.planning/{version}/workflows/{slug}/P##-{phase-slug}/`），不走 doc-writer 管道。doc-writer 管道用于事后文档整理（summary、adr、prd、spec、changelog）。
 
-`phase_dir` 参数格式：`.planning/workflows/{slug}/phases/{domain}/P##-{phase-slug}/`，由编排器根据 slug 和 domain 构建。
+`phase_dir` 参数格式：`.planning/{version}/workflows/{slug}/P##-{phase-slug}/`，由编排器根据 slug 和版本号构建。

@@ -42,14 +42,14 @@ isolation: worktree
 
 ## 审核/评审流程
 
-1. **读取阶段状态** — 读取 `{phase_dir}/P##-STATE.md`，了解当前阶段的目标、输入和产出
+1. **读取阶段状态** — 读取 `{phase_dir}/STATE.md`，了解当前阶段的目标、输入和产出
 2. **读取阶段定义** — 读取 `skills/workflow/references/phase-definitions.md` 中对应阶段的 outputs 列表
 3. **读取产出物** — 根据阶段类型读取测试计划、测试用例、测试报告、缺陷清单等
 4. **覆盖度分析** — 按功能模块逐项检查测试覆盖情况，识别遗漏场景
 5. **质量检查** — 检查用例可执行性、预期结果准确性、数据准备完整性
 6. **缺陷评估** — 分析缺陷分布、修复验证闭环、残留风险评估
 7. **输出审核报告** — 按问题严重程度分级输出结构化报告
-8. **写入验证文档** — 将审核报告写入 `{phase_dir}/P##-VERIFICATION.md`
+8. **写入验证文档** — 将审核报告写入 `{phase_dir}/VERIFICATION.md`
 
 ## 报告格式
 
@@ -91,7 +91,7 @@ isolation: worktree
 - 阶段编号: `phase_index`（如 P16）
 - 工作流标识: `workflow_slug`
 - 上游产出物: `upstream_outputs`（前序阶段产出物路径列表）
-- 阶段文档目录: `phase_dir`（如 `.planning/workflows/{slug}/phases/test-engineer/P16-system-testing/`）
+- 阶段文档目录: `phase_dir`（如 `.planning/{version}/workflows/{slug}/P16-system-testing/`）
 - 阶段定义: `skills/workflow/references/phase-definitions.md`
 
 ## 完成信号

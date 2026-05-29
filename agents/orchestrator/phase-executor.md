@@ -15,11 +15,11 @@ isolation: worktree
 ## 执行流程
 
 1. **接收任务** — 读取编排器传递的阶段编号和任务参数（见 agent-contracts.md）
-2. **加载上下文** — 读取 `{phase_dir}/P##-STATE.md`、phase-definitions.md、上游 STATE.md 输出
+2. **加载上下文** — 读取 `{phase_dir}/STATE.md`、phase-definitions.md、上游 STATE.md 输出
 3. **执行阶段任务** — 按目标领域 Skill 指令执行，严格遵循每个子步骤
 4. **写入输出** — 将执行结果写入 STATE.md（输出部分、版本链）
-5. **写入交付物文档** — 将结构化交付物信息写入 `{phase_dir}/P##-OUTPUT.md`（交付物清单、文件变更、需求覆盖），使用 `references/doc-templates.md` 的 output 模板
-6. **写入执行摘要** — 使用 summary 模板写入 `{phase_dir}/P##-SUMMARY.md`（执行摘要、变更清单、偏差）
+5. **写入交付物文档** — 将结构化交付物信息写入 `{phase_dir}/OUTPUT.md`（交付物清单、文件变更、需求覆盖），使用 `references/doc-templates.md` 的 output 模板
+6. **写入执行摘要** — 使用 summary 模板写入 `{phase_dir}/SUMMARY.md`（执行摘要、变更清单、偏差）
 7. **返回结果** — 输出完成信号和执行摘要
 
 ## 执行原则
@@ -44,7 +44,7 @@ isolation: worktree
   3. [步骤名称]
   4. [步骤名称]
 - **中间产物路径**:
-  - {phase_dir}/P##-STATE.md (部分更新)
+  - {phase_dir}/STATE.md (部分更新)
   - [其他中间文件路径]
 - **当前任务进度**: 2/4
 ```
@@ -66,5 +66,5 @@ isolation: worktree
 - `phase_index`: 阶段编号（如 06）
 - `skill_name`: 目标领域 Skill 目录名
 - `upstream_outputs`: 上游输出文档路径列表
-- `phase_dir`: 阶段文档目录路径（如 `.planning/workflows/{slug}/phases/design/P06-prototype-design/`）
+- `phase_dir`: 阶段文档目录路径（如 `.planning/{version}/workflows/{slug}/P06-prototype-design/`）
 - `phase_slug`: 阶段英文标识（如 `prototype-design`）

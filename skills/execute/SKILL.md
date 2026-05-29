@@ -18,8 +18,8 @@ version: "1.2"
 
 ### 1. 确定工作流路径
 
-- 解析 slug 参数，确定 `{workflow_base}` = `.planning/workflows/{slug}/`
-- 无 slug 时扫描 `.planning/workflows/` 查找 active 的轻量工作流
+- 读取 `.planning/STATE.md` 获取 `current_milestone`，确定 `{workflow_base}` = `.planning/{current_milestone}/workflows/{slug}/`
+- 无 slug 时扫描 `.planning/{current_milestone}/workflows/` 查找 active 的轻量工作流
 - 读取 `{workflow_base}/workflow.md` 确认是轻量模式
 
 ### 2. 前置检查

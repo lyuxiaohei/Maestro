@@ -17,11 +17,12 @@ version: "1.0"
 
 ## 工作流初始化
 
-1. 解析 slug 参数。无 slug 时列出 `.planning/workflows/` 下所有工作流供选择
-2. 检查 `{workflow_base}`（`.planning/workflows/{slug}/`）是否存在
-3. 不存在则创建：5 个域子目录（product-manager/architect/development/test-engineer/ops-engineer）+ 阶段目录骨架 + 写入 workflow.md（使用 `references/state-schema.md` 模板）。P14 域为 development，编排器调度 frontend-developer + backend-developer（D-04）
-4. 存在则读取该工作流的 workflow.md
-5. **旧路径迁移** — 首次启动时检测旧路径（`.planning/phases/P*-STATE.md` 和 `.planning/workflow.md`），自动迁移到 `workflows/default/`（详见 `references/migration.md`）
+1. 读取 `.planning/STATE.md` 获取 `current_milestone`（格式 YYYYMM.PATCH，如 `202505.0`）
+2. 解析 slug 参数。无 slug 时列出 `{version_base}workflows/` 下所有工作流供选择
+3. 检查 `{workflow_base}`（`{version_base}workflows/{slug}/`）是否存在
+4. 不存在则创建：`{version_base}/`（如不存在）+ `{workflow_base}` + 阶段目录骨架（`P##-{phase-slug}/`）+ 写入 workflow.md（使用 `references/state-schema.md` 模板）。阶段目录直接放在 `{workflow_base}` 下，无 domain 中间层
+5. 存在则读取该工作流的 workflow.md
+6. **旧路径迁移** — 首次启动时检测旧路径（`.planning/phases/P*-STATE.md` 和 `.planning/workflow.md`），自动迁移到新版本目录结构（详见 `references/migration.md`）
 
 ## 工作流模板选择
 
@@ -33,20 +34,20 @@ version: "1.0"
 
 ## 路径构建
 
-- `{workflow_base}` = `.planning/workflows/{slug}/`，`{phase_dir}` = `{workflow_base}phases/{domain}/P##-{phase-slug}/`，STATE.md = `{phase_dir}/P##-STATE.md`
+- `{version_base}` = `.planning/{current_milestone}/`，`{workflow_base}` = `{version_base}workflows/{slug}/`，`{phase_dir}` = `{workflow_base}P##-{phase-slug}/`，STATE.md = `{phase_dir}/STATE.md`
 - 跨工作流引用：`{workflow-slug}@P{phase}@V{version}`
 
 ## 阶段启动检查序列
 
 1. 读取 `{workflow_base}/workflow.md` 获取当前 `phase_index` 和 `workflow_status`
-2. 读取目标阶段 `{phase_dir}/P##-STATE.md` 的状态字段（不读完整输出体）
+2. 读取目标阶段 `{phase_dir}/STATE.md` 的状态字段（不读完整输出体）
 3. 读取 `references/phase-definitions.md` 获取阶段定义、domain 和对应 Skill
 4. **GATE-03 防跳步检查**（优先执行）— 遍历当前工作流活跃阶段列表中 phase_index 小于目标阶段的所有 STATE.md，确认 status 为 COMPLETE 或 SKIPPED（仅检查模板范围内的阶段，详见 `references/gate-rules.md`）
 5. GATE-03 发现未完成阶段时，询问用户是否跳过（详见 `references/gate-rules.md` 跳过处理流程）
 6. 加载目标领域 Skill（单个 turn 内不超过 2-3 个，超出则分多 turn 执行）
 7. 读取上游 STATE.md 的输出部分，作为当前阶段输入传递给 Skill（SKIPPED 阶段读取 alternative_inputs）
 8. 将阶段状态设为 IN_PROGRESS，写入 started_at
-9. 创建阶段子目录 `{phase_dir}/`，写入 `P##-CONTEXT.md`（范围、决策、上游引用），更新 STATE.md 阶段文档节 CONTEXT 状态为 WRITTEN
+9. 创建阶段子目录 `{phase_dir}/`，写入 `CONTEXT.md`（范围、决策、上游引用），更新 STATE.md 阶段文档节 CONTEXT 状态为 WRITTEN
 
 ## 阶段讨论（discuss-phase）
 
@@ -54,7 +55,7 @@ GATE-03 通过后、规划流水线前，对需要讨论的阶段执行讨论：
 
 1. 检查 phase-definitions.md 中目标阶段的 `discuss_required` 标记
 2. 标记为 true 时，加载 `discuss` Skill（`maestro-discuss`），传入 phase_index、workflow_slug、upstream_outputs
-3. discuss-phase 执行灰色区域识别 → 交互讨论 → 写入 P##-CONTEXT.md（锁定决策 D-01/D-02...）
+3. discuss-phase 执行灰色区域识别 → 交互讨论 → 写入 CONTEXT.md（锁定决策 D-01/D-02...）
 4. 决策产出后传入 phase-planner，进入规划流水线
 5. 标记为 false 时，直接进入规划流水线（编排器自动生成基础 CONTEXT.md）
 6. 用户可通过 `/discuss-phase {slug} P{N}` 手动触发任意阶段的讨论
@@ -71,9 +72,9 @@ GATE-03 通过后，按以下流水线执行：
 
 ## 阶段完成提交序列
 
-1. 收集 Skill 输出，写入当前阶段 STATE.md 的输出部分和版本链；phase-executor 同时写入 `P##-OUTPUT.md` 和 `P##-SUMMARY.md` 到阶段子目录（见 `references/doc-templates.md`），更新 STATE.md 阶段文档节 OUTPUT/SUMMARY 状态为 WRITTEN
+1. 收集 Skill 输出，写入当前阶段 STATE.md 的输出部分和版本链；phase-executor 同时写入 `OUTPUT.md` 和 `SUMMARY.md` 到阶段子目录（见 `references/doc-templates.md`），更新 STATE.md 阶段文档节 OUTPUT/SUMMARY 状态为 WRITTEN
 2. **GATE-02 自检** — 对照 phase-definitions.md outputs 检查完整性、版本号、STATE.md 非空
-3. 自检 PASS 后调用 **phase-validator Agent**（调度域 Agent，见 `references/agent-contracts.md`）进行独立验证（GATE-05），传入 phase_index、upstream_outputs、phase_dir；validator 写入 `P##-VERIFICATION.md`，更新 STATE.md 阶段文档节 VERIFICATION 状态为 WRITTEN
+3. 自检 PASS 后调用 **phase-validator Agent**（调度域 Agent，见 `references/agent-contracts.md`）进行独立验证（GATE-05），传入 phase_index、upstream_outputs、phase_dir；validator 写入 `VERIFICATION.md`，更新 STATE.md 阶段文档节 VERIFICATION 状态为 WRITTEN
 4. Agent 返回完成信号（见 `references/agent-contracts.md`），失败时按模型升级协议重试（见 `references/model-profiles.md`）
 4. **GATE-01 人工确认** — 向用户展示输出摘要，等待用户明确回复"确认"或"修改"
 5. 用户确认后更新 workflow.md 的 `phase_index`，推进到下一阶段

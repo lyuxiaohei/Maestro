@@ -59,7 +59,7 @@
 - **skill_name**: maestro-prototype-design
 - **workflow_slug**: user-center
 - **upstream_outputs**:
-  - P05@V1.0: .planning/workflows/user-center/phases/product-manager/P05-feature-list/P05-STATE.md (功能清单)
+  - P05@V1.0: .planning/{version}/workflows/user-center/P05-feature-list/STATE.md (功能清单)
   - P09@V1.0: doc/V0.3/logic-list-draft.md (逻辑清单草案)
 - **task_description**: 执行阶段 06「原型设计」，根据逻辑清单生成原型 HTML
 ```
@@ -82,7 +82,7 @@
 - 输出文件:
   - prototype-order-list.html
   - prototype-cart.html
-- 写入: {phase_dir}/P06-STATE.md
+- 写入: {phase_dir}/STATE.md
 ```
 
 #### 阻塞
@@ -122,7 +122,7 @@
   3. [步骤名称]
   4. [步骤名称]
 - **中间产物路径**:
-  - {phase_dir}/P##-STATE.md (部分更新)
+  - {phase_dir}/STATE.md (部分更新)
   - [其他中间文件路径]
 - **当前任务进度**: 2/4
 ```
@@ -186,14 +186,14 @@
 - **触发时机**: GATE-03 通过后、阶段任务开始前
 - **传参**: phase_index, skill_name, workflow_slug, upstream_outputs, task_description, phase_dir, phase_slug, checkpoint_context（续接时可选）
 - **返回**: PHASE EXECUTION COMPLETE / BLOCKED / PARTIAL / CHECKPOINT REACHED
-- **写入权限**: 可写入 {phase_dir}/ 下的 STATE.md 输出部分和版本链、P##-OUTPUT.md、P##-SUMMARY.md
+- **写入权限**: 可写入 {phase_dir}/ 下的 STATE.md 输出部分和版本链、OUTPUT.md、SUMMARY.md
 
 ### phase-validator
 
 - **触发时机**: GATE-02 自检通过后（GATE-05）
 - **传参**: phase_index, workflow_slug, upstream_outputs, phase_dir
 - **返回**: VERIFICATION PASSED / VERIFICATION FAILED + 问题清单
-- **写入权限**: 可写入 {phase_dir}/P##-VERIFICATION.md，不可修改其他文件（Edit 禁用）
+- **写入权限**: 可写入 {phase_dir}/VERIFICATION.md，不可修改其他文件（Edit 禁用）
 
 ### domain-researcher
 
@@ -214,12 +214,12 @@
 - **触发时机**: GATE-03 通过后，阶段执行前（规划流水线第 1 步）
 - **传参**: phase_index, skill_name, workflow_slug, upstream_outputs, phase_dir
 - **返回**: PLANNING COMPLETE / PHASE BLOCKED
-- **写入权限**: 可写入 `{phase_dir}/P##-PLAN.md`
+- **写入权限**: 可写入 `{phase_dir}/PLAN.md`
 
 ### plan-checker
 
 - **触发时机**: phase-planner 返回 PLANNING COMPLETE 后（规划流水线第 2 步）
-- **传参**: phase_index, plan_path（如 `{phase_dir}/P##-PLAN.md`）
+- **传参**: phase_index, plan_path（如 `{phase_dir}/PLAN.md`）
 - **返回**: VERIFICATION PASSED / ISSUES FOUND + 结构化问题清单
 - **写入权限**: 只读，不修改任何文件
 
@@ -276,46 +276,46 @@
 
 ## 岗位 Agent 专用协议
 
-岗位 Agent 以双模式接入编排器：规划时作为域顾问（plan_advisor）审阅计划，验证时作为域审核者（verification_reviewer）并行运行。所有岗位 Agent 统一使用 opus 模型，工具权限为 Read, Write, Grep, Glob（Write 仅限 `{phase_dir}/P##-VERIFICATION.md`）。
+岗位 Agent 以双模式接入编排器：规划时作为域顾问（plan_advisor）审阅计划，验证时作为域审核者（verification_reviewer）并行运行。所有岗位 Agent 统一使用 opus 模型，工具权限为 Read, Write, Grep, Glob（Write 仅限 `{phase_dir}/VERIFICATION.md`）。
 
 ### product-manager
 
 - **触发时机**: phase-planner 规划审阅（D-08）+ GATE-05 岗位验证（D-09）
 - **传参**: phase_index, workflow_slug, upstream_outputs, phase_dir, review_mode (plan_advisor | verification_reviewer)
 - **返回**: VERIFICATION PASSED / VERIFICATION CONDITIONAL / VERIFICATION FAILED + 产品域评审报告
-- **写入权限**: 可写入 {phase_dir}/P##-VERIFICATION.md，不可修改其他文件
+- **写入权限**: 可写入 {phase_dir}/VERIFICATION.md，不可修改其他文件
 
 ### architect
 
 - **触发时机**: phase-planner 规划审阅（D-08）+ GATE-05 岗位验证（D-09）
 - **传参**: phase_index, workflow_slug, upstream_outputs, phase_dir, review_mode (plan_advisor | verification_reviewer)
 - **返回**: VERIFICATION PASSED / VERIFICATION CONDITIONAL / VERIFICATION FAILED + 架构域评审报告
-- **写入权限**: 可写入 {phase_dir}/P##-VERIFICATION.md，不可修改其他文件
+- **写入权限**: 可写入 {phase_dir}/VERIFICATION.md，不可修改其他文件
 
 ### frontend-developer
 
 - **触发时机**: phase-planner 规划审阅（D-08）+ GATE-05 岗位验证（D-09）
 - **传参**: phase_index, workflow_slug, upstream_outputs, phase_dir, review_mode (plan_advisor | verification_reviewer)
 - **返回**: VERIFICATION PASSED / VERIFICATION CONDITIONAL / VERIFICATION FAILED + 前端域评审报告
-- **写入权限**: 可写入 {phase_dir}/P##-VERIFICATION.md，不可修改其他文件
+- **写入权限**: 可写入 {phase_dir}/VERIFICATION.md，不可修改其他文件
 
 ### backend-developer
 
 - **触发时机**: phase-planner 规划审阅（D-08）+ GATE-05 岗位验证（D-09）
 - **传参**: phase_index, workflow_slug, upstream_outputs, phase_dir, review_mode (plan_advisor | verification_reviewer)
 - **返回**: VERIFICATION PASSED / VERIFICATION CONDITIONAL / VERIFICATION FAILED + 后端域评审报告
-- **写入权限**: 可写入 {phase_dir}/P##-VERIFICATION.md，不可修改其他文件
+- **写入权限**: 可写入 {phase_dir}/VERIFICATION.md，不可修改其他文件
 
 ### test-engineer
 
 - **触发时机**: phase-planner 规划审阅（D-08）+ GATE-05 岗位验证（D-09）
 - **传参**: phase_index, workflow_slug, upstream_outputs, phase_dir, review_mode (plan_advisor | verification_reviewer)
 - **返回**: VERIFICATION PASSED / VERIFICATION CONDITIONAL / VERIFICATION FAILED + 测试域评审报告
-- **写入权限**: 可写入 {phase_dir}/P##-VERIFICATION.md，不可修改其他文件
+- **写入权限**: 可写入 {phase_dir}/VERIFICATION.md，不可修改其他文件
 
 ### ops-engineer
 
 - **触发时机**: phase-planner 规划审阅（D-08）+ GATE-05 岗位验证（D-09）
 - **传参**: phase_index, workflow_slug, upstream_outputs, phase_dir, review_mode (plan_advisor | verification_reviewer)
 - **返回**: VERIFICATION PASSED / VERIFICATION CONDITIONAL / VERIFICATION FAILED + 运维域评审报告
-- **写入权限**: 可写入 {phase_dir}/P##-VERIFICATION.md，不可修改其他文件
+- **写入权限**: 可写入 {phase_dir}/VERIFICATION.md，不可修改其他文件
