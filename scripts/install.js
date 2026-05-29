@@ -12,6 +12,7 @@
  *   node scripts/install.js --uninstall  — Remove global install
  *   node scripts/install.js --local      — Register project path without copying files
  *   node scripts/install.js --from-github — Clone from GitHub and install globally
+ *   node scripts/install.js --update     — Check GitHub for newer version and update
  *
  * Pure Node.js built-in modules. No npm dependencies.
  */
@@ -683,6 +684,85 @@ function doGithubInstall() {
   }
 }
 
+// --- Update ---
+
+/**
+ * Fetch latest version from GitHub raw URL without cloning.
+ */
+function fetchLatestVersion() {
+  const rawUrl = 'https://raw.githubusercontent.com/lyuxiaohei/Maestro/main/.claude-plugin/plugin.json';
+  try {
+    const result = execSync(
+      `curl -sS --connect-timeout 10 --max-time 15 "${rawUrl}"`,
+      { encoding: 'utf8', timeout: 20000, stdio: ['pipe', 'pipe', 'pipe'] }
+    );
+    const data = JSON.parse(result);
+    return data.version || null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Remove old version cache directories, keeping only the current version.
+ */
+function cleanOldCaches(currentVersion) {
+  const cacheBase = path.join(getHomeDir(), '.claude', 'plugins', 'cache', 'maestro-private', 'maestro');
+  if (!fs.existsSync(cacheBase)) return 0;
+
+  let removed = 0;
+  for (const entry of fs.readdirSync(cacheBase, { withFileTypes: true })) {
+    if (!entry.isDirectory()) continue;
+    if (entry.name === currentVersion) continue;
+    fs.rmSync(path.join(cacheBase, entry.name), { recursive: true, force: true });
+    removed++;
+  }
+  return removed;
+}
+
+function doUpdate() {
+  // Check if Maestro is installed
+  const registry = readRegistry();
+  const entry = registry.plugins[PLUGIN_KEY];
+  if (!entry || entry.length === 0) {
+    console.log('Maestro is not installed. Run with --from-github to install first.');
+    process.exit(1);
+  }
+
+  const currentVersion = entry[0].version;
+  console.log(`Current version: v${currentVersion}`);
+  console.log('Checking for updates...');
+
+  const latestVersion = fetchLatestVersion();
+  if (!latestVersion) {
+    console.log('Unable to reach GitHub. Check your network and try again.');
+    process.exit(1);
+  }
+
+  if (latestVersion === currentVersion) {
+    // Still clean old caches even if up to date
+    const removed = cleanOldCaches(currentVersion);
+    if (removed > 0) {
+      console.log(`  Cleaned ${removed} old cache version(s).`);
+    }
+    console.log(`Already up to date (v${currentVersion}).`);
+    return;
+  }
+
+  console.log(`Update available: v${currentVersion} → v${latestVersion}`);
+
+  // Reinstall from GitHub
+  doGithubInstall();
+
+  // Clean old caches after successful install
+  const removed = cleanOldCaches(latestVersion);
+  if (removed > 0) {
+    console.log(`  Cleaned ${removed} old cache version(s).`);
+  }
+
+  console.log(`Updated to v${latestVersion}.`);
+}
+
 // --- Local ---
 
 function doLocal() {
@@ -748,6 +828,8 @@ function main() {
   try {
     if (args.includes('--uninstall')) {
       doUninstall();
+    } else if (args.includes('--update')) {
+      doUpdate();
     } else if (args.includes('--local')) {
       doLocal();
     } else if (args.includes('--from-github')) {
