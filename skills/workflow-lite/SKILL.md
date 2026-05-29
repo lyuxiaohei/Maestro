@@ -24,14 +24,14 @@ version: "1.0"
 
 ## 迭代流水线
 
-每次迭代按顺序调用 4 个 Skill，完成 discuss→plan→execute→verify 循环：
+每次迭代按顺序调用 4 个 Skill，完成 discuss→plan→execute→verify 循环。discuss 直接在主会话执行（需要 AskUserQuestion），其余 3 个 Skill 内部 spawn 对应 Agent（无 AskUserQuestion，不会在执行中提问）：
 
-| 步骤 | 斜杠命令 | 产出 | 完成后 |
-|------|----------|------|--------|
-| **discuss** | `/maestro-discuss` | CONTEXT.md（D-01...） | step → plan |
-| **plan** | `/maestro-plan` | PLAN.md（T-01...） | step → execute |
-| **execute** | `/maestro-execute` | 文件变更 | step → verify |
-| **verify** | `/maestro-verify` | VERIFICATION.md | 判定 ↓ |
+| 步骤 | 调度方式 | 内部 Agent | 产出 | 完成后 |
+|------|----------|-----------|------|--------|
+| **discuss** | 直接执行 Skill | — | CONTEXT.md（D-01...） | step → plan |
+| **plan** | 调用 `/maestro-plan` Skill | lite-planner | PLAN.md（T-01...） | step → execute |
+| **execute** | 调用 `/maestro-execute` Skill | lite-executor | 文件变更 | step → verify |
+| **verify** | 调用 `/maestro-verify` Skill | lite-verifier | VERIFICATION.md | 判定 ↓ |
 
 **verify 判定**：目标达成 → single 模式设 status=complete，multi 模式处理下一任务。目标未达 → iteration+1，回到 discuss。
 

@@ -3,10 +3,10 @@ name: plan
 description: "规划技能，基于讨论决策分解任务并制定执行计划。当用户提到plan、制定计划、任务分解、规划任务时触发。"
 risk: low
 source: project
-version: "1.1"
+version: "1.2"
 ---
 
-# 轻量规划
+# 轻量规划（编排器）
 
 ## 触发条件
 
@@ -14,76 +14,36 @@ version: "1.1"
 - `/lite-plan {slug}` — 指定工作流 slug
 - 被 workflow-lite 在 plan 步骤调度
 
-## 执行流程
+## 编排流程
 
-### 1. 加载输入
+### 1. 确定工作流路径
 
-- 读取 `.planning/workflows/{slug}/CONTEXT.md`（决策和范围）
-- 读取 workflow.md 获取目标描述
-- 如无 CONTEXT.md，直接交互获取目标后继续
+- 解析 slug 参数，确定 `{workflow_base}` = `.planning/workflows/{slug}/`
+- 无 slug 时扫描 `.planning/workflows/` 查找 active 的轻量工作流
+- 读取 `{workflow_base}/workflow.md` 确认是轻量模式（有 `mode` 字段）
 
-### 2. 决策保真
+### 2. 前置检查
 
-**PLAN 开始前必须检查 CONTEXT.md 的三级决策**：
+- 确认 `{workflow_base}/CONTEXT.md` 存在（如不存在，提示先运行 discuss）
+- 确认当前步骤为 plan 或可直接进入 plan
 
-- **Locked Decisions (D-01...)**：必须精确实现，每个任务引用对应决策编号（如"按 D-03 使用 Redis"）
-- **Deferred Ideas (DEF-01...)**：不得出现在计划中
-- **Discretion (CLD-01...)**：使用判断力，在任务中说明选择
+### 3. spawn lite-planner Agent
 
-**自检**：计划完成前逐项确认每个 Locked Decision 有对应任务覆盖。
-
-### 3. 任务分解
-
-将目标分解为具体任务，每个任务包含：
-
-| 字段 | 说明 |
-|------|------|
-| 编号 | T-01、T-02... |
-| 描述 | 祈使句，说明做什么 |
-| 文件 | 涉及的具体文件路径 |
-| 验证 | 如何证明完成（命令或检查） |
-| 完成 | 验收标准（可观测的状态） |
-| 依赖 | 阻塞于哪个任务 |
-
-### 4. 拆分规则
-
-**硬性约束：每个计划 2-3 个任务。超过 3 个必须拆为多个计划。**
-
-拆分信号：
-- 任务数 > 3
-- 涉及 > 5 个文件
-- 多个子系统（如 DB + API + UI）
-- 单个任务需要修改 > 3 个文件
-
-拆分后生成多个 PLAN 文件：`PLAN-01.md`、`PLAN-02.md`...
-
-每个计划包含 frontmatter：
-```yaml
-plan: 01
-depends_on: []          # 依赖的其他计划编号
-files_modified: []      # 本计划涉及的文件
-wave: 1                 # 执行波次（无依赖的并行执行）
+```
+Agent(subagent_type="lite-planner", prompt="## Task Parameters\n- workflow_slug: {slug}\n- workflow_base: {workflow_base}\n")
 ```
 
-### 5. 排序和并行
+等待 Agent 返回 `## PLANNING COMPLETE`。
 
-- 按依赖关系拓扑排序
-- 标注执行波次（wave）：无依赖的计划标记为同一 wave，可并行执行
-- 标注关键路径
+### 4. 展示结果
 
-### 6. 上下文预算
+Agent 完成后，读取产出的 PLAN.md，向用户展示摘要：
+- 计划数、任务数、执行波次
+- 决策覆盖情况
+- 关键路径和风险点
 
-每个计划应在 ~50% 上下文内完成。估算规则：
+### 5. 用户确认
 
-| 上下文消耗 | 信号 |
-|------------|------|
-| ~10-15% | 修改 0-3 个文件，纯配置/接线 |
-| ~20-30% | 修改 4-6 个文件，标准功能 |
-| ~40%+ | 修改 7+ 个文件或新子系统 → 必须拆 |
-
-### 7. 写入和确认
-
-- 写入 `.planning/workflows/{slug}/PLAN.md`（单计划）或 `PLAN-01.md`...（多计划）
-- 展示计划摘要（计划数、任务数、执行波次、决策覆盖）
-- 等待用户确认或修改
-- 确认后更新 workflow.md step=execute
+- 用 AskUserQuestion 等待用户确认或修改
+- 确认后更新 `{workflow_base}/workflow.md`：step=execute
+- 用户要求修改时，描述修改要求后重新 spawn Agent

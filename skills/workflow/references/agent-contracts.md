@@ -20,6 +20,14 @@
 | doc-writer | `orchestrator/` | sonnet | Read, Write, Glob, Grep | worktree |
 | doc-verifier | `orchestrator/` | sonnet | Read, Grep, Glob | worktree |
 
+### 轻量工作流 Agent（lite 模式专用）
+
+| Agent | 目录 | 模型 | 工具权限 | 上下文隔离 |
+|-------|------|------|----------|-----------|
+| lite-planner | `orchestrator/` | sonnet | Read, Write, Glob, Grep | — |
+| lite-executor | `orchestrator/` | sonnet | Read, Write, Edit, Bash, Grep, Glob | — |
+| lite-verifier | `orchestrator/` | sonnet | Read, Write, Bash, Grep, Glob | — |
+
 ### 项目域 Agent（按需 spawn）
 
 | Agent | 目录 | 模型 | 工具权限 | 上下文隔离 |
@@ -141,6 +149,16 @@
 | `## CHECKPOINT REACHED` | 执行检查点 | 解析 checkpoint 状态，spawn 新 executor 续接剩余步骤 |
 | `## SYNTHESIS COMPLETE` | 调研合并完成 | 将合并摘要传递给后续阶段 |
 | `## SYNTHESIS BLOCKED` | 调研合并受阻 | 向用户报告矛盾点，请求裁决 |
+
+### 轻量工作流 Agent 信号
+
+| 信号 | Agent | 编排器动作 |
+|------|-------|-----------|
+| `## PLANNING COMPLETE` | lite-planner | 展示计划给用户确认，确认后进入 execute |
+| `## EXECUTION COMPLETE` | lite-executor | 展示执行摘要，进入 verify |
+| `## EXECUTION BLOCKED` | lite-executor | 展示阻塞原因，用户决定后重试或跳过 |
+| `## VERIFICATION PASSED` | lite-verifier | 展示验证结果，判定推进（complete 或下一任务） |
+| `## VERIFICATION FAILED` | lite-verifier | 展示失败项，建议开启新迭代 |
 | `## SECURITY AUDIT COMPLETE` | 安全审计完成 | 将安全问题合并到阶段验证结果 |
 | `## INTEGRATION VERIFICATION COMPLETE` | 集成验证完成 | 将集成问题合并到阶段验证结果 |
 | `## CLASSIFICATION COMPLETE` | 文档分类完成 | 将分类结果传给 doc-synthesizer |
