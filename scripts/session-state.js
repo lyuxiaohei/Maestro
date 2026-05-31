@@ -1,4 +1,4 @@
-// maestro-hook-version: 20250529.0
+// maestro-hook-version: 202605.4
 /**
  * session-state.js — Maestro SessionStart hook
  *

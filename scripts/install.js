@@ -687,7 +687,7 @@ function doGithubInstall() {
 // --- Update ---
 
 /**
- * Compare two CalVer version strings (YYYYMMDD.PATCH format).
+ * Compare two CalVer version strings (YYYYMM.PATCH format).
  * Returns: negative if a < b, 0 if equal, positive if a > b.
  */
 function compareVersions(a, b) {

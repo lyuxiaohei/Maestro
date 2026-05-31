@@ -89,7 +89,7 @@ domain 仅用于角色分配，不参与路径构建。阶段目录结构为 `P#
 ### 方式二：CLI 参数指定
 
 ```
-/workflow {slug} --template {name}
+/maestro-workflow {slug} --template {name}
 ```
 
 - `{name}` 为内置模板名（如 `zero-to-one`）时，从 config.json `templates.built_in` 读取

@@ -1,4 +1,4 @@
-// maestro-hook-version: 20250529.0
+// maestro-hook-version: 202605.4
 /**
  * prompt-guard.js — Maestro PreToolUse Write|Edit injection guard hook
  *

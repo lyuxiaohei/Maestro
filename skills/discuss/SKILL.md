@@ -82,7 +82,7 @@ version: "1.1"
 
 - 向用户展示分类决策摘要（表格形式：编号 + 级别 + 内容）
 - 等待用户确认或要求修改
-- 确认后返回，编排器继续进入规划流水线
+- 确认后 STOP。lite 模式输出：`discuss 完成。输入 /maestro-plan {slug} 继续 plan 步骤。`；full 模式输出：`discuss 完成。输入 /maestro-plan {slug} P{N} 继续 plan 步骤。`
 
 ## 输出规范
 

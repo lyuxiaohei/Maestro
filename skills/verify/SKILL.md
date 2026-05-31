@@ -37,18 +37,14 @@ Agent(subagent_type="lite-verifier", prompt="## Task Parameters\n- workflow_slug
 
 ### 4. 处理结果
 
-**`## VERIFICATION PASSED`**：
-- 展示验证摘要
-- 目标达成判定：
-  - single 模式 → 更新 workflow.md status=complete
-  - multi 模式 → 处理下一任务
-
-**`## VERIFICATION FAILED`**：
-- 展示失败项和未覆盖决策
-- 建议开启新迭代
-- 用户确认后更新 workflow.md：iteration+1，step=discuss
+- 将验证结果写入 `{workflow_base}/VERIFICATION.md`
+- 更新 `{workflow_base}/workflow.md`：step=verify（保持当前步骤不变）
+- STOP，输出模式相关提示：
+  - lite 模式：`verify 完成。输入 /maestro-workflow-lite {slug} 查看结果。`
+  - full 模式：`verify 完成。输入 /maestro-workflow {slug} 继续下一阶段。`
 
 ### 5. 用户确认
 
-- 展示验证摘要和判定结果
+- 展示验证摘要
 - 等待用户确认或要求修改
+- 确认后 STOP，不自动推进

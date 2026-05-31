@@ -10,9 +10,9 @@ version: "1.0"
 
 ## 触发条件
 
-- `/workflow {slug}` — 指定或创建工作流（slug 为 kebab-case 标识符）
-- `/workflow` — 列出已有工作流或创建新工作流
-- `/workflow {slug} start P{N}` — 在指定工作流中启动阶段
+- `/maestro-workflow {slug}` — 指定或创建工作流（slug 为 kebab-case 标识符）
+- `/maestro-workflow` — 列出已有工作流或创建新工作流
+- `/maestro-workflow {slug} start P{N}` — 在指定工作流中启动阶段
 - 推进到某个特定阶段、跳过阶段、查看状态
 
 ## 工作流初始化
@@ -26,9 +26,9 @@ version: "1.0"
 
 ## 工作流模板选择
 
-1. `/workflow {slug}` 带 `--template {name}` 时使用指定模板（config.json `templates.built_in` 或 `.planning/templates/{name}.json`）
+1. `/maestro-workflow {slug}` 带 `--template {name}` 时使用指定模板（config.json `templates.built_in` 或 `.planning/templates/{name}.json`）
 2. 无 `--template` 时交互选择：列出内置模板（zero-to-one/lite）+ 自定义模板 +「自定义」选项，默认「从零到一」
-3. 选择 **lite（轻量工作流）** 时，转调 `/workflow-lite {slug}`，进入 discuss→plan→execute→verify 迭代循环，不使用18阶段状态机
+3. 选择 **lite（轻量工作流）** 时，转调 `/maestro-workflow-lite {slug}`，进入 discuss→plan→execute→verify 迭代循环，不使用18阶段状态机
 4. 自定义流程：选岗位 → 系统按 phase-definitions.md role 字段筛选阶段 → 用户确认并保存到 `.planning/templates/{name}.json`
 4. 详细说明见 `references/template-guide.md`
 
@@ -56,7 +56,7 @@ GATE-03 通过后、规划流水线前，对需要讨论的阶段执行讨论：
 1. 检查 phase-definitions.md 中目标阶段的 `discuss_required` 标记
 2. 标记为 true 时，加载 `discuss` Skill（`maestro-discuss`），传入 phase_index、workflow_slug、upstream_outputs
 3. discuss-phase 执行灰色区域识别 → 交互讨论 → 写入 CONTEXT.md（锁定决策 D-01/D-02...）
-4. 决策产出后传入 phase-planner，进入规划流水线
+4. discuss 完成后 STOP，输出：`discuss 完成。输入 /maestro-plan {slug} P{N} 继续 plan 步骤。`
 5. 标记为 false 时，直接进入规划流水线（编排器自动生成基础 CONTEXT.md）
 6. 用户可通过 `/discuss-phase {slug} P{N}` 手动触发任意阶段的讨论
 
@@ -68,7 +68,7 @@ GATE-03 通过后，按以下流水线执行：
 2. planner 返回 `## PLANNING COMPLETE` 后，更新 STATE.md 阶段文档节 PLAN 状态为 WRITTEN，**spawn plan-checker**
 3. checker 返回 `## ISSUES FOUND` 时，将问题清单反馈给 planner 重新规划（最多 2 轮修订）
 4. checker 通过后，根据 phase-definitions.md 的 `role` 字段确定岗位 Agent，spawn 对应岗位 Agent 以 `plan_advisor` 模式审阅计划。返回 CONDITIONAL/FAILED 时反馈给 planner 修订（最多 1 轮），修订后重新 spawn plan-checker
-5. 岗位顾问审阅通过后，进入"阶段完成提交序列"中的 executor 执行流程
+5. 岗位顾问审阅通过后，STOP，输出：`plan 完成。输入 /maestro-execute {slug} P{N} 继续 execute 步骤。`
 
 ## 阶段完成提交序列
 
@@ -76,8 +76,9 @@ GATE-03 通过后，按以下流水线执行：
 2. **GATE-02 自检** — 对照 phase-definitions.md outputs 检查完整性、版本号、STATE.md 非空
 3. 自检 PASS 后调用 **phase-validator Agent**（调度域 Agent，见 `references/agent-contracts.md`）进行独立验证（GATE-05），传入 phase_index、upstream_outputs、phase_dir；validator 写入 `VERIFICATION.md`，更新 STATE.md 阶段文档节 VERIFICATION 状态为 WRITTEN
 4. Agent 返回完成信号（见 `references/agent-contracts.md`），失败时按模型升级协议重试（见 `references/model-profiles.md`）
-4. **GATE-01 人工确认** — 向用户展示输出摘要，等待用户明确回复"确认"或"修改"
-5. 用户确认后更新 workflow.md 的 `phase_index`，推进到下一阶段
+5. GATE-05 通过后，STOP，输出：`verify 完成。输入 /maestro-workflow {slug} 确认阶段结果。`
+6. **GATE-01 人工确认** — 向用户展示输出摘要，等待用户明确回复"确认"或"修改"
+7. 用户确认后更新 workflow.md 的 `phase_index`，STOP，输出：`阶段 N 完成。输入 /maestro-workflow {slug} 启动下一阶段。`
 
 ## 阶段跳过序列
 

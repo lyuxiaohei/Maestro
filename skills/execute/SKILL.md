@@ -40,6 +40,7 @@ Agent(subagent_type="lite-executor", prompt="## Task Parameters\n- workflow_slug
 **`## EXECUTION COMPLETE`**：
 - 展示执行摘要（完成任务数、偏差调整、受影响文件）
 - 更新 `{workflow_base}/workflow.md`：step=verify
+- STOP，输出：`execute 完成。输入 /maestro-verify {slug} 继续 verify 步骤。`
 
 **`## EXECUTION BLOCKED`**：
 - 向用户展示阻塞原因

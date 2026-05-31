@@ -1,4 +1,4 @@
-// maestro-hook-version: 20250529.0
+// maestro-hook-version: 202605.4
 /**
  * read-injection-scanner.js — Maestro PostToolUse Read injection scanner hook
  *

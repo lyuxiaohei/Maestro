@@ -45,5 +45,5 @@ Agent 完成后，读取产出的 PLAN.md，向用户展示摘要：
 ### 5. 用户确认
 
 - 用 AskUserQuestion 等待用户确认或修改
-- 确认后更新 `{workflow_base}/workflow.md`：step=execute
+- 确认后更新 `{workflow_base}/workflow.md`：step=execute，STOP，输出：`plan 完成。输入 /maestro-execute {slug} 继续 execute 步骤。`
 - 用户要求修改时，描述修改要求后重新 spawn Agent

@@ -10,8 +10,8 @@ version: "1.0"
 
 ## 触发条件
 
-- `/workflow-lite {slug}` — 创建或恢复轻量工作流
-- `/workflow-lite` — 列出已有工作流或创建新的
+- `/maestro-workflow-lite {slug}` — 创建或恢复轻量工作流
+- `/maestro-workflow-lite` — 列出已有工作流或创建新的
 - 用户提到"轻量工作流"、"快速迭代"、"lite 模式"
 
 ## 初始化
@@ -19,26 +19,24 @@ version: "1.0"
 1. 读取 `.planning/STATE.md` 获取 `current_milestone`，确定版本基路径 `{version_base}` = `.planning/{current_milestone}/`
 2. 解析 slug。无 slug 时列出 `{version_base}workflows/` 下所有工作流供选择或输入新名称
 3. 检查 `{workflow_base}`（`{version_base}workflows/{slug}/`）是否存在
-4. **已存在**：读取 workflow.md。检测到 `phase_index` 字段（全量工作流）时提示"此工作流使用18阶段模式，请用 /workflow 继续"。检测到 `mode` 字段（轻量工作流）时从中断点恢复
+4. **已存在**：读取 workflow.md。检测到 `phase_index` 字段（全量工作流）时提示"此工作流使用18阶段模式，请用 /maestro-workflow 继续"。检测到 `mode` 字段（轻量工作流）时从中断点恢复
 5. **不存在**：用 AskUserQuestion 交互获取目标描述和工作模式（single/multi），写入 workflow.md（模板见 [lite-state-schema.md](references/lite-state-schema.md)）
-6. 初始化后进入迭代流水线的 discuss 步骤
+6. 初始化后进入 discuss 步骤。discuss 完成后 STOP，不自动推进
 
-## 迭代流水线
+## discuss 步骤
 
-每次迭代按顺序调用 4 个 Skill，完成 discuss→plan→execute→verify 循环。discuss 直接在主会话执行（需要 AskUserQuestion），其余 3 个 Skill 内部 spawn 对应 Agent（无 AskUserQuestion，不会在执行中提问）：
+discuss 直接在主会话执行（需要 AskUserQuestion）。加载 `discuss` Skill，传入 workflow_slug 和 workflow_base。discuss 完成后 STOP，输出：`discuss 完成。输入 /maestro-plan {slug} 继续 plan 步骤。`
 
-| 步骤 | 调度方式 | 内部 Agent | 产出 | 完成后 |
-|------|----------|-----------|------|--------|
-| **discuss** | 直接执行 Skill | — | CONTEXT.md（D-01...） | step → plan |
-| **plan** | 调用 `/maestro-plan` Skill | lite-planner | PLAN.md（T-01...） | step → execute |
-| **execute** | 调用 `/maestro-execute` Skill | lite-executor | 文件变更 | step → verify |
-| **verify** | 调用 `/maestro-verify` Skill | lite-verifier | VERIFICATION.md | 判定 ↓ |
+## 迭代管理
 
-**verify 判定**：目标达成 → single 模式设 status=complete，multi 模式处理下一任务。目标未达 → iteration+1，回到 discuss。
+当用户调用 `/maestro-workflow-lite {slug}` 且 workflow.md 当前 step=verify 时，读取 `{workflow_base}/VERIFICATION.md` 判定结果：
+
+- **PASSED**：single 模式 → 更新 workflow.md status=complete；multi 模式 → 更新 iteration+1、step=discuss
+- **FAILED**：建议用户开启新迭代，用户确认后更新 workflow.md iteration+1、step=discuss
 
 ## 跨会话续接
 
-- `/workflow-lite {slug}` 命中已存在的 active 工作流时，读取当前 iteration 和 step，从断点恢复
+- `/maestro-workflow-lite {slug}` 命中已存在的 active 工作流时，读取当前 iteration 和 step，从断点恢复
 - status 为 complete 时询问"目标已达成，是否开启新迭代？"
 
 ## 引用文件

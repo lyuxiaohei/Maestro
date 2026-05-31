@@ -74,4 +74,4 @@ multi 模式下，verify 通过后检查任务队列：
 
 ## 与全量工作流的区分
 
-workflow.md 包含 `mode` 字段（非 `template` 字段）且无 `phase_index`，据此区分轻量和全量工作流。全量工作流的 workflow skill 检测到 `mode` 字段时应提示用户使用 `/workflow-lite`。
+workflow.md 包含 `mode` 字段（非 `template` 字段）且无 `phase_index`，据此区分轻量和全量工作流。全量工作流的 workflow skill 检测到 `mode` 字段时应提示用户使用 `/maestro-workflow-lite`。
