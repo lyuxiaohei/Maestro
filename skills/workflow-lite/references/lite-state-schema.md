@@ -7,6 +7,8 @@
   workflow.md        — 状态追踪（唯一必需文件）
   CONTEXT.md         — 当前迭代范围和决策（每次迭代覆盖写）
   PLAN.md            — 当前迭代任务计划（每次迭代覆盖写）
+  OUTPUT.md          — 交付物清单（每次迭代覆盖写）
+  SUMMARY.md         — 执行摘要（每次迭代覆盖写）
   VERIFICATION.md    — 当前迭代验证结果（每次迭代覆盖写）
 ```
 

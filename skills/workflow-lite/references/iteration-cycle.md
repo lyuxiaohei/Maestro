@@ -27,14 +27,16 @@
 1. 读取 PLAN.md 的任务列表
 2. 按 T-01、T-02... 顺序逐项执行
 3. 每完成一项在 PLAN.md 中标记 ✅
-4. 全部完成后更新 workflow.md：step=verify
+4. 全部任务完成后生成 OUTPUT.md（交付物清单）和 SUMMARY.md（执行摘要）
+5. 更新 workflow.md：step=verify
 
 ## Verify（验证）
 
 1. 读取 PLAN.md 对照实际变更
-2. 逐项检查：是否完成、是否符合决策约束
-3. 写入 VERIFICATION.md，列出 PASS/FAIL 项
-4. 向用户展示验证摘要
+2. 读取 OUTPUT.md，交叉验证交付物文件存在性（如不存在则记 WARNING）
+3. 逐项检查：是否完成、是否符合决策约束
+4. 写入 VERIFICATION.md，列出 PASS/FAIL 项
+5. 向用户展示验证摘要
 
 **判定结果：**
 - 全部 PASS 且目标已达成 → 更新 workflow.md status=complete（single 模式）或处理下一任务（multi 模式）
@@ -42,4 +44,4 @@
 
 ## 迭代产物的覆盖策略
 
-每次新迭代开始时，CONTEXT.md、PLAN.md、VERIFICATION.md 被覆盖写。如需保留历史，在 workflow.md 的迭代历史表中记录关键信息即可。
+每次新迭代开始时，CONTEXT.md、PLAN.md、OUTPUT.md、SUMMARY.md、VERIFICATION.md 被覆盖写。如需保留历史，在 workflow.md 的迭代历史表中记录关键信息即可。

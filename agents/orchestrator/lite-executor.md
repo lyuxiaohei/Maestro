@@ -70,6 +70,81 @@ tools: "Read, Write, Edit, Bash, Grep, Glob"
 
 如果连续 5 次以上 Read/Grep/Glob 操作没有任何 Edit/Write/Bash 动作，停止搜索，要么开始执行要么返回 BLOCKED。
 
+### 7. 生成执行产出
+
+所有任务执行完成后、返回完成信号前，一次性写入以下两个文件到 `{workflow_base}/`。
+
+#### OUTPUT.md — 交付物清单
+
+```markdown
+---
+iteration: {N}
+status: complete|partial|blocked
+files_created:
+  - {path}
+files_modified:
+  - {path}
+---
+
+## 交付物清单
+（列出每个交付物及其用途）
+
+## 文件变更明细
+| 文件 | 变更类型 | 关联任务 | 说明 |
+|------|----------|----------|------|
+| {path} | 新增/修改 | T-0N | {说明} |
+
+## 任务覆盖表
+| 任务 | 状态 | 产出文件 |
+|------|------|----------|
+| T-01 | 完成 | {files} |
+
+## 偏差说明
+（如有偏差，列出调整原因）
+```
+
+#### SUMMARY.md — 执行摘要
+
+```markdown
+---
+iteration: {N}
+status: complete|blocked
+subsystem: {涉及的子系统或模块描述}
+duration: {执行时长估算}
+key_files:
+  created:
+    - {path}
+  modified:
+    - {path}
+decisions:
+  - {本次执行中确认的实现选择}
+metrics:
+  tasks: {完成任务数}
+  files: {变更文件数}
+---
+
+## 执行摘要
+{一句话总结本次执行完成的工作}
+
+## 变更清单
+- {文件变更的一句话描述}
+
+## 决策执行情况
+- **D-01**: {如何实现} — {结果}
+
+## 偏差
+（如有偏差，列出原因和影响）
+
+## Self-Check
+- [x] 所有 PLAN.md 任务已执行
+- [x] 所有 Locked Decisions 已遵守
+- [x] 无超出范围的变更
+```
+
+#### 覆盖策略
+
+每次迭代覆盖写 OUTPUT.md 和 SUMMARY.md，与 CONTEXT.md、PLAN.md、VERIFICATION.md 一致。历史靠 workflow.md 迭代历史表记录。
+
 ## 完成信号
 
 **成功完成：**
@@ -81,6 +156,10 @@ tools: "Read, Write, Edit, Bash, Grep, Glob"
 - 完成任务数: N
 - 偏差调整: （如有，列出）
 - 受影响文件: （列出修改的文件路径）
+
+### 产出文件
+- OUTPUT.md: 已写入 {workflow_base}/OUTPUT.md
+- SUMMARY.md: 已写入 {workflow_base}/SUMMARY.md
 ```
 
 **阻塞：**

@@ -29,6 +29,7 @@ tools: "Read, Write, Bash, Grep, Glob"
 
 - 读取 `{workflow_base}/PLAN.md`（或 PLAN-01.md... 多计划时）
 - 读取 `{workflow_base}/CONTEXT.md`（决策约束）
+- 读取 `{workflow_base}/OUTPUT.md`（交付物清单，如不存在则记 WARNING，不阻塞）
 - 收集实际变更（`git diff`、文件对比）
 
 ### 2. 逐项验证
@@ -43,7 +44,16 @@ tools: "Read, Write, Bash, Grep, Glob"
 
 每项判定 **PASS** / **FAIL** / **PARTIAL**。
 
-### 3. 决策覆盖审计
+### 3. 交付物完整性交叉验证
+
+如 OUTPUT.md 存在，对其 `files_created` 和 `files_modified` 列表中的每个文件执行存在性检查：
+
+- 文件实际存在 → PASS
+- 文件不存在 → FAIL（记入问题列表）
+
+如 OUTPUT.md 不存在（旧迭代未生成），记为 WARNING 而非 BLOCKER，不影响总体结论。
+
+### 4. 决策覆盖审计
 
 对照 CONTEXT.md 三级决策检查覆盖情况：
 
@@ -53,14 +63,14 @@ tools: "Read, Write, Bash, Grep, Glob"
 
 **未覆盖的 Locked Decision → 自动 FAIL**。
 
-### 4. 反模式扫描
+### 5. 反模式扫描
 
 检查执行产出的代码中是否存在：
 - TBD / FIXME / XXX → BLOCKER
 - TODO / HACK / PLACEHOLDER → WARNING
 - 空实现、硬编码空数据、console.log-only 实现
 
-### 5. 写入 VERIFICATION.md
+### 6. 写入 VERIFICATION.md
 
 写入 `{workflow_base}/VERIFICATION.md`，包含：
 
@@ -69,6 +79,11 @@ tools: "Read, Write, Bash, Grep, Glob"
 | 任务 | 验证项 | 结果 |
 |------|--------|------|
 | T-01 | [验收标准] | PASS/FAIL/PARTIAL |
+
+## 交付物完整性
+| 文件路径 | 状态 | 说明 |
+|----------|------|------|
+| {OUTPUT.md 中的文件} | EXISTS/MISSING | {说明} |
 
 ## 决策覆盖
 | 决策 | 覆盖状态 | 说明 |
