@@ -1,12 +1,12 @@
 # Maestro
 
-18 阶段产研全流程 AI 指挥家 — 从需求调研到部署上线，21 个 Skill + 20 个 Agent 协同编排。
+18 阶段产研全流程 AI 指挥家 — 从需求调研到部署上线，27 个 Skill + 23 个 Agent 协同编排。
 
 ## 概览
 
 Maestro 是一个 Claude Code 插件，将完整的产研工作流（需求调研 → 部署上线）自动化。纯 Markdown Skills + Agent 定义，零运行时依赖。
 
-**核心隐喻**：Maestro（指挥家）— 编排 18 阶段产研工作流，调度 20 个专业 Agent，协调 21 个领域 Skill，如同指挥家统领整个交响乐团。
+**核心隐喻**：Maestro（指挥家）— 编排 18 阶段产研工作流，调度 23 个 Agent，协调 27 个 Skill，如同指挥家统领整个交响乐团。
 
 ![Maestro 18 阶段全流程](docs/flows/maestro-18-phases.png)
 
@@ -90,7 +90,7 @@ node scripts/install.js
 | P17 | 验收测试 | acceptance-testing |
 | P18 | 部署上线 | deployment |
 
-## 20 个 Agent
+## 23 个 Agent
 
 | Agent | 域 | 模型 | 职责 |
 |-------|-----|------|------|
@@ -103,6 +103,9 @@ node scripts/install.js
 | doc-synthesizer | 调度 | sonnet | 多文档合并、冲突检测 |
 | doc-writer | 调度 | sonnet | 按模板生成/更新项目文档 |
 | doc-verifier | 调度 | sonnet | 校验文档与代码库一致性 |
+| lite-planner | 轻量 | sonnet | 轻量工作流规划 |
+| lite-executor | 轻量 | sonnet | 轻量工作流执行 |
+| lite-verifier | 轻量 | sonnet | 轻量工作流验证 |
 | domain-researcher | 产品 | sonnet | 调研项目领域背景 |
 | competitive-researcher | 产品 | sonnet | Web 搜索竞品信息 |
 | requirement-analyst | 产品 | sonnet | 结构化需求分析 |
@@ -139,10 +142,15 @@ node scripts/install.js
 maestro/
 ├── .claude-plugin/
 │   └── plugin.json                 # 插件清单
-├── skills/                         # 22 个 Skill（21 领域 + 1 编排器）
+├── skills/                         # 27 个 Skill（21 领域 + 1 编排器 + 1 轻量编排器 + 4 轻量步骤）
 │   ├── workflow/            #   中央编排器
 │   │   ├── SKILL.md
-│   │   └── references/             #   5 个参考文件
+│   │   └── references/             #   参考文件
+│   ├── workflow-lite/               #   轻量编排器（discuss→plan→execute→verify）
+│   ├── discuss/                     #   灰色区域识别 + 交互决策
+│   ├── plan/                        #   任务分解和计划制定
+│   ├── execute/                     #   按计划逐项实施
+│   ├── verify/                      #   对照计划检查结果
 │   ├── diagram-design/             #   流程图/架构图（14 种图表）
 │   ├── logic-list-spec/            #   业务逻辑清单（双模式）
 │   ├── prototype-design/           #   原型 HTML（双模式 + 双规范）
@@ -165,11 +173,11 @@ maestro/
 │   ├── acceptance-testing/         #   验收测试
 │   └── deployment/                 #   部署上线
 ├── agents/                         # Agent 定义（按域分类）
-│   ├── orchestrator/               #   调度域：executor, validator, planner, checker, synthesizer, doc×4 (9)
-│   └── domain/                     #   项目域：researcher, reviewer, engineer, security, integration 等 11 个
+│   ├── orchestrator/               #   编排域：executor, validator, planner, checker, synthesizer, doc×4, lite×3 (12)
+│   └── domain/                     #   领域域：researcher, reviewer, engineer, security, integration 等 11 个
 ├── hooks/
-│   └── hooks.json                  # 6 个 Hook 注册
-├── scripts/                        # Hook 脚本（6 个）
+│   └── hooks.json                  # 7 个 Hook 注册
+├── scripts/                        # Hook 脚本（7 个）
 └── docs/                           # README 引用图片
 ```
 
@@ -195,11 +203,12 @@ maestro/
 
 ## Hook 系统
 
-Maestro 内置 6 个 Claude Code Hook，覆盖安全防护、上下文监控、提交校验、阶段边界检测和会话状态注入。所有 Hook 使用纯 Node.js 脚本，零外部依赖。
+Maestro 内置 7 个 Claude Code Hook，覆盖安全防护、工作流保护、上下文监控、提交校验、阶段边界检测和会话状态注入。所有 Hook 使用纯 Node.js 脚本，零外部依赖。
 
 | Hook | 触发事件 | 功能 | 默认状态 |
 |------|---------|------|---------|
 | prompt-guard | PreToolUse Write\|Edit | 注入防护（扫描 .planning/ 写入内容） | 默认启用 |
+| workflow-guard | PreToolUse Write\|Edit | 工作流外编辑提醒 | 默认启用 |
 | read-injection-scanner | PostToolUse Read | 读取内容注入扫描 | 默认启用 |
 | validate-commit | PreToolUse Bash | Conventional Commits 格式校验 | 默认关闭（opt-in） |
 | phase-boundary | PostToolUse Write\|Edit | 阶段状态文件变更检测 | 默认启用 |

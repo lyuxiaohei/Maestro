@@ -16,8 +16,8 @@ version: "1.0"
 
 ## 初始化
 
-1. 读取 `.planning/STATE.md` 获取 `current_milestone`，确定版本基路径 `{version_base}` = `.planning/{current_milestone}/`
-2. 解析 slug。无 slug 时列出 `{version_base}workflows/` 下所有工作流供选择或输入新名称
+1. 确定工作流基路径。若 `.planning/STATE.md` 存在，读取 `current_milestone` 确定版本基路径 `{version_base}` = `.planning/{current_milestone}/`；若不存在，直接以 `.planning/` 为基路径，扫描其下所有子目录查找 `workflows/` 目录
+2. 解析 slug。无 slug 时在 `{version_base}workflows/` 下列出所有工作流供选择或输入新名称。若 `workflows/` 目录不存在，直接创建
 3. 检查 `{workflow_base}`（`{version_base}workflows/{slug}/`）是否存在
 4. **已存在**：读取 workflow.md。检测到 `phase_index` 字段（全量工作流）时提示"此工作流使用18阶段模式，请用 /maestro-workflow 继续"。检测到 `mode` 字段（轻量工作流）时从中断点恢复
 5. **不存在**：用 AskUserQuestion 交互获取目标描述和工作模式（single/multi），写入 workflow.md（模板见 [lite-state-schema.md](references/lite-state-schema.md)）
