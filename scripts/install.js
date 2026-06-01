@@ -34,6 +34,7 @@ const AGENT_PREFIX = 'maestro-';
 const HOOK_DEFS = [
   ['SessionStart', null, 'session-state.js', null],
   ['PreToolUse', 'Write|Edit', 'prompt-guard.js', 5],
+  ['PreToolUse', 'Write|Edit', 'workflow-guard.js', 5],
   ['PreToolUse', 'Bash', 'validate-commit.js', 5],
   ['PostToolUse', 'Read', 'read-injection-scanner.js', 5],
   ['PostToolUse', 'Write|Edit', 'phase-boundary.js', 5],
@@ -150,7 +151,7 @@ function removeMaestroHooks(settings) {
         if (!h.command || typeof h.command !== 'string') return true;
         const cmd = h.command.toLowerCase();
         return !(cmd.includes('maestro-private') || cmd.includes('/maestro/') ||
-                 /maestro-(prompt-guard|session-state|read-injection|validate-commit|phase-boundary|context-monitor)/.test(cmd));
+                 /maestro-(prompt-guard|session-state|read-injection|validate-commit|phase-boundary|context-monitor|workflow-guard)/.test(cmd));
       });
 
       if (entry.hooks.length < before) modified = true;

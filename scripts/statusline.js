@@ -18,32 +18,9 @@
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
+const { readCurrentMilestone } = require('./lib/workflow-parser');
 
 // --- Workflow state reader ---------------------------------------------------
-
-/**
- * Read current_milestone from STATE.md.
- */
-function readCurrentMilestone(planningDir) {
-  try {
-    const statePath = path.join(planningDir, 'STATE.md');
-    const raw = fs.readFileSync(statePath, 'utf8');
-    const match = raw.match(/^current_milestone:\s*["']?(.+?)["']?\s*$/m);
-    if (match) return match[1].trim();
-  } catch { /* no STATE.md */ }
-
-  // Fallback: find newest version directory
-  try {
-    const entries = fs.readdirSync(planningDir, { withFileTypes: true });
-    const versionDirs = entries
-      .filter(e => e.isDirectory() && /^\d{6}\.\d+$/.test(e.name))
-      .sort()
-      .reverse();
-    return versionDirs.length > 0 ? versionDirs[0].name : null;
-  } catch {
-    return null;
-  }
-}
 
 /**
  * Walk up from dir looking for .planning/ and find active workflow.
@@ -103,18 +80,16 @@ function scanWorkflowsDir(workflowsDir) {
 function parseWorkflowMd(content) {
   const state = {};
 
-  // Check for lite mode
-  const modeMatch = content.match(/^mode:\s*(.+)/m);
+  // Check for lite mode — match both `- **mode**: single` and `mode: single`
+  const modeMatch = content.match(/(?:^mode:\s*|^\- \*\*mode\*\*:\s*)(.+?)$/m);
   if (modeMatch) {
     state.mode = 'lite';
-    const statusMatch = content.match(/^status:\s*(.+)/m);
+    const statusMatch = content.match(/(?:^status:\s*|^\- \*\*status\*\*:\s*)(.+?)$/m);
     state.workflow_status = statusMatch ? statusMatch[1].trim() : 'unknown';
-    const iterMatch = content.match(/^iteration:\s*(\d+)/m);
+    const iterMatch = content.match(/(?:^iteration:\s*|^\- \*\*iteration\*\*:\s*)(\d+)/m);
     state.iteration = iterMatch ? iterMatch[1] : '0';
-    const stepMatch = content.match(/^step:\s*(.+)/m);
+    const stepMatch = content.match(/(?:^step:\s*|^\- \*\*step\*\*:\s*)(.+?)$/m);
     state.step = stepMatch ? stepMatch[1].trim() : '';
-    const goalMatch = content.match(/^goal:\s*(.+)/m);
-    state.goal = goalMatch ? goalMatch[1].trim().substring(0, 30) : '';
     return state;
   }
 
@@ -163,20 +138,22 @@ function parseWorkflowMd(content) {
 function formatMaestroState(state) {
   if (!state) return '';
 
+  const slugSuffix = state.slug ? ` | ${state.slug}` : '';
+
   if (state.mode === 'lite') {
     const icon = state.workflow_status === 'complete' ? 'done' : `it${state.iteration}`;
     const stepLabel = { discuss: 'discuss', plan: 'plan', execute: 'exec', verify: 'verify' }[state.step] || state.step;
-    if (state.workflow_status === 'complete') return `lite:${icon}`;
-    return `lite:${icon} ${stepLabel}${state.goal ? ' ' + state.goal : ''}`;
+    if (state.workflow_status === 'complete') return `lite:${icon}${slugSuffix}`;
+    return `lite:${icon} ${stepLabel}${slugSuffix}`;
   }
 
   // Full workflow
-  if (state.phase_index === 0) return `workflow:${state.workflow_status}`;
+  if (state.phase_index === 0) return `workflow:${state.workflow_status}${slugSuffix}`;
   const pi = String(state.phase_index).padStart(2, '0');
   const statusIcon = state.current_phase_status === 'IN_PROGRESS' ? '...' :
                      state.current_phase_status === 'BLOCKED' ? '!!' :
                      state.current_phase_status === 'COMPLETE' ? 'ok' : '';
-  return `P${pi}${state.current_phase_name ? ' ' + state.current_phase_name : ''} ${statusIcon}`;
+  return `P${pi}${state.current_phase_name ? ' ' + state.current_phase_name : ''} ${statusIcon}${slugSuffix}`;
 }
 
 /**
@@ -229,5 +206,7 @@ function runStatusline() {
     process.exit(0);
   });
 }
+
+module.exports = { parseWorkflowMd, formatMaestroState, composeStatusline, formatContext };
 
 if (require.main === module) runStatusline();
