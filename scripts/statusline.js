@@ -1,4 +1,4 @@
-// maestro-hook-version: 202605.4
+// maestro-hook-version: 202606.0
 /**
  * statusline.js — Maestro statusline for Claude Code
  *

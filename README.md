@@ -176,8 +176,8 @@ maestro/
 │   ├── orchestrator/               #   编排域：executor, validator, planner, checker, synthesizer, doc×4, lite×3 (12)
 │   └── domain/                     #   领域域：researcher, reviewer, engineer, security, integration 等 11 个
 ├── hooks/
-│   └── hooks.json                  # 7 个 Hook 注册
-├── scripts/                        # Hook 脚本（7 个）
+│   └── hooks.json                  # 8 个 Hook 注册
+├── scripts/                        # Hook 脚本（8 个）
 └── docs/                           # README 引用图片
 ```
 
@@ -203,7 +203,7 @@ maestro/
 
 ## Hook 系统
 
-Maestro 内置 7 个 Claude Code Hook，覆盖安全防护、工作流保护、上下文监控、提交校验、阶段边界检测和会话状态注入。所有 Hook 使用纯 Node.js 脚本，零外部依赖。
+Maestro 内置 8 个 Claude Code Hook，覆盖安全防护、工作流保护、上下文监控、提交校验、阶段边界检测、会话状态注入和代码索引增量更新。所有 Hook 使用纯 Node.js 脚本，零外部依赖。
 
 | Hook | 触发事件 | 功能 | 默认状态 |
 |------|---------|------|---------|
@@ -214,6 +214,7 @@ Maestro 内置 7 个 Claude Code Hook，覆盖安全防护、工作流保护、�
 | phase-boundary | PostToolUse Write\|Edit | 阶段状态文件变更检测 | 默认启用 |
 | context-monitor | PostToolUse Write\|Edit | 上下文写入量监控 | 默认启用 |
 | session-state | SessionStart | 会话启动时注入工作流状态 | 始终启用 |
+| code-graph-update | PostToolUse Write\|Edit | 代码索引增量更新 | 默认启用 |
 
 配置示例（`.planning/config.json` hooks 节）：
 

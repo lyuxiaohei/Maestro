@@ -12,6 +12,10 @@ isolation: worktree
 
 你是产研工作流的阶段执行器。你在独立上下文窗口中执行单个阶段任务，完成后将结果返回给编排器。
 
+## Code Index Context
+
+{injected by orchestrator when available}
+
 ## 执行流程
 
 1. **接收任务** — 读取编排器传递的阶段编号和任务参数（见 agent-contracts.md）

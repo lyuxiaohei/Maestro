@@ -41,6 +41,7 @@ version: "1.0"
 
 1. 读取 `{workflow_base}/workflow.md` 获取当前 `phase_index` 和 `workflow_status`
 2. 读取目标阶段 `{phase_dir}/STATE.md` 的状态字段（不读完整输出体）
+2.5. **幂等保护** — 如果目标阶段 status 已为 IN_PROGRESS：检查 `.session.json` 是否为当前会话，同一会话则续接，不同会话则警告并发冲突；status 已为 COMPLETE/SKIPPED 则跳过启动，提示"阶段已完成，如需重做请先回退版本"
 3. 读取 `references/phase-definitions.md` 获取阶段定义、domain 和对应 Skill
 4. **GATE-03 防跳步检查**（优先执行）— 遍历当前工作流活跃阶段列表中 phase_index 小于目标阶段的所有 STATE.md，确认 status 为 COMPLETE 或 SKIPPED（仅检查模板范围内的阶段，详见 `references/gate-rules.md`）
 5. GATE-03 发现未完成阶段时，询问用户是否跳过（详见 `references/gate-rules.md` 跳过处理流程）
@@ -59,6 +60,10 @@ GATE-03 通过后、规划流水线前，对需要讨论的阶段执行讨论：
 4. discuss 完成后 STOP，输出：`discuss 完成。输入 /maestro-plan {slug} P{N} 继续 plan 步骤。`
 5. 标记为 false 时，直接进入规划流水线（编排器自动生成基础 CONTEXT.md）
 6. 用户可通过 `/discuss-phase {slug} P{N}` 手动触发任意阶段的讨论
+
+## 代码索引上下文注入（P14-P18）
+
+P14-P18 阶段 spawn phase-executor 前，检查 `.planning/code-index.json` 是否存在。若存在，运行 `node scripts/code-graph-scan.js . --context --dirs {relevant_dirs}`（无 --dirs 则不过滤），将 stdout 输出注入 phase-executor prompt 末尾的 `## Code Index Context` 区块。索引可选——不存在时一切照常运行。
 
 ## 阶段规划流水线
 
@@ -147,6 +152,13 @@ GATE-05 通过后可选运行 doc-classifier → doc-synthesizer → doc-writer 
 - 首次激活时读取 workflow.md，如 workflow_status 为 IN_PROGRESS 或 BLOCKED，从中断点恢复，报告中断位置待确认后续接
 - 用户指定阶段编号时，先执行 GATE-03 检查所有前序阶段（全部 COMPLETE/SKIPPED 时正常启动，否则询问跳过）
 - 用户可直接请求跳过特定阶段，按"阶段跳过序列"处理
+
+## 多会话安全规则
+
+- 编排器启动前读取 `.session.json` 检查会话冲突（不同 slug 之间完全隔离，无需冲突检测）
+- 不同会话操作同一 workflow 的同一阶段时，通过 advisory 警告提醒（不阻断，CLD-03）
+- 写入 workflow.md 和 STATE.md 时使用 file-lock.js 保护（CLD-01）
+- 会话续接时执行 Safe Resume Gate 检查状态一致性
 
 ## 引用文件
 

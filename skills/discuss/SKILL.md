@@ -89,6 +89,9 @@ version: "1.1"
 | 产物 | 路径 | 说明 |
 |------|------|------|
 | CONTEXT.md | `{workflow_base}P##-{phase-slug}/CONTEXT.md` 或 `{workflow_base}/CONTEXT.md` | 三级分类决策上下文 |
+| RESEARCH.md | `{workflow_base}/RESEARCH.md` | 调研报告：领域调研、竞品分析等（仅涉及调研时生成） |
+
+**调研文件规则**：调研文档直接写入 `{workflow_base}/RESEARCH.md`（与 CONTEXT.md 同目录），禁止新建 `research/`、`调研/` 等子目录存放调研文件。
 
 ## 引用文件
 

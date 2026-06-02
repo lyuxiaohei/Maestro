@@ -1,4 +1,4 @@
-// maestro-hook-version: 202605.4
+// maestro-hook-version: 202606.0
 /**
  * workflow-guard.js — Maestro PreToolUse Write|Edit workflow awareness hook
  *

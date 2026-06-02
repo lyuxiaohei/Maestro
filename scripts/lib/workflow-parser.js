@@ -1,4 +1,4 @@
-// maestro-hook-version: 202605.4
+// maestro-hook-version: 202606.0
 /**
  * workflow-parser.js — Maestro shared workflow state parser
  *
@@ -316,4 +316,297 @@ function scanLegacyDomainDirs(phasesDir, completed) {
   }
 }
 
-module.exports = { readCurrentMilestone, readWorkflowState, readMilestone, scanCompletedPhases, discoverWorkflows, resolveWorkflowDir };
+/**
+ * Read a single phase STATE.md status field.
+ * @param {string} phaseDir - absolute path to phase directory (e.g. P01-requirement-research/)
+ * @returns {{ phaseIndex: string, status: string, version: string, updatedAt: string }|null}
+ */
+function readPhaseStatus(phaseDir) {
+  try {
+    const statePath = path.join(phaseDir, 'STATE.md');
+    const raw = fs.readFileSync(statePath, 'utf8');
+
+    const indexMatch = raw.match(/\*\*phase_index\*\*:\s*(\d+)/);
+    const statusMatch = raw.match(/\*\*status\*\*:\s*(\S+)/);
+    const versionMatch = raw.match(/\*\*version\*\*:\s*(\S+)/);
+    const updatedMatch = raw.match(/\*\*(?:updated_at|completed_at)\*\*:\s*(.+)/);
+
+    if (!indexMatch || !statusMatch) return null;
+
+    return {
+      phaseIndex: indexMatch[1],
+      status: statusMatch[1],
+      version: versionMatch ? versionMatch[1] : null,
+      updatedAt: updatedMatch ? updatedMatch[1].trim() : null,
+    };
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Scan all phases in a workflow directory and return status for each.
+ * @param {string} wfDir - absolute path to workflow directory
+ * @returns {Array<{ phaseDir: string, phasePrefix: string, status: object|null }>}
+ */
+function scanAllPhaseStatuses(wfDir) {
+  const results = [];
+  try {
+    const entries = fs.readdirSync(wfDir, { withFileTypes: true });
+    for (const entry of entries) {
+      if (!entry.isDirectory()) continue;
+      const prefixMatch = entry.name.match(/^(P\d+)-/);
+      if (!prefixMatch) continue;
+      const phaseDir = path.join(wfDir, entry.name);
+      results.push({
+        phaseDir,
+        phasePrefix: prefixMatch[1],
+        status: readPhaseStatus(phaseDir),
+      });
+    }
+  } catch { /* dir missing */ }
+  return results;
+}
+
+/**
+ * Calculate progress for a workflow by scanning all STATE.md files.
+ * @param {string} planningDir - absolute path to .planning/ directory
+ * @param {string} slug - workflow slug
+ * @returns {{ total: number, completed: string[], inProgress: string[], skipped: string[], notStarted: string[], completionRate: string }}
+ */
+function calculateProgress(planningDir, slug) {
+  const empty = { total: 0, completed: [], inProgress: [], skipped: [], notStarted: [], completionRate: '0%' };
+
+  const wfDir = resolveWorkflowDir(planningDir, slug);
+
+  // Read workflow.md to get total phase count
+  let total = 0;
+  try {
+    const wfPath = path.join(wfDir, 'workflow.md');
+    const raw = fs.readFileSync(wfPath, 'utf8');
+    const lines = raw.split('\n');
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (/^\|\s*\d+\s*\|/.test(trimmed)) {
+        total++;
+      }
+    }
+  } catch {
+    // If workflow.md missing, count phase directories instead
+    const phaseStatuses = scanAllPhaseStatuses(wfDir);
+    total = phaseStatuses.length;
+  }
+
+  if (total === 0) return empty;
+
+  const completed = [];
+  const inProgress = [];
+  const skipped = [];
+  const notStarted = [];
+
+  const phaseStatuses = scanAllPhaseStatuses(wfDir);
+  for (const { phasePrefix, status } of phaseStatuses) {
+    if (!status) {
+      notStarted.push(phasePrefix);
+      continue;
+    }
+    switch (status.status) {
+      case 'COMPLETE':
+        completed.push(phasePrefix);
+        break;
+      case 'IN_PROGRESS':
+        inProgress.push(phasePrefix);
+        break;
+      case 'SKIPPED':
+        skipped.push(phasePrefix);
+        break;
+      case 'BLOCKED':
+        inProgress.push(phasePrefix); // treat blocked as in-progress
+        break;
+      default:
+        notStarted.push(phasePrefix);
+        break;
+    }
+  }
+
+  // Pad notStarted if total exceeds discovered phases
+  const discovered = completed.length + inProgress.length + skipped.length + notStarted.length;
+  if (total > discovered) {
+    for (let i = discovered; i < total; i++) {
+      notStarted.push('P' + String(i + 1).padStart(2, '0'));
+    }
+  }
+
+  const rate = total > 0 ? Math.round((completed.length / total) * 100) : 0;
+  return {
+    total,
+    completed,
+    inProgress,
+    skipped,
+    notStarted,
+    completionRate: rate + '%',
+  };
+}
+
+/**
+ * Read session lock from a workflow directory.
+ * @param {string} planningDir - absolute path to .planning/ directory
+ * @param {string} slug - workflow slug
+ * @returns {object|null} session lock data or null
+ */
+function readSessionLock(planningDir, slug) {
+  try {
+    const wfDir = resolveWorkflowDir(planningDir, slug);
+    const lockPath = path.join(wfDir, '.session.json');
+    const raw = fs.readFileSync(lockPath, 'utf8');
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Write session lock to a workflow directory.
+ * @param {string} planningDir - absolute path to .planning/ directory
+ * @param {string} slug - workflow slug
+ * @param {object} data - session lock data to write
+ * @returns {boolean} true if written successfully
+ */
+function writeSessionLock(planningDir, slug, data) {
+  try {
+    const wfDir = resolveWorkflowDir(planningDir, slug);
+    // Ensure directory exists
+    fs.mkdirSync(wfDir, { recursive: true });
+    const lockPath = path.join(wfDir, '.session.json');
+    // Use withLock if available, otherwise direct write
+    try {
+      const { withLock } = require('./file-lock');
+      withLock(lockPath + '.wlock', () => {
+        fs.writeFileSync(lockPath, JSON.stringify(data, null, 2) + '\n');
+      });
+    } catch {
+      // Fallback: direct write (file-lock not available)
+      fs.writeFileSync(lockPath, JSON.stringify(data, null, 2) + '\n');
+    }
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Safe Resume Check — compare git log with STATE.md/OUTPUT.md for inconsistencies.
+ * @param {string} workflowBase - absolute path to workflow base directory
+ * @returns {{ status: string, issues: string[], suggestion: string }}
+ */
+function safeResumeCheck(workflowBase) {
+  const { execSync } = require('child_process');
+  const issues = [];
+
+  // 1. Get recent git commits affecting .planning/
+  let recentCommits = [];
+  try {
+    const planningDir = path.resolve(workflowBase, '..', '..');
+    const output = execSync(
+      `git log --oneline -20 -- ".planning/"`,
+      { cwd: planningDir, encoding: 'utf8', timeout: 5000 }
+    ).trim();
+    if (output) {
+      recentCommits = output.split('\n').filter(Boolean);
+    }
+  } catch {
+    // Git not available or no commits — not an error
+  }
+
+  // 2. Scan all phase directories for STATE.md and OUTPUT.md
+  const phaseEntries = [];
+  try {
+    const entries = fs.readdirSync(workflowBase, { withFileTypes: true });
+    for (const entry of entries) {
+      if (!entry.isDirectory()) continue;
+      const prefixMatch = entry.name.match(/^P(\d+)-/);
+      if (!prefixMatch) continue;
+
+      const phaseDir = path.join(workflowBase, entry.name);
+      const phaseIndex = prefixMatch[1];
+      let stateData = null;
+      let outputExists = false;
+      let outputMtime = 0;
+      let stateMtime = 0;
+
+      try {
+        const statePath = path.join(phaseDir, 'STATE.md');
+        const raw = fs.readFileSync(statePath, 'utf8');
+        stateMtime = fs.statSync(statePath).mtimeMs;
+
+        const statusMatch = raw.match(/\*\*status\*\*:\s*(\S+)/);
+        const completedMatch = raw.match(/\*\*completed_at\*\*:\s*(.+)/);
+        stateData = {
+          status: statusMatch ? statusMatch[1] : null,
+          completedAt: completedMatch ? completedMatch[1].trim() : null,
+        };
+      } catch { /* STATE.md missing */ }
+
+      try {
+        const outputPath = path.join(phaseDir, 'OUTPUT.md');
+        const stat = fs.statSync(outputPath);
+        outputExists = true;
+        outputMtime = stat.mtimeMs;
+      } catch { /* OUTPUT.md missing */ }
+
+      phaseEntries.push({ phaseIndex, phaseDir, stateData, outputExists, outputMtime, stateMtime });
+    }
+  } catch { /* workflow dir missing */ }
+
+  // 3. Check for inconsistencies
+  for (const entry of phaseEntries) {
+    if (!entry.stateData) continue;
+
+    // STATE.md marked COMPLETE but OUTPUT.md does not exist
+    if (entry.stateData.status === 'COMPLETE' && !entry.outputExists) {
+      issues.push(`P${entry.phaseIndex}: STATE.md marked COMPLETE but OUTPUT.md is missing`);
+    }
+
+    // OUTPUT.md exists and is newer than STATE.md
+    if (entry.outputExists && entry.outputMtime > entry.stateMtime && entry.stateData.status !== 'COMPLETE') {
+      issues.push(`P${entry.phaseIndex}: OUTPUT.md is newer than STATE.md (possible incomplete state update)`);
+    }
+  }
+
+  // 4. Check for stale_state: commits touching phase files but STATE.md not updated
+  if (recentCommits.length > 0) {
+    for (const entry of phaseEntries) {
+      if (!entry.stateData) continue;
+      if (entry.stateData.status === 'IN_PROGRESS' || entry.stateData.status === 'BLOCKED') {
+        // Phase was in progress — check if there have been recent commits to it
+        try {
+          const planningDir = path.resolve(workflowBase, '..', '..');
+          const phaseDirRelative = path.relative(planningDir, entry.phaseDir).replace(/\\/g, '/');
+          const recentPhaseCommits = execSync(
+            `git log --oneline -5 -- "${phaseDirRelative}/"`,
+            { cwd: planningDir, encoding: 'utf8', timeout: 5000 }
+          ).trim();
+          if (recentPhaseCommits && entry.stateData.status === 'IN_PROGRESS') {
+            // There are commits but state is still IN_PROGRESS — might be ok (still working)
+          }
+        } catch { /* git check failed, skip */ }
+      }
+    }
+  }
+
+  if (issues.length === 0) {
+    return { status: 'consistent', issues: [], suggestion: '' };
+  }
+
+  const suggestion = issues.some(i => i.includes('missing'))
+    ? '检查缺失的 OUTPUT.md 文件，确认阶段是否真正完成。如阶段未完成，将 STATE.md status 改回 IN_PROGRESS。'
+    : '检查 STATE.md 与 OUTPUT.md 的时间戳差异，确认最新状态。';
+
+  return { status: 'inconsistent', issues, suggestion };
+}
+
+module.exports = {
+  readCurrentMilestone, readWorkflowState, readMilestone, scanCompletedPhases,
+  discoverWorkflows, resolveWorkflowDir, readPhaseStatus, calculateProgress,
+  readSessionLock, writeSessionLock, safeResumeCheck,
+};

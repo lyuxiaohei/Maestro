@@ -1,9 +1,12 @@
-// maestro-hook-version: 202605.4
+// maestro-hook-version: 202606.0
 /**
  * session-state.js — Maestro SessionStart hook
  *
  * Reads workflow state and injects it as additionalContext when a session starts.
  * Also calls statusline.js via execFile to update the bridge file.
+ *
+ * Session identity: injects CLAUDE_SESSION_ID and creates .session.json lock files.
+ * Safe Resume Gate: checks STATE.md/OUTPUT.md consistency on resume.
  *
  * Hook protocol: reads JSON from stdin, writes JSON to stdout.
  * stdin timeout: 5 seconds.
@@ -19,6 +22,7 @@ const fs = require('fs');
 const { execFile } = require('child_process');
 
 const STDIN_TIMEOUT_MS = 5000;
+const SESSION_LOCK_TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes
 
 function readStdin() {
   return new Promise((resolve) => {
@@ -37,6 +41,90 @@ function readStdin() {
 
 function getPlanningDir() {
   return process.env.PLANNING_DIR || path.join(__dirname, '..', '.planning');
+}
+
+/**
+ * Get TTY identity string for session identification.
+ * @returns {string}
+ */
+function getTtyIdentity() {
+  try {
+    const term = process.env.TERM || 'unknown';
+    const cols = process.stdout.columns || 0;
+    const rows = process.stdout.rows || 0;
+    return `${term}-${cols}x${rows}`;
+  } catch {
+    return 'unknown';
+  }
+}
+
+/**
+ * Get session identifier with source priority (CLD-02).
+ * Priority: CLAUDE_SESSION_ID env var > TTY identity
+ * @returns {{ sessionId: string, source: string }}
+ */
+function getSessionId() {
+  // Priority 1: CLAUDE_SESSION_ID environment variable
+  if (process.env.CLAUDE_SESSION_ID) {
+    return { sessionId: process.env.CLAUDE_SESSION_ID, source: 'env' };
+  }
+  // Priority 2: TTY identity
+  return { sessionId: getTtyIdentity(), source: 'tty' };
+}
+
+/**
+ * Write session lock file for a workflow.
+ * Uses file-lock.js withLock for safe concurrent writes.
+ * @param {string} planningDir
+ * @param {string} slug
+ * @param {string} phaseIndex
+ * @param {{ sessionId: string, source: string }} session
+ */
+function writeSessionLock(planningDir, slug, phaseIndex, session) {
+  try {
+    const { writeSessionLock: wpWriteLock } = require('./lib/workflow-parser');
+    wpWriteLock(planningDir, slug, {
+      sessionId: session.sessionId,
+      source: session.source,
+      phaseIndex: phaseIndex || null,
+      lockedAt: new Date().toISOString(),
+      pid: process.pid,
+      tty: getTtyIdentity(),
+    });
+  } catch { /* advisory — ignore errors */ }
+}
+
+/**
+ * Check for session conflict on a workflow.
+ * @param {string} planningDir
+ * @param {string} slug
+ * @param {{ sessionId: string, source: string }} currentSession
+ * @returns {{ conflict: boolean, existingSession: object|null, message: string }}
+ */
+function checkSessionConflict(planningDir, slug, currentSession) {
+  try {
+    const { readSessionLock } = require('./lib/workflow-parser');
+    const existing = readSessionLock(planningDir, slug);
+    if (!existing) return { conflict: false, existingSession: null, message: '' };
+
+    // Same session — no conflict
+    if (existing.sessionId === currentSession.sessionId) {
+      return { conflict: false, existingSession: existing, message: '' };
+    }
+
+    // Check if lock is expired (30 minutes)
+    const lockedAt = new Date(existing.lockedAt).getTime();
+    const now = Date.now();
+    if (now - lockedAt > SESSION_LOCK_TIMEOUT_MS) {
+      return { conflict: false, existingSession: existing, message: '' };
+    }
+
+    // Different active session — conflict detected
+    const message = `[多会话警告] 工作流 [${slug}] 正被另一会话占用 (PID: ${existing.pid}, 锁定时间: ${existing.lockedAt})。请确认是否有其他 Claude Code 实例在操作此工作流。`;
+    return { conflict: true, existingSession: existing, message };
+  } catch {
+    return { conflict: false, existingSession: null, message: '' };
+  }
 }
 
 function updateStatusline(phaseIndex, totalPhases, phaseName, status, completed, slug) {
@@ -69,16 +157,21 @@ async function main() {
   }
 
   // 3. Import workflow parser
-  const { readWorkflowState, readMilestone, scanCompletedPhases } = require('./lib/workflow-parser');
-  const { discoverWorkflows } = require('./lib/workflow-parser');
+  const {
+    readWorkflowState, readMilestone, scanCompletedPhases,
+    discoverWorkflows, safeResumeCheck,
+  } = require('./lib/workflow-parser');
 
-  // 4. Get planning directory
+  // 4. Get session identity
+  const session = getSessionId();
+
+  // 5. Get planning directory
   const planningDir = getPlanningDir();
 
-  // 5. Read workflow state
+  // 6. Read workflow state
   const workflowState = readWorkflowState(planningDir);
 
-  // 6. If workflow.md missing: output fallback (HOOK6-03)
+  // 7. If workflow.md missing: output fallback (HOOK6-03)
   if (!workflowState) {
     const fallback = 'Maestro 会话状态: 未找到工作流 -- 运行 /workflow 初始化';
     const output = JSON.stringify({
@@ -91,13 +184,13 @@ async function main() {
     process.exit(0);
   }
 
-  // 7. Read milestone version
+  // 8. Read milestone version
   const milestone = readMilestone(planningDir);
 
-  // 8. Scan completed phases
+  // 9. Scan completed phases
   const completed = scanCompletedPhases(planningDir);
 
-  // 9. Build pure text summary
+  // 10. Build pure text summary
   const { phaseIndex, phaseName, status, totalPhases, slug } = workflowState;
   const completedStr = completed.length > 0 ? completed.join(', ') : '-';
 
@@ -120,17 +213,56 @@ async function main() {
   }
   summary += ` | 完成: ${completedStr}`;
 
+  // 11. Append session identity
+  summary += ` | 会话: ${session.sessionId.substring(0, 32)} (${session.source})`;
+
+  // 12. Write session lock for active workflow
+  if (slug) {
+    writeSessionLock(planningDir, slug, phaseIndex, session);
+  }
+
+  // 13. Check session conflicts for all active workflows
+  const allSlugs = discoverWorkflows(planningDir);
+  const conflictMessages = [];
+  for (const wfSlug of allSlugs) {
+    const conflict = checkSessionConflict(planningDir, wfSlug, session);
+    if (conflict.conflict) {
+      conflictMessages.push(conflict.message);
+    }
+  }
+
+  // 14. Safe Resume Gate — check consistency when resuming
+  if (slug && (status === 'IN_PROGRESS' || status === 'BLOCKED')) {
+    try {
+      const { resolveWorkflowDir } = require('./lib/workflow-parser');
+      const wfDir = resolveWorkflowDir(planningDir, slug);
+      const resumeCheck = safeResumeCheck(wfDir);
+      if (resumeCheck.status !== 'consistent') {
+        conflictMessages.push(
+          `[Safe Resume Gate] 检测到状态不一致: ${resumeCheck.issues.join('; ')}. 建议: ${resumeCheck.suggestion}`
+        );
+      }
+    } catch { /* advisory — ignore */ }
+  }
+
   // Truncate to 2000 chars
   summary = summary.substring(0, 2000);
 
-  // 10. Call updateStatusline (HOOK6-04)
+  // 15. Build additionalContext with optional warnings
+  let additionalContext = summary;
+  if (conflictMessages.length > 0) {
+    additionalContext += '\n\n' + conflictMessages.join('\n');
+    additionalContext = additionalContext.substring(0, 2000);
+  }
+
+  // 16. Call updateStatusline (HOOK6-04)
   updateStatusline(phaseIndex, totalPhases, phaseName, status, completed, slug || null);
 
-  // 11. Output JSON
+  // 17. Output JSON
   const output = JSON.stringify({
     hookSpecificOutput: {
       hookEventName: 'SessionStart',
-      additionalContext: summary,
+      additionalContext,
     },
   });
   process.stdout.write(output);

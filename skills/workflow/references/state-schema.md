@@ -33,6 +33,29 @@
 
 阶段所属域（domain）信息记录在 STATE.md 元信息中，不参与路径构建。
 
+### 会话锁定文件
+
+`{workflow_base}/.session.json` — 会话锁定信息文件，记录当前会话占用的阶段。SessionStart 时创建/更新，用于多会话冲突检测。详细字段定义见本文档末尾"会话锁定文件 .session.json"章节。
+
+---
+
+## 会话锁定文件 .session.json
+
+路径：`{workflow_base}/.session.json`
+
+```json
+{
+  "sessionId": "string — 会话标识（CLAUDE_SESSION_ID 或 TTY identity）",
+  "source": "env|tty — sessionId 来源",
+  "phaseIndex": "number — 当前锁定阶段编号",
+  "lockedAt": "ISO 8601 — 锁定时间",
+  "pid": "number — 进程 PID",
+  "tty": "string — TTY 标识"
+}
+```
+
+生命周期：SessionStart 时创建/更新，30 分钟无活动视为过期。Advisory 用途，不阻断工作流执行。
+
 ---
 
 ## STATE.md 模板

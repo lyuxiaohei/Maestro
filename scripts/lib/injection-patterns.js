@@ -1,4 +1,4 @@
-// maestro-hook-version: 202605.4
+// maestro-hook-version: 202606.0
 /**
  * injection-patterns.js — Maestro shared injection detection pattern library
  *

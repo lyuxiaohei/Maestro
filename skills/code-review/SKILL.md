@@ -16,6 +16,10 @@ version: "1.0"
 
 ## 执行流程
 
+### 步骤 0：代码索引上下文（可选）
+
+审核开始时检查 `.planning/code-index.json` 是否存在。若存在，运行 `node scripts/code-graph-scan.js . --context --dirs {changed_file_dirs}` 获取变更文件的依赖关系，作为审核补充上下文。索引不存在时跳过此步骤。
+
 ### 步骤 1：审核范围确认
 
 - 确认审核范围（后端/前端/全栈）
