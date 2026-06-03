@@ -1,0 +1,43 @@
+# Vitest 组件测试骨架
+
+```typescript
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+// AI-GENERATED: review business correctness before merge
+
+// TODO: import component under test
+// import { {{ComponentName}} } from '@/{{componentPath}}';
+
+// TODO: mock dependencies if needed
+// vi.mock('@/api/{{apiModule}}', () => ({ ... }));
+
+describe('{{ComponentName}}', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  // TODO: should render correctly
+  it('should render {{expectedContent}}', () => {
+    // render(<{{ComponentName}} {...defaultProps} />);
+    // expect(screen.getByText(/{{text}}/i)).toBeInTheDocument();
+  });
+
+  // TODO: should handle user interaction
+  it('should {{expectedBehavior}} when {{userAction}}', async () => {
+    const user = userEvent.setup();
+    // render(<{{ComponentName}} {...defaultProps} />);
+    // await user.click(screen.getByRole('button', { name: /{{label}}/i }));
+    // await waitFor(() => { expect(...).toBe...(); });
+  });
+});
+```
+
+## 使用说明
+
+- 替换 `{{ComponentName}}` 为被测组件名
+- `{{componentPath}}` 为组件相对路径
+- 用 `vi.mock()` mock API 调用
+- 用 `userEvent` 模拟用户交互（非 fireEvent）
+- 用 `waitFor()` 等待异步更新
+- 测试文件命名：`{ComponentName}.test.tsx`

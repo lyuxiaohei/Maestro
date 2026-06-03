@@ -1,0 +1,55 @@
+# pytest 集成测试骨架
+
+```python
+import pytest
+from httpx import AsyncClient
+# AI-GENERATED: review business correctness before merge
+
+# TODO: import app and fixtures
+# from app.main import app
+# from tests.conftest import db_session, client
+
+
+class Test{{FeatureName}}:
+    """Integration tests for {{FeatureName}}."""
+
+    @pytest.fixture(autouse=True)
+    def setup(self, db_session):
+        # TODO: seed test data
+        pass
+
+    # TODO: should succeed with valid input
+    @pytest.mark.asyncio
+    async def test_should_{{expected}}_when_{{condition}}(
+        self, client: AsyncClient
+    ):
+        # Arrange
+        payload = {
+            # TODO: fill valid payload
+        }
+
+        # Act
+        response = await client.post("/api/{{endpoint}}", json=payload)
+
+        # Assert
+        assert response.status_code == 200
+        data = response.json()
+        # TODO: assert response fields
+
+    # TODO: should reject invalid input
+    @pytest.mark.asyncio
+    async def test_should_reject_{{invalidCondition}}(
+        self, client: AsyncClient
+    ):
+        response = await client.post("/api/{{endpoint}}", json={})
+        assert response.status_code == 422
+```
+
+## 使用说明
+
+- 替换 `{{FeatureName}}` 为功能模块名
+- 使用 `conftest.py` 提供 `client` 和 `db_session` fixtures
+- 测试方法命名：`test_should_xxx_when_yyy`
+- 使用 `@pytest.mark.asyncio` 标注异步测试
+- 测试文件命名：`test_{feature}.py`
+- 放置目录：`tests/integration/`

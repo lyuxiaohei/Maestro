@@ -1,16 +1,17 @@
 // maestro-hook-version: 202606.0
 /**
- * context-monitor.js — Maestro PostToolUse Write|Edit context usage monitor hook
+ * context-monitor.js — Maestro PostToolUse Write|Edit context usage reminder hook
  *
- * Tracks cumulative bytes written by Claude Code in a session and warns at thresholds:
- *   SOFT:     204800 bytes (200KB) — silent, no output
- *   HARD:     512000 bytes (500KB) — additionalContext warning
- *   CRITICAL: 1048576 bytes (1MB)  — strong warning suggesting new session
+ * Monitors context window usage via Claude Code's context_window.remaining_percentage
+ * and outputs advisory-tone reminders at three thresholds:
+ *   SOFT:     60% used — suggest /compact after current sub-task
+ *   HARD:     75% used — suggest /compact soon or new session
+ *   CRITICAL: 88% used — suggest immediate /compact, auto-persist workflow state
+ *
+ * Debounce: percentage-based zone dedup via .planning/.ctx-level.json
+ *   (same zone only warns once; zone escalation triggers immediately)
  *
  * Opt-out: set hooks.context_warnings to false in .planning/config.json
- *
- * State file: .planning/.ctx-tracker.json
- * Structure: { "current": { "bytes": N, "updated": "ISO-8601" } }
  *
  * Hook protocol: reads JSON from stdin, writes JSON to stdout.
  * stdin timeout: 5 seconds.
@@ -27,12 +28,10 @@ const { execFile } = require('child_process');
 
 const STDIN_TIMEOUT_MS = 5000;
 
-// Thresholds in bytes
-const SOFT_THRESHOLD = 204800;   // 200KB
-const HARD_THRESHOLD = 512000;   // 500KB
-const CRITICAL_THRESHOLD = 1048576; // 1MB
-
-const DEBOUNCE_CALLS = 5;
+// Percentage thresholds (used context = 100 - remaining)
+const SOFT_PCT = 60;
+const HARD_PCT = 75;
+const CRITICAL_PCT = 88;
 
 function readStdin() {
   return new Promise((resolve) => {
@@ -59,15 +58,19 @@ function getConfig() {
   }
 }
 
-function getTrackerPath() {
-  return path.join(__dirname, '..', '.planning', '.ctx-tracker.json');
+/**
+ * Get the path for the level tracker file (.planning/.ctx-level.json).
+ * This lightweight file stores only the last warning zone for debounce.
+ */
+function getLevelPath() {
+  return path.join(__dirname, '..', '.planning', '.ctx-level.json');
 }
 
-function readTracker(trackerPath) {
+function readLevel() {
   try {
-    const raw = fs.readFileSync(trackerPath, 'utf8');
+    const raw = fs.readFileSync(getLevelPath(), 'utf8');
     const data = JSON.parse(raw);
-    if (data && typeof data.current === 'object' && typeof data.current.bytes === 'number') {
+    if (data && typeof data.lastLevel === 'string') {
       return data;
     }
     return null;
@@ -76,23 +79,73 @@ function readTracker(trackerPath) {
   }
 }
 
-function writeTracker(trackerPath, bytes) {
+function writeLevel(levelData) {
   try {
-    const data = {
-      current: {
-        bytes: bytes,
-        updated: new Date().toISOString(),
-      },
-    };
-    fs.writeFileSync(trackerPath, JSON.stringify(data, null, 2), 'utf8');
+    fs.writeFileSync(getLevelPath(), JSON.stringify(levelData, null, 2), 'utf8');
   } catch {
     // Silently ignore write errors — advisory only
   }
 }
 
+/**
+ * Determine the current zone based on used percentage.
+ */
+function getZone(usedPct) {
+  if (usedPct >= CRITICAL_PCT) return 'critical';
+  if (usedPct >= HARD_PCT) return 'hard';
+  if (usedPct >= SOFT_PCT) return 'soft';
+  return null;
+}
+
+/**
+ * Find active workflow slug for warning message template.
+ */
+function findActiveSlug() {
+  try {
+    const workflowParser = require('./lib/workflow-parser');
+    const planningDir = path.join(__dirname, '..', '.planning');
+    const slugs = workflowParser.discoverWorkflows(planningDir);
+    if (slugs.length === 0) return null;
+
+    // Return the first workflow that has an active (non-complete) state
+    for (const slug of slugs) {
+      const wfDir = workflowParser.resolveWorkflowDir(planningDir, slug);
+      const wfPath = path.join(wfDir, 'workflow.md');
+      try {
+        const raw = fs.readFileSync(wfPath, 'utf8');
+        const statusMatch = raw.match(/(?:^status:\s*|^\- \*\*status\*\*:\s*)(.+?)$/m);
+        const status = statusMatch ? statusMatch[1].trim() : '';
+        if (status && status !== 'complete') return slug;
+      } catch { continue; }
+    }
+
+    // If all are complete or we can't determine, return first slug
+    return slugs[0];
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Format the advisory-tone warning message.
+ */
+function formatMessage(zone, usedPct, remainingPct, slug) {
+  const pct = Math.round(usedPct);
+  const rem = Math.round(remainingPct);
+  const slugPart = slug ? ` /maestro-workflow-lite ${slug}` : '';
+
+  if (zone === 'soft') {
+    return `Maestro 上下文提醒: 已使用 ${pct}%（剩余 ${rem}%）。建议在完成当前子任务后执行 /compact 释放空间，可附带保留指令（如"保留所有决策和工作流状态"）。`;
+  }
+  if (zone === 'hard') {
+    return `Maestro 上下文提醒: 已使用 ${pct}%（剩余 ${rem}%）。建议尽快执行 /compact。如已感觉回复质量下降，可在新会话中运行${slugPart} 从当前步骤恢复。`;
+  }
+  // critical
+  return `Maestro 上下文提醒: 已使用 ${pct}%（仅剩 ${rem}%）。auto-compact 即将触发（有损摘要）。建议立即 /compact 或开启新会话运行${slugPart}。工作流状态已自动记录。`;
+}
+
 function updateStatusline() {
   try {
-    // Use shared workflow parser to get current phase info
     const workflowParser = require('./lib/workflow-parser');
     const planningDir = path.join(__dirname, '..', '.planning');
     const state = workflowParser.readWorkflowState(planningDir);
@@ -108,6 +161,40 @@ function updateStatusline() {
     child.unref();
   } catch {
     // Silently ignore — statusline update is non-critical
+  }
+}
+
+/**
+ * Auto-persist workflow state on CRITICAL (fire-and-forget subprocess).
+ * Updates the active workflow's workflow.md stopped_at field.
+ */
+function triggerAutoPersist(slug, usedPct) {
+  if (!slug) return;
+  try {
+    const script = `
+      const fs = require('fs');
+      const path = require('path');
+      try {
+        const workflowParser = require('./lib/workflow-parser');
+        const planningDir = path.join(__dirname, '..', '.planning');
+        const wfDir = workflowParser.resolveWorkflowDir(planningDir, ${JSON.stringify(slug)});
+        const wfPath = path.join(wfDir, 'workflow.md');
+        if (fs.existsSync(wfPath)) {
+          let content = fs.readFileSync(wfPath, 'utf8');
+          const today = new Date().toISOString().split('T')[0];
+          const stoppedAt = 'context exhaustion at ${Math.round(usedPct)}% (' + today + ')';
+          content = content.replace(/^stopped_at:.*$/m, 'stopped_at: ' + stoppedAt);
+          content = content.replace(/^last_updated:.*$/m, 'last_updated: ' + new Date().toISOString());
+          fs.writeFileSync(wfPath, content, 'utf8');
+        }
+      } catch {}
+    `;
+    const child = execFile(process.execPath, ['-e', script], { cwd: __dirname }, () => {
+      // Ignore errors — fire-and-forget
+    });
+    child.unref();
+  } catch {
+    // Silently ignore — auto-persist is non-critical
   }
 }
 
@@ -130,113 +217,67 @@ async function main() {
     process.exit(0);
   }
 
-  // 4. Only track Write and Edit tools
+  // 4. Only handle Write and Edit tools
   const toolName = input.tool_name || '';
   if (toolName !== 'Write' && toolName !== 'Edit') process.exit(0);
 
-  // 5. Compute byte count for this operation
-  const toolInput = input.tool_input || {};
-  let newBytes = 0;
-
-  if (toolName === 'Write') {
-    newBytes = Buffer.byteLength(toolInput.content || '', 'utf8');
-  } else if (toolName === 'Edit') {
-    newBytes = Buffer.byteLength(toolInput.new_string || '', 'utf8');
-  }
-
-  if (newBytes === 0) process.exit(0);
-
-  // 6. Read existing tracker or start fresh
-  const trackerPath = getTrackerPath();
-  const existing = readTracker(trackerPath);
-  const currentBytes = existing ? existing.current.bytes + newBytes : newBytes;
-
-  // 7. Persist updated tracker
-  writeTracker(trackerPath, currentBytes);
-
-  // 7.1. Debounce check — reduces warning spam in long sessions
-  const debouncePath = path.join(__dirname, '..', '.planning', '.ctx-debounce.json');
-  let debounceData = { callsSinceWarn: 0, lastLevel: null, criticalRecorded: false };
-  let firstWarn = true;
-
-  if (fs.existsSync(debouncePath)) {
-    try {
-      debounceData = JSON.parse(fs.readFileSync(debouncePath, 'utf8'));
-      firstWarn = false;
-    } catch { /* corrupted, start fresh */ }
-  }
-
-  debounceData.callsSinceWarn = (debounceData.callsSinceWarn || 0) + 1;
-
-  // Compute threshold levels for debounce logic
-  const isCritical = currentBytes >= CRITICAL_THRESHOLD;
-  const isHard = currentBytes >= HARD_THRESHOLD;
-  const currentLevel = isCritical ? 'critical' : (isHard ? 'hard' : 'soft');
-
-  // Severity escalation bypasses debounce
-  const severityEscalated = currentLevel === 'critical' && debounceData.lastLevel === 'hard';
-
-  // Skip if debounced (unless first warning, critical, or severity escalated)
-  if (!firstWarn && !isCritical && debounceData.callsSinceWarn < DEBOUNCE_CALLS && !severityEscalated) {
-    try { fs.writeFileSync(debouncePath, JSON.stringify(debounceData)); } catch {}
+  // 5. Read remaining_percentage from context_window
+  const remainingPct = input.context_window && input.context_window.remaining_percentage;
+  if (typeof remainingPct !== 'number' || !isFinite(remainingPct)) {
+    // Graceful fallback: no context window data, silently exit
     process.exit(0);
   }
 
-  // Reset counter and persist
-  debounceData.callsSinceWarn = 0;
-  debounceData.lastLevel = currentLevel;
-  try { fs.writeFileSync(debouncePath, JSON.stringify(debounceData)); } catch {}
+  const usedPct = 100 - remainingPct;
 
-  // 7.2. CRITICAL auto-save — persist STATE.md progress once per session
-  if (isCritical && !debounceData.criticalRecorded) {
+  // 6. Determine zone
+  const zone = getZone(usedPct);
+  if (!zone) {
+    // Below SOFT threshold, clean up level tracker and exit silently
     try {
-      const statePath = path.join(__dirname, '..', '.planning', 'STATE.md');
-      if (fs.existsSync(statePath)) {
-        let stateContent = fs.readFileSync(statePath, 'utf8');
-        const today = new Date().toISOString().split('T')[0];
-        const mb = (currentBytes / 1048576).toFixed(1);
-        const stoppedAt = `context exhaustion at ${mb}MB (${today})`;
-        stateContent = stateContent.replace(
-          /^stopped_at:.*$/m,
-          `stopped_at: ${stoppedAt}`
-        );
-        stateContent = stateContent.replace(
-          /^last_updated:.*$/m,
-          `last_updated: ${new Date().toISOString()}`
-        );
-        fs.writeFileSync(statePath, stateContent, 'utf8');
-        debounceData.criticalRecorded = true;
-        try { fs.writeFileSync(debouncePath, JSON.stringify(debounceData)); } catch {}
+      const levelPath = getLevelPath();
+      if (fs.existsSync(levelPath)) {
+        writeLevel({ lastLevel: null, criticalRecorded: false });
       }
-    } catch { /* non-critical, don't break the hook */ }
+    } catch {}
+    process.exit(0);
   }
 
-  // 7.5. Update statusline bridge file (non-critical, fire-and-forget)
+  // 7. Debounce: same zone only warns once; escalation triggers immediately
+  const existing = readLevel();
+  const lastLevel = existing ? existing.lastLevel : null;
+  const criticalRecorded = existing ? existing.criticalRecorded : false;
+
+  if (lastLevel === zone) {
+    // Same zone, already warned — skip output but still update statusline
+    updateStatusline();
+    process.exit(0);
+  }
+
+  // 8. Zone escalated or first warning — output advisory message
+  const slug = findActiveSlug();
+  const msg = formatMessage(zone, usedPct, remainingPct, slug);
+
+  const output = JSON.stringify({
+    hookSpecificOutput: {
+      hookEventName: 'PostToolUse',
+      additionalContext: msg.substring(0, 2000),
+    },
+  });
+  process.stdout.write(output);
+
+  // 9. Persist level tracker
+  const newLevelData = { lastLevel: zone, criticalRecorded: criticalRecorded || false };
+  writeLevel(newLevelData);
+
+  // 10. CRITICAL auto-persist workflow state (fire-and-forget)
+  if (zone === 'critical' && !criticalRecorded) {
+    triggerAutoPersist(slug, usedPct);
+    writeLevel({ lastLevel: zone, criticalRecorded: true });
+  }
+
+  // 11. Update statusline (non-critical, fire-and-forget)
   updateStatusline();
-
-  // 8. Apply thresholds and output
-  if (currentBytes >= CRITICAL_THRESHOLD) {
-    const mb = (currentBytes / 1048576).toFixed(1);
-    const msg = `Maestro 上下文监控: 已累计写入 ${mb}MB，超过 CRITICAL 阈值。建议开始新会话 — 状态已持久化在 .planning/。`;
-    const output = JSON.stringify({
-      hookSpecificOutput: {
-        hookEventName: 'PostToolUse',
-        additionalContext: msg.substring(0, 2000),
-      },
-    });
-    process.stdout.write(output);
-  } else if (currentBytes >= HARD_THRESHOLD) {
-    const kb = Math.round(currentBytes / 1024);
-    const msg = `Maestro 上下文监控: 已累计写入 ${kb}KB，接近上下文窗口上限。建议留意输出质量。`;
-    const output = JSON.stringify({
-      hookSpecificOutput: {
-        hookEventName: 'PostToolUse',
-        additionalContext: msg.substring(0, 2000),
-      },
-    });
-    process.stdout.write(output);
-  }
-  // SOFT threshold and below: silent exit
 
   process.exit(0);
 }

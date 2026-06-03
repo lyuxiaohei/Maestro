@@ -1,6 +1,6 @@
 {
   "_comment": "此文件仅作文档参考。实际 hooks 由 install.js 直接写入 ~/.claude/settings.json（绝对路径）。",
-  "description": "Maestro Hook 安全体系 -- 注入防护、上下文监控、提交校验、阶段边界检测、会话状态",
+  "description": "Maestro Hook 安全体系 -- 注入防护、上下文百分比提醒（60%/75%/88%）、提交校验、阶段边界检测、会话状态",
   "hooks": {
     "SessionStart": [
       {
@@ -37,6 +37,15 @@
           {
             "type": "command",
             "command": "${CLAUDE_PLUGIN_ROOT}/scripts/validate-commit.js"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/stale-check.js"
           }
         ]
       }

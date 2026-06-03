@@ -44,6 +44,51 @@ function getPlanningDir() {
 }
 
 /**
+ * Inject meta-rules from gate-rules.md into additionalContext.
+ * Reads GATE-01~05 summaries and wraps in <GATE_RULES> tags.
+ * Returns null if file not found or on error.
+ * @param {string} projectRoot
+ * @returns {string|null}
+ */
+function injectMetaRules(projectRoot) {
+  try {
+    const gateRulesPath = path.join(projectRoot, 'skills', 'workflow', 'references', 'gate-rules.md');
+    const content = fs.readFileSync(gateRulesPath, 'utf8');
+
+    // Extract GATE-XX rule_name and core constraint (first 2 lines after header)
+    const gates = [];
+    const regex = /## (GATE-\d+):.*?\n\n-\s+\*\*rule_name\*\*:\s*(.+)/g;
+    let match;
+    while ((match = regex.exec(content)) !== null) {
+      const gateId = match[1];
+      const ruleName = match[2].trim();
+
+      // Extract one-line constraint from check_procedure
+      const sectionStart = match.index;
+      const nextSection = content.indexOf('## GATE-', sectionStart + 10);
+      const section = nextSection > 0 ? content.substring(sectionStart, nextSection) : content.substring(sectionStart);
+
+      let constraint = '';
+      const constraintMatch = section.match(/核心约束[：:]\s*(.+)/);
+      if (constraintMatch) {
+        constraint = constraintMatch[1].trim();
+      }
+
+      gates.push(`- ${gateId} ${ruleName}${constraint ? ': ' + constraint : ''}`);
+    }
+
+    if (gates.length === 0) return null;
+
+    const result = `<GATE_RULES>\nMaestro 铁律门禁规则（本会话全程有效）:\n${gates.join('\n')}\n</GATE_RULES>`;
+
+    // Cap at 500 characters
+    return result.length > 500 ? result.substring(0, 497) + '...' : result;
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Get TTY identity string for session identification.
  * @returns {string}
  */
@@ -252,6 +297,14 @@ async function main() {
   let additionalContext = summary;
   if (conflictMessages.length > 0) {
     additionalContext += '\n\n' + conflictMessages.join('\n');
+    additionalContext = additionalContext.substring(0, 2000);
+  }
+
+  // 15.5. Inject meta-rules (P0-3)
+  const projectRoot = path.resolve(__dirname, '..');
+  const metaRules = injectMetaRules(projectRoot);
+  if (metaRules) {
+    additionalContext += '\n\n' + metaRules;
     additionalContext = additionalContext.substring(0, 2000);
   }
 

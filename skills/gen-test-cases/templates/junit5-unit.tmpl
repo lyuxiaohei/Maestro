@@ -1,0 +1,51 @@
+# JUnit 5 单元测试骨架
+
+```java
+package {{packageName}};
+
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.*;
+import org.mockito.junit.jupiter.MockitoExtension;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.BDDMockito.*;
+
+// AI-GENERATED: review business correctness before merge
+
+@ExtendWith(MockitoExtension.class)
+class {{TestClass}} {
+
+    @InjectMocks
+    private {{TargetClass}} {{targetInstance}};
+
+    @Mock
+    private {{DependencyClass}} {{dependencyInstance}};
+
+    @BeforeEach
+    void setUp() {
+        // TODO: setup common test data
+    }
+
+    // TODO: shouldXxx_whenYyy
+    @Test
+    void should{{ExpectedBehavior}}_when{{Condition}}() {
+        // given
+        // TODO: prepare mock data
+
+        // when
+        // TODO: invoke method under test
+
+        // then
+        // TODO: assert results
+    }
+}
+```
+
+## 使用说明
+
+- 替换 `{{packageName}}` 为目标包路径
+- `{{TestClass}}` = 被测类名 + Test（如 BrandServiceTest）
+- `{{TargetClass}}` = 被测类名（如 BrandServiceImpl）
+- 每个 `@Mock` 对应被测类的一个依赖
+- 测试方法命名：`shouldXxx_whenYyy`
+- 使用 BDD 风格：given-when-then 三段式

@@ -1,0 +1,71 @@
+# GitHub Actions Deploy Workflow
+# Triggers: manual dispatch, or after CI workflow success
+#
+# Required secrets:
+#   DEPLOY_KEY: SSH key for deployment server
+#   DEPLOY_HOST: Deployment server hostname
+#   DEPLOY_USER: Deployment server username
+#   DEPLOY_PATH: Deployment target path on server
+
+name: Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+      version:
+        description: 'Version tag or commit SHA'
+        required: false
+        type: string
+
+env:
+  SERVICE_NAME: "{{SERVICE_NAME}}"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ endsWith(github.event.inputs.environment, 'java') && 'java-artifact' || 'react-dist' }}
+        continue-on-error: true
+
+      - name: Set version
+        id: version
+        run: |
+          VERSION="${{ github.event.inputs.version }}"
+          if [ -z "$VERSION" ]; then
+            VERSION="${{ github.sha }}"
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Deploying version: $VERSION"
+
+      - name: Deploy to ${{ github.event.inputs.environment }}
+        env:
+          DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+        run: |
+          echo "Deploying $SERVICE_NAME to ${{ github.event.inputs.environment }}..."
+          # TODO: Replace with actual deployment commands
+          # Example: rsync, kubectl, docker deploy, etc.
+          echo "Version ${{ steps.version.outputs.version }} deployed successfully"
+
+      - name: Health check
+        run: |
+          echo "Running health check..."
+          # TODO: Add health check endpoint verification
+          # curl -f https://${{ github.event.inputs.environment }}.example.com/health || exit 1
+          echo "Health check passed"

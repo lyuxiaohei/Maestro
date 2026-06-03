@@ -40,6 +40,9 @@ const HOOK_DEFS = [
   ['PostToolUse', 'Write|Edit', 'phase-boundary.js', 5],
   ['PostToolUse', 'Write|Edit', 'context-monitor.js', 10],
   ['PostToolUse', 'Write|Edit', 'code-graph-update.js', 10],
+  ['PreToolUse', 'Bash', 'stale-check.js', 10],
+  ['PreToolUse', 'Write|Edit', 'tdd-guard.js', 5],
+  ['PreToolUse', 'Write|Edit', 'lang-guard.js', 5],
 ];
 
 // --- Helpers ---
@@ -152,7 +155,7 @@ function removeMaestroHooks(settings) {
         if (!h.command || typeof h.command !== 'string') return true;
         const cmd = h.command.toLowerCase();
         return !(cmd.includes('maestro-private') || cmd.includes('/maestro/') ||
-                 /maestro-(prompt-guard|session-state|read-injection|validate-commit|phase-boundary|context-monitor|workflow-guard|code-graph-update)/.test(cmd));
+                 /maestro-(prompt-guard|session-state|read-injection|validate-commit|phase-boundary|context-monitor|workflow-guard|code-graph-update|stale-check)/.test(cmd));
       });
 
       if (entry.hooks.length < before) modified = true;

@@ -1,0 +1,50 @@
+# Playwright E2E 测试骨架
+
+```typescript
+import { test, expect, Page } from '@playwright/test';
+// AI-GENERATED: review business correctness before merge
+
+test.describe('{{FeatureName}} E2E', () => {
+
+  test.beforeEach(async ({ page }) => {
+    // TODO: navigate to starting page
+    // await page.goto('/{{startPath}}');
+  });
+
+  // TODO: happy path
+  test('should {{expectedOutcome}} when {{userJourney}}', async ({ page }) => {
+    // Step 1: Navigate
+    // await page.goto('/{{path}}');
+
+    // Step 2: Interact
+    // await page.getByLabel('{{label}}').fill('{{value}}');
+    // await page.getByRole('button', { name: /{{action}}/i }).click();
+
+    // Step 3: Assert result
+    // await expect(page.getByText(/{{expectedText}}/i)).toBeVisible();
+  });
+
+  // TODO: edge case - error handling
+  test('should show error when {{errorCondition}}', async ({ page }) => {
+    // await page.goto('/{{path}}');
+    // trigger error condition
+    // await expect(page.getByText(/error/i)).toBeVisible();
+  });
+
+  // TODO: e2e-flow multi-page journey (if applicable)
+  // test('should complete {{journeyName}} flow', async ({ page }) => {
+  //   // Page 1: Login
+  //   // Page 2: Browse
+  //   // Page 3: Confirm
+  // });
+});
+```
+
+## 使用说明
+
+- 替换 `{{FeatureName}}` 为功能模块名
+- 优先使用 `getByRole` / `getByLabel` / `getByText` 选择器
+- 每个测试独立，不依赖执行顺序
+- e2e-flow 在单个 test 中编排多页跳转
+- 测试文件命名：`{feature}.spec.ts`
+- 放置目录：`e2e/` 或 `tests/e2e/`

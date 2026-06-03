@@ -43,6 +43,7 @@
 | ops-engineer | `domain/` | opus | Read, Write, Grep, Glob | worktree |
 | security-reviewer | `domain/` | sonnet | Read, Grep, Glob | worktree |
 | integration-reviewer | `domain/` | sonnet | Read, Grep, Glob | worktree |
+| code-reviewer | `domain/` | sonnet | Read, Grep, Glob | worktree |
 
 ---
 
@@ -161,6 +162,8 @@
 | `## VERIFICATION FAILED` | lite-verifier | 展示失败项，建议开启新迭代 |
 | `## SECURITY AUDIT COMPLETE` | 安全审计完成 | 将安全问题合并到阶段验证结果 |
 | `## INTEGRATION VERIFICATION COMPLETE` | 集成验证完成 | 将集成问题合并到阶段验证结果 |
+| `## CODE REVIEW PASSED` | 代码审查通过 | 进入下一审查阶段或完成 |
+| `## CODE REVIEW FAILED` | 代码审查未通过 | 展示问题清单，标记 BLOCKED |
 | `## CLASSIFICATION COMPLETE` | 文档分类完成 | 将分类结果传给 doc-synthesizer |
 | `## DOC WRITE COMPLETE` | 文档生成完成 | 将生成文档传给 doc-verifier |
 | `## DOC VERIFICATION COMPLETE` | 文档验证完成 | 进入 GATE-01 人工确认 |
@@ -271,6 +274,20 @@
 - **传参**: doc_path
 - **返回**: DOC VERIFICATION COMPLETE / DOC VERIFICATION FAILED
 - **写入权限**: 只读，不修改任何文件
+
+### code-reviewer
+
+- **触发时机**: 编码类任务执行后、验证前
+- **传参**: role (spec-reviewer | quality-reviewer | cross-task-reviewer), scope (files/tasks), spec_text, implementation_report
+- **返回**: CODE REVIEW PASSED / CODE REVIEW FAILED + 审查报告
+- **写入权限**: 只读，不修改任何文件
+- **角色模式**:
+  - spec-reviewer: 验证规范符合性（不少实现、不过度实现）
+  - quality-reviewer: 验证代码质量（职责单一、接口清晰）
+  - cross-task-reviewer: 跨任务一致性（接口对齐、命名统一）
+- **两阶段审查流程**:
+  1. 第一阶段: spec-reviewer — 独立验证规范符合性
+  2. 第二阶段: quality-reviewer + cross-task-reviewer — 代码质量 + 跨任务一致性（可并行）
 
 ---
 

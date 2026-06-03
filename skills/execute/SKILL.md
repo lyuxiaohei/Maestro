@@ -30,7 +30,7 @@ version: "1.2"
 ### 3. spawn lite-executor Agent
 
 ```
-Agent(subagent_type="lite-executor", prompt="## Task Parameters\n- workflow_slug: {slug}\n- workflow_base: {workflow_base}\n")
+Agent(subagent_type="lite-executor", prompt="## Task Parameters\n- workflow_slug: {slug}\n- workflow_base: {workflow_base}\n\n## Briefing Gate\n如果是编码类任务（涉及 Write/Edit 代码文件），执行前必须先做 Briefing:\n1. 读取 skills/execute/references/briefing-gate.md 了解 Briefing 流程\n2. 解析 PLAN.md 任务的 Files 清单，推断需要的语言包模板\n3. Read 匹配的语言包 modules/ + templates/\n4. 输出结构化 Briefing 块（涉及文件 + 已加载 + 关键约束）\n未做 Briefing 直接 Write/Edit 代码文件 = 违规\n")
 ```
 
 等待 Agent 返回完成信号。
