@@ -40,6 +40,9 @@ Claude Code 插件，将完整产研工作流（需求调研 → 部署上线，
 | doc-synthesizer | 多文档合并、冲突检测 | 工作流调度 | sonnet |
 | doc-writer | 按模板生成/更新项目文档 | 工作流调度 | sonnet |
 | doc-verifier | 校验文档与代码库一致性 | 工作流调度 | sonnet |
+| lite-planner | 轻量工作流规划 | 轻量工作流 | sonnet |
+| lite-executor | 轻量工作流执行 | 轻量工作流 | sonnet |
+| lite-verifier | 轻量工作流验证 | 轻量工作流 | sonnet |
 
 ### 项目域 Agent（按需 spawn）
 
@@ -56,21 +59,27 @@ Claude Code 插件，将完整产研工作流（需求调研 → 部署上线，
 | ops-engineer | 部署域规划审阅和验证（P18） | 部署域 | opus |
 | security-reviewer | OWASP Top 10 安全审计 | 安全域 | sonnet |
 | integration-reviewer | 跨模块集成验证 | 测试域 | sonnet |
+| code-reviewer | 多角色代码审查（spec/quality/cross-task） | 测试域 | sonnet |
 
 ## Hook 架构
 
-Maestro 内置 6 个 Claude Code Hook，注册在 hooks/hooks.json，脚本位于 scripts/ 目录。所有 Hook 使用纯 Node.js 内置模块，零外部依赖。
+Maestro 内置 11 个 Claude Code Hook，由 install.js 以绝对路径直接注册到 `~/.claude/settings.json`，脚本位于 scripts/ 目录。所有 Hook 使用纯 Node.js 内置模块，零外部依赖。
 
 | Hook | 事件 | 功能 | 配置键 |
 |------|------|------|--------|
 | prompt-guard | PreToolUse Write\|Edit | 注入防护 | injection_guard |
+| workflow-guard | PreToolUse Write\|Edit | 工作流外编辑提醒 | workflow_guard |
 | read-injection-scanner | PostToolUse Read | 读取扫描 | read_scanner |
 | validate-commit | PreToolUse Bash | 提交校验 | commit_validation |
 | phase-boundary | PostToolUse Write\|Edit | 阶段边界 | phase_boundary |
 | context-monitor | PostToolUse Write\|Edit | 上下文监控 | context_warnings |
 | session-state | SessionStart | 会话状态 | (always on) |
+| code-graph-update | PostToolUse Write\|Edit | 代码索引增量更新 | code_graph_index |
+| stale-check | PreToolUse Bash | 过期文件检查 | stale_check |
+| tdd-guard | PreToolUse Write\|Edit | TDD 物理保险丝（默认 OFF） | tdd_guard |
+| lang-guard | PreToolUse Write\|Edit | 语言包模板强制加载（默认 OFF） | lang_guard |
 
-Hook 设计原则：advisory-only（exit 0），fail-open（错误时不拦截），独立配置开关（config.json hooks 节）。仅 validate-commit 为阻断型（exit 2），需显式启用。
+Hook 设计原则：advisory-only（exit 0），fail-open（错误时不拦截），独立配置开关（config.json hooks 节）。仅 validate-commit 和 tdd-guard/lang-guard（需显式启用）为阻断型（exit 2）。
 
 ## 全局安装
 
@@ -83,8 +92,17 @@ Maestro 支持全局安装，一条命令在所有项目中生效。
 | `node scripts/install.js --local` | 仅注册当前项目 |
 | `node scripts/install.js --from-github` | 从 GitHub 一键安装 |
 
-安装流程：
+安装采用 GSD 式直接写入策略：
 1. 从 `.claude-plugin/plugin.json` 读取版本号
 2. 复制运行时文件到 `~/.claude/plugins/cache/maestro-private/maestro/<version>/`
-3. 注册到 `~/.claude/plugins/installed_plugins.json`（scope: "user"）
-4. 重启 Claude Code 后生效
+3. **Skills** → 直接复制到 `~/.claude/skills/maestro-<name>/`
+4. **Agents** → 直接复制到 `~/.claude/agents/maestro-<name>.md`
+5. **Hooks** → 绝对路径写入 `~/.claude/settings.json` 的 hooks 字段
+6. **StatusLine** → 写入 `~/.claude/settings.json` 的 statusLine 字段
+7. 注册到 `~/.claude/plugins/installed_plugins.json`（scope: "user"）
+8. 重启 Claude Code 后生效
+
+注意事项：
+- 安装后源码目录可独立删除，插件不依赖源码路径
+- 全局 + 项目级双重加载是安全的（hooks 全部 advisory exit 0）
+- 更新时重新运行安装命令即可（覆盖安装）
