@@ -418,7 +418,7 @@
 
 ## 全量 Skill 映射汇总
 
-共 22 个 Skill，覆盖全部 18 个产研阶段。
+共 37 个 Skill（21 领域 + 2 编排器 + 4 轻量步骤 + 10 devkit 集成），覆盖全部 18 个产研阶段。
 
 | 需求编号 | Skill | 类型 | 开发阶段 | 覆盖阶段 |
 |---------|-------|------|---------|----------|
@@ -444,6 +444,22 @@
 | DLVR-03 | acceptance-testing | 新开发 | Phase 8 ✅ | P17 |
 | DLVR-04 | deployment | 新开发 | Phase 8 ✅ | P18 |
 | CROSS-01 | discuss-phase | 新开发 | P14-A ✅ | 全阶段（按需） |
+| ORCH-01 | maestro-workflow | 编排器 | — | 18 阶段中央编排 |
+| ORCH-02 | maestro-workflow-lite | 编排器 | — | 轻量 4 步流水线 |
+| LITE-01 | maestro-discuss | 轻量步骤 | — | 全阶段（按需） |
+| LITE-02 | maestro-plan | 轻量步骤 | — | 全阶段（按需） |
+| LITE-03 | maestro-execute | 轻量步骤 | — | 全阶段（按需） |
+| LITE-04 | maestro-verify | 轻量步骤 | — | 全阶段（按需） |
+| DK-01 | maestro-tdd-discipline | devkit 集成 | DevKit P0 ✅ | P15（可跳过） |
+| DK-02 | maestro-lang-pack | devkit 集成 | DevKit P1 ✅ | P15（前置） |
+| DK-03 | maestro-lang-react | devkit 集成 | DevKit P1 ✅ | P15（前端） |
+| DK-04 | maestro-lang-java | devkit 集成 | DevKit P1 ✅ | P15（后端） |
+| DK-05 | maestro-gen-test-cases | devkit 集成 | DevKit P1 ✅ | P16 |
+| DK-06 | maestro-ci-template | devkit 集成 | DevKit P1 ✅ | P18 |
+| DK-07 | maestro-gen-test-run | devkit 集成 | DevKit P2 ✅ | P16 |
+| DK-08 | maestro-qa-contract | devkit 集成 | DevKit P3 ✅ | P16（可选） |
+| DK-09 | maestro-qa-mutation | devkit 集成 | DevKit P3 ✅ | P16（可选） |
+| DK-10 | maestro-gen-mr | devkit 集成 | DevKit P3 ✅ | P15 |
 
 **开发阶段汇总：**
 
@@ -456,7 +472,23 @@
 | Phase 6 ✅ | architecture-design, architecture-review, architecture-refinement, detailed-design | 4 |
 | Phase 7 ✅ | dev-task-planner, backend-dev, frontend-dev, code-review | 4 |
 | Phase 8 ✅ | test-engineering, training-materials, acceptance-testing, deployment | 4 |
-| **合计** | | **22** |
+| 跨阶段基础设施 | discuss-phase, workflow, workflow-lite, discuss, plan, execute, verify | 7 |
+| DevKit 集成 | tdd-discipline, lang-pack, lang-react, lang-java, gen-test-cases, ci-template, gen-test-run, qa-contract, qa-mutation, gen-mr | 10 |
+| **合计** | | **37** |
+
+### DevKit 集成 Skill 融入详情
+
+| 阶段 | 融入位置 | 融入的 devkit Skill | 调用时机 |
+|------|---------|-------------------|---------|
+| P15 前后端开发 | frontend-dev 步骤 0 / backend-dev 步骤 0 | lang-pack, lang-react, lang-java | 开发前自动检测语言栈 |
+| P15 前后端开发 | frontend-dev 步骤 0.5 / backend-dev 步骤 0.5 | tdd-discipline | 编码前 TDD 纪律（可跳过） |
+| P15 前后端开发 | code-review 步骤 2/3 | code-reviewer Agent | AI 审核时多角色审查 |
+| P15 前后端开发 | frontend-dev 步骤 7.5 / backend-dev 步骤 7.5 | gen-mr | AI 审核通过后生成 MR/PR |
+| P16 系统测试 | test-engineering 步骤 2 | gen-test-cases | AI 生成测试用例骨架 |
+| P16 系统测试 | test-engineering 步骤 2.5 | gen-test-run | 测试骨架自动填实和运行 |
+| P16 系统测试 | test-engineering 步骤 5.5 | qa-contract | 微服务契约测试（可选） |
+| P16 系统测试 | test-engineering 步骤 8.5 | qa-mutation | 变异测试质量评估（可选） |
+| P18 部署 | deployment 步骤 0 | ci-template | 部署前 CI/CD 配置检查 |
 
 ---
 

@@ -26,18 +26,20 @@ version: "1.0"
 - 读取相关源代码文件和设计文档
 - 输出：审核范围清单
 
-### 步骤 2：后端代码审核
+### 步骤 2：后端代码审核（增强）
 
-- 安全审核：SQL 注入、权限绕过、敏感数据泄露
-- 性能审核：N+1 查询、缓存策略、连接池使用
-- 规范审核：命名、异常处理、事务管理
+- spawn code-reviewer Agent（role: spec-reviewer）检查接口实现是否符合设计文档
+- spawn code-reviewer Agent（role: quality-reviewer）检查代码质量（复杂度/重复/规范）
+- 人工补充安全审核：SQL 注入、权限绕过、敏感数据泄露
+- 人工补充性能审核：N+1 查询、缓存策略、连接池使用
 - 输出：后端审核发现列表
 
-### 步骤 3：前端代码审核
+### 步骤 3：前端代码审核（增强）
 
-- 安全审核：XSS、CSRF、Token 处理、敏感信息存储
-- 性能审核：重渲染、包体积、懒加载
-- 规范审核：类型安全、组件拆分、状态管理
+- spawn code-reviewer Agent（role: spec-reviewer）检查 UI 实现是否符合设计规范
+- spawn code-reviewer Agent（role: quality-reviewer）检查代码质量（组件拆分/类型安全/状态管理）
+- 人工补充安全审核：XSS、CSRF、Token 处理
+- 人工补充性能审核：重渲染、包体积、懒加载
 - 输出：前端审核发现列表
 
 ### 步骤 4：问题分级

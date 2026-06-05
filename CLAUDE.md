@@ -1,31 +1,86 @@
-# Maestro — 产研AI工作流插件
+# 产研AI工作流插件 — Claude Code 项目指引
+
+## 项目概况
 
 Claude Code 插件，将完整产研工作流（需求调研 → 部署上线，18 阶段、55 子步骤）自动化。纯 Markdown Skills + Agents，零运行时依赖。
 
 ## 核心架构
 
-- **中央编排器**: workflow skill 管理 18 阶段生命周期
-- **状态即 Markdown**: `.planning/workflow.md` 跟踪当前阶段
+- **中央编排器**: workflow skill 管理 18 阶段生命周期，支持多工作流并行
+- **状态即 Markdown**: `.planning/{version}/workflows/{slug}/workflow.md` 跟踪当前阶段，`{phase_dir}/STATE.md` 持久化（version 为 YYYYMM.PATCH 格式）
+- **版本归档**: 每个版本独立目录，发布后归档只读，完整可追溯
+- **多工作流架构**: 同一版本内多条独立工作流，domain 信息存储在 STATE.md 元数据中
 - **铁律内嵌 Skill**: 门禁规则在编排器内强制执行（GATE-03 支持用户确认后跳过阶段）
 - **Agent-as-Validator**: 独立上下文 agent 验证阶段输出
-- **Agent 执行体系**: phase-executor 独立执行 + 完成信号协议 + 模型分级 + 失败升级机制
+- **Agent 执行体系**: phase-executor 独立执行 + 完成信号协议 + 模型分级（opus/sonnet/haiku）+ 失败升级机制
 
-## 已有 Skill
+## 技术约束
 
-| Skill | 版本 | 功能 |
+- 纯 Markdown Skills + Agent 定义文件 + Hook 脚本，零外部依赖（Node.js 内置模块）
+- SKILL.md 控制在 150 行内，细节放参考文件
+- 上下文预算：编排器不同时加载超过 2-3 个 Skill
+- 用目录名做 Skill 标识（规避 Bug #22063 frontmatter name 冲突）
+
+## Skills（37 个）
+
+### 18 阶段领域 Skill（21 个）
+
+| Skill | 阶段 | 功能 |
 |-------|------|------|
-| logic-list-spec | v0.21 | 业务逻辑清单（Draft/Extract 双模式） |
-| prototype-design | v0.50 | 原型 HTML（口述/草案双模式） |
-| prd-auto-generator | v0.51 | PRD 自动生成 |
-| diagram-design | - | 流程图/架构图生成 |
+| meeting-minutes | P01/P03 | 会议纪要 |
+| diagram-design | P02 | 流程图/架构图（14 种图表） |
+| competitive-analysis | P04 | 竞品分析 |
+| feature-list | P05 | 功能清单 |
+| prototype-design | P06 | 原型 HTML（口述/草案双模式） |
+| logic-list-spec | P06/P09 | 业务逻辑清单（Draft/Extract 双模式） |
+| prototype-review | P07 | 原型复核 |
+| ui-design | P08 | UI 设计 |
+| architecture-design | P10 | 架构设计 |
+| architecture-review | P11 | 架构评审 |
+| architecture-refinement | P12 | 架构细化 |
+| detailed-design | P13 | 详细设计 |
+| dev-task-planner | P14 | 开发任务规划 |
+| frontend-dev | P15 | 前端开发 |
+| backend-dev | P15 | 后端开发 |
+| code-review | P15 | 代码审核 |
+| test-engineering | P16 | 系统测试 |
+| training-materials | P16 | 培训材料 |
+| acceptance-testing | P17 | 验收测试 |
+| deployment | P18 | 部署上线 |
+| prd-auto-generator | — | PRD 自动生成 |
 
-## 语言规范
+### 编排器 Skill（2 个）
 
-- 用户输出：中文
-- 内部规则标识：英文
-- Skill 指令：中文
+| Skill | 功能 |
+|-------|------|
+| workflow | 18 阶段中央编排器 |
+| workflow-lite | 轻量工作流引擎（discuss → plan → execute → verify） |
 
-## Agents
+### 轻量步骤 Skill（4 个）
+
+| Skill | 功能 |
+|-------|------|
+| discuss | 讨论技能（灰色区域识别 + 交互决策） |
+| plan | 轻量规划（任务分解和计划制定） |
+| execute | 轻量执行（按计划逐项实施） |
+| verify | 轻量验证（对照计划检查结果） |
+
+### DevKit 集成 Skill（10 个）
+
+| Skill | 融入阶段 | 功能 |
+|-------|---------|------|
+| tdd-discipline | P15（可跳过） | TDD 纪律（RED-GREEN-REFACTOR 铁律） |
+| lang-pack | P15（前置） | 语言包框架（自动检测技术栈并激活） |
+| lang-react | P15（前端） | React/TypeScript 语言包 |
+| lang-java | P15（后端） | Java/Spring 语言包 |
+| gen-test-cases | P16 | 测试用例 AI 生成（5 步 Pipeline） |
+| gen-test-run | P16 | 测试自愈（AST 填实 + 失败自愈） |
+| ci-template | P18 | CI/CD 模板生成（GitLab CI / GitHub Actions） |
+| gen-mr | P15 | 自动 MR/PR 生成 |
+| qa-contract | P16（可选） | 契约测试（Spring Cloud Contract） |
+| qa-mutation | P16（可选） | 变异测试（PIT / Stryker） |
+
+## Agents（24 个）
 
 ### 调度域 Agent（编排器直接调用）
 
@@ -63,7 +118,7 @@ Claude Code 插件，将完整产研工作流（需求调研 → 部署上线，
 
 ## Hook 架构
 
-Maestro 内置 11 个 Claude Code Hook，由 install.js 以绝对路径直接注册到 `~/.claude/settings.json`，脚本位于 scripts/ 目录。所有 Hook 使用纯 Node.js 内置模块，零外部依赖。
+Maestro 内置 11 个 Claude Code Hook，由 install.js 以绝对路径注册到 `~/.claude/settings.json`，脚本位于 scripts/ 目录。所有 Hook 使用纯 Node.js 内置模块，零外部依赖。
 
 | Hook | 事件 | 功能 | 配置键 |
 |------|------|------|--------|
@@ -72,10 +127,10 @@ Maestro 内置 11 个 Claude Code Hook，由 install.js 以绝对路径直接注
 | read-injection-scanner | PostToolUse Read | 读取扫描 | read_scanner |
 | validate-commit | PreToolUse Bash | 提交校验 | commit_validation |
 | phase-boundary | PostToolUse Write\|Edit | 阶段边界 | phase_boundary |
-| context-monitor | PostToolUse Write\|Edit | 上下文监控 | context_warnings |
+| context-monitor | PostToolUse Write\|Edit | 上下文监控（剩余百分比提醒 60%/75%/88%） | context_warnings |
 | session-state | SessionStart | 会话状态 | (always on) |
 | code-graph-update | PostToolUse Write\|Edit | 代码索引增量更新 | code_graph_index |
-| stale-check | PreToolUse Bash | 过期文件检查 | stale_check |
+| stale-check | PreToolUse Bash | 远程新提交过期检查 | stale_check |
 | tdd-guard | PreToolUse Write\|Edit | TDD 物理保险丝（默认 OFF） | tdd_guard |
 | lang-guard | PreToolUse Write\|Edit | 语言包模板强制加载（默认 OFF） | lang_guard |
 
@@ -92,7 +147,7 @@ Maestro 支持全局安装，一条命令在所有项目中生效。
 | `node scripts/install.js --local` | 仅注册当前项目 |
 | `node scripts/install.js --from-github` | 从 GitHub 一键安装 |
 
-安装采用 GSD 式直接写入策略：
+安装采用直接写入策略：
 1. 从 `.claude-plugin/plugin.json` 读取版本号
 2. 复制运行时文件到 `~/.claude/plugins/cache/maestro-private/maestro/<version>/`
 3. **Skills** → 直接复制到 `~/.claude/skills/maestro-<name>/`
@@ -102,7 +157,8 @@ Maestro 支持全局安装，一条命令在所有项目中生效。
 7. 注册到 `~/.claude/plugins/installed_plugins.json`（scope: "user"）
 8. 重启 Claude Code 后生效
 
-注意事项：
-- 安装后源码目录可独立删除，插件不依赖源码路径
-- 全局 + 项目级双重加载是安全的（hooks 全部 advisory exit 0）
-- 更新时重新运行安装命令即可（覆盖安装）
+## 语言规范
+
+- 用户输出：中文
+- 内部规则标识：英文
+- Skill 指令：中文

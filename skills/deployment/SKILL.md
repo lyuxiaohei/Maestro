@@ -17,6 +17,12 @@ version: "1.0"
 
 ## 执行流程
 
+### 步骤 0：CI/CD 配置检查（新增）
+
+- 检查项目是否已有 CI/CD 配置（.gitlab-ci.yml / .github/）
+- 如缺失：调用 ci-template Skill，自动检测技术栈和 CI 平台，生成配置
+- 如已有：检查配置是否完整（lint → test → build → deploy）
+
 ### 步骤 1：上线准备
 
 - 读取验收报告和架构文档，确认上线条件

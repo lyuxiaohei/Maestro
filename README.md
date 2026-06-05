@@ -1,12 +1,12 @@
 # Maestro
 
-18 阶段产研全流程 AI 指挥家 — 从需求调研到部署上线，37 个 Skill + 24 个 Agent 协同编排。
+18 阶段产研全流程 AI 指挥家 — 从需求调研到部署上线，37 个 Skill + 24 个 Agent + 11 个 Hook 协同编排。
 
 ## 概览
 
 Maestro 是一个 Claude Code 插件，将完整的产研工作流（需求调研 → 部署上线）自动化。纯 Markdown Skills + Agent 定义，零运行时依赖。
 
-**核心隐喻**：Maestro（指挥家）— 编排 18 阶段产研工作流，调度 24 个 Agent，协调 37 个 Skill，如同指挥家统领整个交响乐团。
+**核心隐喻**：Maestro（指挥家）— 编排 18 阶段产研工作流，调度 24 个 Agent，协调 37 个 Skill，管理 11 个 Hook，如同指挥家统领整个交响乐团。
 
 ![Maestro 18 阶段全流程](docs/flows/maestro-18-phases.png)
 
@@ -172,23 +172,23 @@ maestro/
 │   ├── test-engineering/           #   测试工程
 │   ├── training-materials/         #   培训材料
 │   ├── acceptance-testing/         #   验收测试
-│   ├── deployment/                 #   部署上线
-│   ├── tdd-discipline/            #   TDD 铁律纪律
+│   ├── ci-template/                #   CI/CD 模板
+│   ├── gen-mr/                     #   自动 MR/PR 生成
+│   ├── gen-test-cases/             #   测试用例生成
+│   ├── gen-test-run/               #   测试自愈
 │   ├── lang-pack/                  #   语言包框架
-│   ├── lang-react/                 #   React 语言包（mature）
-│   ├── lang-java/                  #   Java 语言包（mature）
-│   ├── gen-test-cases/            #   测试骨架生成
-│   ├── ci-template/               #   CI/CD 模板
-│   ├── gen-test-run/              #   测试自愈
-│   ├── qa-contract/               #   契约测试
-│   ├── qa-mutation/               #   变异测试
-│   └── gen-mr/                     #   自动 MR 生成
+│   ├── lang-java/                  #   Java 语言包
+│   ├── lang-react/                 #   React 语言包
+│   ├── tdd-discipline/             #   TDD 纪律
+│   ├── qa-contract/                #   契约测试
+│   ├── qa-mutation/                #   变异测试
+│   └── deployment/                 #   部署上线
 ├── agents/                         # Agent 定义（按域分类）
 │   ├── orchestrator/               #   编排域：executor, validator, planner, checker, synthesizer, doc×4, lite×3 (12)
-│   └── domain/                     #   领域域：researcher, reviewer, engineer, security, integration 等 11 个
+│   └── domain/                     #   领域域：researcher, reviewer, engineer, security, integration, code-reviewer 等 12 个
 ├── hooks/
 │   └── hooks.json                  # 11 个 Hook 注册
-├── scripts/                        # Hook 脚本（11 个）
+├── scripts/                        # Hook 脚本（11 个）+ 安装/发布/状态栏/迁移脚本（6 个）
 └── docs/                           # README 引用图片
 ```
 
@@ -214,7 +214,7 @@ maestro/
 
 ## Hook 系统
 
-Maestro 内置 11 个 Claude Code Hook，覆盖安全防护、工作流保护、上下文监控、提交校验、阶段边界检测、会话状态注入、代码索引增量更新和可选的 TDD/语言包物理保险丝。所有 Hook 使用纯 Node.js 脚本，零外部依赖。
+Maestro 内置 11 个 Claude Code Hook，覆盖安全防护、工作流保护、上下文监控、提交校验、阶段边界检测、会话状态注入、代码索引增量更新、过期检查、TDD 物理保险丝和语言包强制加载。所有 Hook 使用纯 Node.js 脚本，零外部依赖。
 
 | Hook | 触发事件 | 功能 | 默认状态 |
 |------|---------|------|---------|
@@ -226,8 +226,8 @@ Maestro 内置 11 个 Claude Code Hook，覆盖安全防护、工作流保护、
 | context-monitor | PostToolUse Write\|Edit | 上下文写入量监控 | 默认启用 |
 | session-state | SessionStart | 会话启动时注入工作流状态 | 始终启用 |
 | code-graph-update | PostToolUse Write\|Edit | 代码索引增量更新 | 默认启用 |
-| stale-check | PreToolUse Bash | 过期文件检查 | 默认启用 |
-| tdd-guard | PreToolUse Write\|Edit | TDD 物理保险丝（新建实现前检查测试） | 默认关闭（opt-in） |
+| stale-check | PreToolUse Bash | 远程新提交过期检查 | 默认启用 |
+| tdd-guard | PreToolUse Write\|Edit | TDD 物理保险丝（测试先行检查） | 默认关闭（opt-in） |
 | lang-guard | PreToolUse Write\|Edit | 语言包模板强制加载 | 默认关闭（opt-in） |
 
 配置示例（`.planning/config.json` hooks 节）：

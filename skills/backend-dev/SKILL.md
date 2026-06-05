@@ -17,6 +17,19 @@ version: "1.0"
 
 ## 执行流程
 
+### 步骤 0：语言栈检测（新增）
+
+- 调用 lang-pack Skill 检测项目技术栈
+- 后端：自动加载 lang-java 模块
+- 后续步骤按语言包规范执行
+
+### 步骤 0.5：TDD 纪律（新增，可跳过）
+
+- 调用 tdd-discipline Skill，确认本次编码任务的适用范围
+- 每个函数/方法按 RED → GREEN → REFACTOR 循环开发
+- 完成前检查 tdd-discipline 完成前检查清单
+- 例外情况（一次性原型/配置文件）需用户明确批准，可跳过本步骤
+
 ### 步骤 1：接口层开发
 
 - 根据 API 设计文档实现 Controller/路由层
@@ -62,6 +75,12 @@ version: "1.0"
 - 调用 code-review Skill 对后端代码进行 AI 审核
 - 根据审核结果修正问题，确认所有 P0/P1 问题已解决
 - 输出：审核通过的后端代码
+
+### 步骤 7.5：生成 MR/PR（新增）
+
+- 调用 gen-mr Skill，从 CONTEXT.md/PLAN.md 提取变更说明
+- 自动生成 Merge Request 或 Pull Request
+- 描述包含变更说明、成功标准、技术方案、测试验证
 
 ## 输入输出规范
 

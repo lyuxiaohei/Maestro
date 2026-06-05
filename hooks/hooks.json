@@ -48,6 +48,24 @@
             "command": "${CLAUDE_PLUGIN_ROOT}/scripts/stale-check.js"
           }
         ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/tdd-guard.js"
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/lang-guard.js"
+          }
+        ]
       }
     ],
     "PostToolUse": [
