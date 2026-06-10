@@ -30,6 +30,10 @@ Maestro 是一个 Claude Code 插件，将完整的产研工作流（需求调�
 更新插件：
 
 ```bash
+# 1. 刷新市场缓存（获取最新版本）
+/plugin marketplace update maestro-marketplace
+
+# 2. 更新插件
 /plugin update maestro
 ```
 
