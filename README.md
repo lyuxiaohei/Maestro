@@ -17,7 +17,29 @@ Maestro 是一个 Claude Code 插件，将完整的产研工作流（需求调�
 - [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code) 已安装
 - 无其他运行时依赖
 
-### 快速安装（推荐）
+### 方式一：官方插件命令安装（推荐）
+
+```bash
+# 1. 添加市场源（只需一次）
+/plugin marketplace add lyuxiaohei/Maestro
+
+# 2. 安装插件
+/plugin install maestro@maestro-marketplace
+```
+
+更新插件：
+
+```bash
+/plugin update maestro
+```
+
+卸载：
+
+```bash
+/plugin uninstall maestro
+```
+
+### 方式二：install.js 安装（降级方案）
 
 一行命令安装 Maestro：
 
