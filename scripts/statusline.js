@@ -173,6 +173,38 @@ function composeStatusline({ model, dirname, maestroState, ctx, remaining }) {
 
 // --- Context usage -----------------------------------------------------------
 
+/**
+ * Read the freshest remaining_percentage from .planning/.ctx-latest.json.
+ * Walks up from dir (max 10 levels) to find .planning/ directory.
+ * Returns the `r` value if file exists and timestamp is within 60 seconds, else null.
+ * Fail-open: any error returns null.
+ */
+function readCtxLatest(dir) {
+  try {
+    const home = os.homedir();
+    let current = dir;
+    for (let i = 0; i < 10; i++) {
+      const candidate = path.join(current, '.planning', '.ctx-latest.json');
+      if (fs.existsSync(candidate)) {
+        const raw = fs.readFileSync(candidate, 'utf8');
+        const data = JSON.parse(raw);
+        if (data && typeof data.t === 'number' && typeof data.r === 'number') {
+          if ((Date.now() - data.t) < 60000) {
+            return data.r;
+          }
+        }
+        return null; // file found but stale or malformed
+      }
+      const parent = path.dirname(current);
+      if (parent === current || current === home) break;
+      current = parent;
+    }
+  } catch {
+    // Silently ignore — fail-open
+  }
+  return null;
+}
+
 function formatContext(remaining) {
   if (remaining == null) return '';
   const used = Math.max(0, Math.round(100 - remaining));
@@ -194,12 +226,15 @@ function runStatusline() {
       const dir = data.workspace?.current_dir || process.cwd();
       const dirname = path.basename(dir);
       const remaining = data.context_window?.remaining_percentage;
+      // Prefer fresher value from context-monitor hook if available
+      const ctxLatest = readCtxLatest(dir);
+      const effectiveRemaining = ctxLatest != null ? ctxLatest : remaining;
 
       const state = readMaestroState(dir);
       const maestroState = formatMaestroState(state);
-      const ctx = formatContext(remaining);
+      const ctx = formatContext(effectiveRemaining);
 
-      process.stdout.write(composeStatusline({ model, dirname, maestroState, ctx, remaining }));
+      process.stdout.write(composeStatusline({ model, dirname, maestroState, ctx, remaining: effectiveRemaining }));
     } catch {
       // On any error, output nothing — fail-open
     }

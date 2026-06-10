@@ -66,6 +66,27 @@ function getLevelPath() {
   return path.join(__dirname, '..', '.planning', '.ctx-level.json');
 }
 
+/**
+ * Get the path for the context latest file (.planning/.ctx-latest.json).
+ * This lightweight file stores the most recent remaining_percentage + timestamp.
+ */
+function getCtxLatestPath() {
+  return path.join(__dirname, '..', '.planning', '.ctx-latest.json');
+}
+
+/**
+ * Persist the current remaining_percentage and timestamp to .ctx-latest.json.
+ * Compact single-line JSON: {"r":85.2,"t":1718000000000}
+ * Advisory-only: silently ignores write errors.
+ */
+function writeCtxLatest(remainingPct) {
+  try {
+    fs.writeFileSync(getCtxLatestPath(), JSON.stringify({ r: remainingPct, t: Date.now() }), 'utf8');
+  } catch {
+    // Silently ignore write errors — advisory only
+  }
+}
+
 function readLevel() {
   try {
     const raw = fs.readFileSync(getLevelPath(), 'utf8');
@@ -229,6 +250,9 @@ async function main() {
   }
 
   const usedPct = 100 - remainingPct;
+
+  // 5.5 Persist remaining_percentage for statusline to read (even below threshold)
+  writeCtxLatest(remainingPct);
 
   // 6. Determine zone
   const zone = getZone(usedPct);

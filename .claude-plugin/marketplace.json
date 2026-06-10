@@ -1,5 +1,8 @@
 {
   "name": "maestro-marketplace",
+  "owner": {
+    "name": "lyuxiaohei"
+  },
   "plugins": [
     {
       "id": "maestro",
