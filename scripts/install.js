@@ -484,7 +484,18 @@ function verifyInstallation() {
     errors.push('No agents registered');
   }
 
-  // 3. Hooks verification
+  // 3. Marketplace manifest verification
+  const registry2 = readRegistry();
+  const pluginEntry = registry2.plugins[PLUGIN_KEY];
+  if (pluginEntry && pluginEntry.length > 0) {
+    const cacheDir = pluginEntry[0].installPath;
+    const marketplaceJson = path.join(cacheDir, '.claude-plugin', 'marketplace.json');
+    if (!fs.existsSync(marketplaceJson)) {
+      errors.push('marketplace.json missing in plugin cache');
+    }
+  }
+
+  // 4. Hooks verification
   const settings = readSettings();
   let hookCount = 0;
   if (settings.hooks) {

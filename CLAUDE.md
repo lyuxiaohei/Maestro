@@ -140,6 +140,18 @@ Hook 设计原则：advisory-only（exit 0），fail-open（错误时不拦截�
 
 Maestro 支持全局安装，一条命令在所有项目中生效。
 
+### 官方插件命令安装（推荐）
+
+```bash
+# 添加市场源
+/plugin marketplace add lyuxiaohei/Maestro
+
+# 安装插件
+/plugin install maestro@lyuxiaohei/Maestro
+```
+
+### install.js 安装（降级方案）
+
 | 命令 | 功能 |
 |------|------|
 | `node scripts/install.js` | 全局安装（默认） |

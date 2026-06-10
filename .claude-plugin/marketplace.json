@@ -1,0 +1,12 @@
+{
+  "name": "maestro-marketplace",
+  "plugins": [
+    {
+      "id": "maestro",
+      "name": "maestro",
+      "displayName": "Maestro",
+      "description": "18阶段产研全流程AI指挥家 — 37 Skill + 24 Agent + 11 Hook | 支持全局安装",
+      "source": "."
+    }
+  ]
+}
