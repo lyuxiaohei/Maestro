@@ -143,11 +143,27 @@ Maestro 支持全局安装，一条命令在所有项目中生效。
 ### 官方插件命令安装（推荐）
 
 ```bash
-# 添加市场源
+# 添加市场源（只需一次）
 /plugin marketplace add lyuxiaohei/Maestro
 
 # 安装插件
-/plugin install maestro@lyuxiaohei/Maestro
+/plugin install maestro@maestro-marketplace
+```
+
+更新插件：
+
+```bash
+# 1. 刷新市场缓存（获取最新版本）
+/plugin marketplace update maestro-marketplace
+
+# 2. 更新插件
+/plugin update maestro
+```
+
+卸载：
+
+```bash
+/plugin uninstall maestro
 ```
 
 ### install.js 安装（降级方案）
