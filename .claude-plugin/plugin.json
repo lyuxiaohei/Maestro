@@ -1,7 +1,7 @@
 {
   "name": "maestro",
   "displayName": "Maestro",
-  "version": "202606.0",
+  "version": "202606.2",
   "description": "18阶段产研全流程AI指挥家 — 从需求调研到部署上线，37个Skill + 24个Agent + 11个Hook协同编排 | 支持全局安装",
   "skills": "./skills/"
 }
