@@ -7,7 +7,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/session-state.js"
+            "command": "node ${CLAUDE_PLUGIN_ROOT}/scripts/session-state.js"
           }
         ]
       }
@@ -18,7 +18,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/prompt-guard.js"
+            "command": "node ${CLAUDE_PLUGIN_ROOT}/scripts/prompt-guard.js"
           }
         ]
       },
@@ -27,7 +27,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/workflow-guard.js"
+            "command": "node ${CLAUDE_PLUGIN_ROOT}/scripts/workflow-guard.js"
           }
         ]
       },
@@ -36,7 +36,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/validate-commit.js"
+            "command": "node ${CLAUDE_PLUGIN_ROOT}/scripts/validate-commit.js"
           }
         ]
       },
@@ -45,7 +45,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/stale-check.js"
+            "command": "node ${CLAUDE_PLUGIN_ROOT}/scripts/stale-check.js"
           }
         ]
       },
@@ -54,7 +54,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/tdd-guard.js"
+            "command": "node ${CLAUDE_PLUGIN_ROOT}/scripts/tdd-guard.js"
           }
         ]
       },
@@ -63,7 +63,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/lang-guard.js"
+            "command": "node ${CLAUDE_PLUGIN_ROOT}/scripts/lang-guard.js"
           }
         ]
       }
@@ -74,7 +74,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/read-injection-scanner.js"
+            "command": "node ${CLAUDE_PLUGIN_ROOT}/scripts/read-injection-scanner.js"
           }
         ]
       },
@@ -83,15 +83,15 @@
         "hooks": [
           {
             "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/phase-boundary.js"
+            "command": "node ${CLAUDE_PLUGIN_ROOT}/scripts/phase-boundary.js"
           },
           {
             "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/context-monitor.js"
+            "command": "node ${CLAUDE_PLUGIN_ROOT}/scripts/context-monitor.js"
           },
           {
             "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/code-graph-update.js"
+            "command": "node ${CLAUDE_PLUGIN_ROOT}/scripts/code-graph-update.js"
           }
         ]
       }
